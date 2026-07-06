@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Block admin and private sections from indexing
+Disallow: /admin/
+Disallow: /customer/dashboard
+Disallow: /technician/dashboard
+Disallow: /checkout
+
+# Block utility/auth pages
+Disallow: /admin/login
+
+Sitemap: https://www.kselectrical.in/sitemap.xml

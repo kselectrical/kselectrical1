@@ -1,0 +1,14 @@
+# KS Electrical — Apache SPA Rewrite Rules
+# Required for React Router client-side routing on InfinityFree/Apache.
+# Without this, direct URL access (e.g. /ac-on-rent) returns a 404
+# because Apache looks for a physical file that doesn't exist.
+
+Options -MultiViews
+RewriteEngine On
+
+# Serve existing files and directories as-is
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite everything else to index.html so React Router can take over
+RewriteRule ^ /index.html [L]
