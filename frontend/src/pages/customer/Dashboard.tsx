@@ -15,7 +15,7 @@ interface CustomerDashboardProps {
   bookings: BookingData[];
   services: TechnicalService[];
   onLogout: () => void;
-  onUpdateCurrentUser: (user: any) => void;
+  onUpdateCurrentUser: (user: { name: string; email?: string; photoUrl: string; phone?: string; address?: string }) => void;
   handleGenerateInvoice: (booking: BookingData) => void;
 }
 

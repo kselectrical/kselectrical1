@@ -50,14 +50,14 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
     quantity: number;
     brand?: string;
     gstRate?: number;
-  }[]>(
-    editBooking?.items?.filter(Boolean).map(item => ({
-      serviceId: item.serviceId ?? 'manual-' + Date.now(),
+  }[]>(() =>
+    editBooking?.items?.filter(Boolean).map((item, idx) => ({
+      serviceId: item.serviceId ?? `manual-${idx}`,
       serviceName: item.serviceName ?? '',
       price: item.price ?? 0,
       quantity: item.quantity ?? 1,
       brand: item.brand ?? 'Generic',
-      gstRate: (item as any).gstRate ?? 0,
+      gstRate: item.gstRate ?? 0,
     })) ?? []
   );
 
@@ -74,6 +74,7 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
   // Re-populate if the editBooking reference changes (e.g. navigation)
   useEffect(() => {
     if (editBooking) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setManualCustomerName(editBooking.customerName ?? '');
       setManualPhone(editBooking.phone ?? '');
       setManualAddress(editBooking.address ?? '');
@@ -82,13 +83,13 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
       setManualTerms(editBooking.termsAndConditions ?? '');
       setManualStatus((editBooking.status as 'Pending' | 'Completed' | 'Cancelled') ?? 'Completed');
       setManualItems(
-        editBooking.items?.filter(Boolean).map(item => ({
-          serviceId: item.serviceId ?? 'manual-' + Date.now(),
+        editBooking.items?.filter(Boolean).map((item, idx) => ({
+          serviceId: item.serviceId ?? `manual-${idx}`,
           serviceName: item.serviceName ?? '',
           price: item.price ?? 0,
           quantity: item.quantity ?? 1,
           brand: item.brand ?? 'Generic',
-          gstRate: (item as any).gstRate ?? 0,
+          gstRate: item.gstRate ?? 0,
         })) ?? []
       );
     }

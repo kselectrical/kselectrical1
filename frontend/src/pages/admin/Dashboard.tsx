@@ -164,10 +164,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Live metrics dashboard & technicians allocation control</p>
         </div>
         <div className="flex items-center gap-2">
-          {['overview', 'technicians', 'reviews', 'areas'].map((tab) => (
+          {([
+            'overview',
+            'technicians',
+            'reviews',
+            'areas'
+          ] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 border cursor-pointer ${
                 activeTab === tab 
                   ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-100' 

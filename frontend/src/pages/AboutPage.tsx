@@ -176,16 +176,16 @@ export const AboutPage: React.FC = () => {
         {/* Section Navigation Tabs */}
         <div className="sticky top-[72px] z-30 bg-slate-50 border-y border-gray-200 shadow-sm">
           <div className="max-w-6xl mx-auto px-4 overflow-x-auto scrollbar-none flex space-x-1 sm:space-x-2 py-3">
-            {[
+            {([
               { id: 'story', label: 'Our Story & Mission' },
               { id: 'services', label: 'Detailed Services' },
               { id: 'process', label: 'How We Work' },
               { id: 'areas', label: 'Service Coverage Areas' },
               { id: 'why', label: 'The KS Advantage' }
-            ].map((tab) => (
+            ] as const).map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap select-none cursor-pointer ${
                   activeTab === tab.id
                     ? 'bg-brand-blue text-white shadow-button'

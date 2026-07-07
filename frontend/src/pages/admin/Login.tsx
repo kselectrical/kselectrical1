@@ -21,7 +21,8 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, userRole, onLoginSucce
 
   // If already logged in as admin, redirect to catalog
   if (isLoggedIn && userRole === 'admin') {
-    const from = (location.state as any)?.from?.pathname || '/admin/catalog';
+    const state = location.state as { from?: { pathname?: string } } | null;
+    const from = state?.from?.pathname || '/admin/catalog';
     return <Navigate to={from} replace />;
   }
 
@@ -58,8 +59,9 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, userRole, onLoginSucce
       } else {
         setError('Firebase configuration is not active. Unable to verify credentials.');
       }
-    } catch (err: any) {
-      setError(err.message || 'Invalid admin email or password.');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Invalid admin email or password.';
+      setError(errorMsg);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -90,9 +92,10 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, userRole, onLoginSucce
             setError('Access Denied: Your Google account email is not registered in the admins collection.');
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         console.error("Admin Google Login failed:", e);
-        setError(e.message || "Google Authentication failed.");
+        const errorMsg = e instanceof Error ? e.message : "Google Authentication failed.";
+        setError(errorMsg);
       } finally {
         setIsGoogleLoading(false);
       }

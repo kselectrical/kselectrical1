@@ -90,7 +90,7 @@ const BillCard: React.FC<BillCardProps> = ({ b, onStatusChange, onGenerateInvoic
   let totalBase = 0, totalGstAmt = 0;
   items.forEach(item => {
     const lineTotal = (item.price ?? 0) * (item.quantity ?? 1);
-    const rate = (item as any).gstRate ?? 0;
+    const rate = item.gstRate ?? 0;
     if (rate > 0) {
       const base = lineTotal / (1 + rate / 100);
       totalBase    += base;

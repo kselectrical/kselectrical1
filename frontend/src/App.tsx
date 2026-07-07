@@ -73,30 +73,31 @@ const CreateManualInvoice = lazy(() => import('./pages/admin/CreateManualInvoice
 
 // Ambient Loading Screen Placeholder
 // Ambient Isolated Sub-components for CPU-efficient DOM updates
+const CYCLER_SERVICES = [
+  { label: 'AC Repair & Service', icon: '❄️' },
+  { label: 'RO Water Purifier', icon: '💧' },
+  { label: 'Certified Electrician', icon: '⚡' },
+  { label: 'Washing Machine Repair', icon: '🧺' },
+  { label: 'Geyser Repair & Service', icon: '🔥' },
+  { label: 'Kitchen Chimney Service', icon: '🍳' },
+  { label: 'Home Electrical Services', icon: '🏠' }
+];
+
 const ServiceCycler: React.FC = () => {
   const [idx, setIdx] = useState(0);
-  const services = [
-    { label: 'AC Repair & Service', icon: '❄️' },
-    { label: 'RO Water Purifier', icon: '💧' },
-    { label: 'Certified Electrician', icon: '⚡' },
-    { label: 'Washing Machine Repair', icon: '🧺' },
-    { label: 'Geyser Repair & Service', icon: '🔥' },
-    { label: 'Kitchen Chimney Service', icon: '🍳' },
-    { label: 'Home Electrical Services', icon: '🏠' }
-  ];
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setIdx(prev => (prev + 1) % services.length);
+      setIdx(prev => (prev + 1) % CYCLER_SERVICES.length);
     }, 650);
     return () => clearInterval(timer);
   }, []);
 
   return (
     <div className="flex items-center space-x-2.5 bg-slate-50 border border-slate-200 px-4 py-2 rounded-2xl shadow-2xs animate-slide-up">
-      <span className="text-lg animate-bounce">{services[idx].icon}</span>
+      <span className="text-lg animate-bounce">{CYCLER_SERVICES[idx].icon}</span>
       <span className="text-xs font-black text-slate-800 tracking-wide uppercase transition-all duration-300">
-        {services[idx].label}
+        {CYCLER_SERVICES[idx].label}
       </span>
     </div>
   );
@@ -309,7 +310,7 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('ks_auth_session');
     return saved ? JSON.parse(saved).userRole : null;
   });
-  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; photoUrl: string; phone?: string } | null>(() => {
+  const [currentUser, setCurrentUser] = useState<{ name: string; email?: string; photoUrl: string; phone?: string; address?: string } | null>(() => {
     const saved = localStorage.getItem('ks_auth_session');
     return saved ? JSON.parse(saved).currentUser : null;
   });
@@ -333,7 +334,7 @@ const App: React.FC = () => {
       try {
         const bookingDocRef = doc(db, 'bookings', bookingId);
         await updateDoc(bookingDocRef, { status });
-      } catch (err) {
+      } catch {
         try {
           const invoiceDocRef = doc(db, 'invoices', bookingId);
           await updateDoc(invoiceDocRef, { status });
@@ -394,15 +395,17 @@ const App: React.FC = () => {
             const bks = await getBookingsFromCloud();
             const invs = await getInvoicesFromCloud();
             
-            const getSafeSortDate = (val: any): Date => {
+            const getSafeSortDate = (val: unknown): Date => {
               if (!val) return new Date(0);
-              if (typeof val === 'object' && val !== null && 'toDate' in val && typeof val.toDate === 'function') {
-                return val.toDate();
+              if (typeof val === 'object' && val !== null) {
+                if ('toDate' in val && typeof (val as { toDate: unknown }).toDate === 'function') {
+                  return (val as { toDate: () => Date }).toDate();
+                }
+                if ('seconds' in val && typeof (val as { seconds: unknown }).seconds === 'number') {
+                  return new Date((val as { seconds: number }).seconds * 1000);
+                }
               }
-              if (typeof val === 'object' && val !== null && 'seconds' in val && typeof val.seconds === 'number') {
-                return new Date(val.seconds * 1000);
-              }
-              const d = new Date(val);
+              const d = new Date(val as string | number | Date);
               return isNaN(d.getTime()) ? new Date(0) : d;
             };
 
@@ -531,9 +534,11 @@ const App: React.FC = () => {
       const saved = localStorage.getItem('ks_auth_session');
       if (saved) {
         const parsed = JSON.parse(saved);
-        setIsLoggedIn(parsed.isLoggedIn);
-        setUserRole(parsed.userRole);
-        setCurrentUser(parsed.currentUser);
+        setTimeout(() => {
+          setIsLoggedIn(parsed.isLoggedIn);
+          setUserRole(parsed.userRole);
+          setCurrentUser(parsed.currentUser);
+        }, 0);
       }
       setTimeout(() => {
         setIsAuthLoading(false);
@@ -709,15 +714,17 @@ const App: React.FC = () => {
         .replace(/'/g, "&#039;");
     };
 
-    const getSafeInvoiceDate = (val: any): Date => {
+    const getSafeInvoiceDate = (val: unknown): Date => {
       if (!val) return new Date();
-      if (typeof val === 'object' && val !== null && 'toDate' in val && typeof val.toDate === 'function') {
-        return val.toDate();
+      if (typeof val === 'object' && val !== null) {
+        if ('toDate' in val && typeof (val as { toDate: unknown }).toDate === 'function') {
+          return (val as { toDate: () => Date }).toDate();
+        }
+        if ('seconds' in val && typeof (val as { seconds: unknown }).seconds === 'number') {
+          return new Date((val as { seconds: number }).seconds * 1000);
+        }
       }
-      if (typeof val === 'object' && val !== null && 'seconds' in val && typeof val.seconds === 'number') {
-        return new Date(val.seconds * 1000);
-      }
-      const d = new Date(val);
+      const d = new Date(val as string | number | Date);
       return isNaN(d.getTime()) ? new Date() : d;
     };
     const invoiceDate = getSafeInvoiceDate(booking.createdAt);
@@ -741,7 +748,7 @@ const App: React.FC = () => {
     let totalGst = 0;
     validItems.forEach(item => {
       const itemTotal = item.price * item.quantity;
-      const rate = (item as any).gstRate ?? 18;
+      const rate = item.gstRate ?? 18;
       const base = itemTotal / (1 + (rate / 100));
       const gst = itemTotal - base;
       totalBase += base;
@@ -754,7 +761,7 @@ const App: React.FC = () => {
     const sgst = Math.round(totalGst - cgst);
 
     const itemsRows = validItems.map((item, idx) => {
-      const rate = (item as any).gstRate ?? 18;
+      const rate = item.gstRate ?? 18;
       return `
         <tr style="font-size: 9.5px;">
           <td style="padding: 4px 6px; border-bottom: 1px solid #e5e7eb; text-align: center; font-weight: bold; color: #4b5563;">${idx + 1}</td>

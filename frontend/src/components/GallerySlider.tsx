@@ -72,6 +72,14 @@ export const GallerySlider: React.FC = () => {
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+  };
+
   useEffect(() => {
     if (isPaused) return;
 
@@ -81,14 +89,6 @@ export const GallerySlider: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [currentIndex, isPaused]);
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-  };
 
   const handleDotClick = (index: number) => {
     setCurrentIndex(index);

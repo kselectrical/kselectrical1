@@ -23,10 +23,10 @@ interface ServicePageSeo {
   areasServed: AreaLink[];
   faqList: { q: string; a: string }[];
   localHighlights: string;
-  serviceSchema: Record<string, any>;
-  faqSchema: Record<string, any>;
-  breadcrumbSchema: Record<string, any>;
-  localBusinessSchema: Record<string, any>;
+  serviceSchema: Record<string, unknown>;
+  faqSchema: Record<string, unknown>;
+  breadcrumbSchema: Record<string, unknown>;
+  localBusinessSchema: Record<string, unknown>;
 }
 
 const PRIMARY_AREAS = [

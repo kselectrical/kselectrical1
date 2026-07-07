@@ -196,20 +196,18 @@ interface BaseServicePageProps {
 const getBrandsForCategory = (slug: string, city: string) => {
   const normCity = city ? `in ${city}` : 'in Noida';
   const cleanSlug = slug.toLowerCase();
-  let brands: string[] = [];
-  if (cleanSlug.includes('ac')) {
-    brands = ['Voltas', 'Daikin', 'LG', 'Mitsubishi', 'Samsung', 'O General', 'Carrier', 'Hitachi', 'Lloyd', 'Godrej'];
-  } else if (cleanSlug.includes('ro-') || cleanSlug.includes('purifier')) {
-    brands = ['Kent', 'Aquaguard', 'Pureit', 'Livpure', 'Eureka Forbes', 'Blue Star', 'AO Smith', 'Havells'];
-  } else if (cleanSlug.includes('washing') || cleanSlug.includes('machine')) {
-    brands = ['LG', 'Samsung', 'IFB', 'Whirlpool', 'Bosch', 'Haier', 'Godrej', 'Panasonic'];
-  } else if (cleanSlug.includes('refrigerator') || cleanSlug.includes('fridge')) {
-    brands = ['Samsung', 'LG', 'Whirlpool', 'Haier', 'Godrej', 'Bosch', 'Panasonic'];
-  } else if (cleanSlug.includes('electrician') || cleanSlug.includes('wiring') || cleanSlug.includes('switch') || cleanSlug.includes('mcb')) {
-    brands = ['Havells', 'Anchor', 'Schneider', 'Legrand', 'L&T', 'Bajaj', 'Polycab', 'Anchor Roma'];
-  } else {
-    brands = ['Bajaj', 'Havells', 'V-Guard', 'Crompton', 'Usha', 'Orient', 'AO Smith', 'Philips'];
-  }
+  const brands = cleanSlug.includes('ac')
+    ? ['Voltas', 'Daikin', 'LG', 'Mitsubishi', 'Samsung', 'O General', 'Carrier', 'Hitachi', 'Lloyd', 'Godrej']
+    : (cleanSlug.includes('ro-') || cleanSlug.includes('purifier'))
+    ? ['Kent', 'Aquaguard', 'Pureit', 'Livpure', 'Eureka Forbes', 'Blue Star', 'AO Smith', 'Havells']
+    : (cleanSlug.includes('washing') || cleanSlug.includes('machine'))
+    ? ['LG', 'Samsung', 'IFB', 'Whirlpool', 'Bosch', 'Haier', 'Godrej', 'Panasonic']
+    : (cleanSlug.includes('refrigerator') || cleanSlug.includes('fridge'))
+    ? ['Samsung', 'LG', 'Whirlpool', 'Haier', 'Godrej', 'Bosch', 'Panasonic']
+    : (cleanSlug.includes('electrician') || cleanSlug.includes('wiring') || cleanSlug.includes('switch') || cleanSlug.includes('mcb'))
+    ? ['Havells', 'Anchor', 'Schneider', 'Legrand', 'L&T', 'Bajaj', 'Polycab', 'Anchor Roma']
+    : ['Bajaj', 'Havells', 'V-Guard', 'Crompton', 'Usha', 'Orient', 'AO Smith', 'Philips'];
+
   return brands.map(b => `${b} Service & Repair ${normCity}`);
 };
 
@@ -235,12 +233,9 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
 
   // Filter services belonging to this category and optional subcategory
   const activeCategoryServices = services.filter(s => {
-    let matches = false;
-    if (catalogSubcategory) {
-      matches = s.category === catalogCategory && s.subcategory === catalogSubcategory;
-    } else {
-      matches = s.category === catalogCategory;
-    }
+    let matches = catalogSubcategory
+      ? s.category === catalogCategory && s.subcategory === catalogSubcategory
+      : s.category === catalogCategory;
 
     if (matches && serviceIdPrefix) {
       matches = s.id.startsWith(serviceIdPrefix);
