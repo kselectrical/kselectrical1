@@ -101,22 +101,28 @@ const ServiceCycler: React.FC = () => {
   );
 };
 
-const MessageCycler: React.FC = () => {
-  const [idx, setIdx] = useState(0);
-  const messages = [
+const MessageCycler: React.FC<{ messages?: string[] }> = ({
+  messages = [
     "Preparing your local technician...",
     "Finding nearby service experts...",
     "Checking service availability...",
     "Loading trusted home services...",
-    "Almost ready..."
-  ];
+    "Almost ready...",
+  ],
+}) => {
+  const [idx, setIdx] = useState(0);
 
   useEffect(() => {
+    if (messages.length === 0) return;
     const timer = setInterval(() => {
-      setIdx(prev => (prev + 1) % messages.length);
-    }, 900);
+      setIdx((prev) => (prev + 1) % messages.length);
+    }, 3000);
     return () => clearInterval(timer);
-  }, []);
+  }, [messages]);
+
+  if (messages.length === 0) {
+    return <p className="text-xs font-bold text-slate-500 animate-pulse transition-all duration-300">Loading…</p>;
+  }
 
   return (
     <p className="text-xs font-bold text-slate-500 animate-pulse transition-all duration-300">
