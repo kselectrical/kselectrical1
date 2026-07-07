@@ -21,7 +21,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 10, 2026',
     readTime: '4 min read',
     category: 'AC Services',
-    imageUrl: '/ac_service.webp',
+    imageUrl: '/ac-service-gaur-city.jpg',
     content: `
 <h2>एसी सर्विस (AC Service) कब और क्यों करानी चाहिए?</h2>
 <p>भारत में गर्मियों के मौसम में एयर कंडीशनर (AC) हमारी जिंदगी का एक बेहद अहम हिस्सा बन जाता है। लेकिन क्या आप जानते हैं कि एक एयर कंडीशनर को सुचारू रूप से चलाने के लिए और बिजली का बिल कम रखने के लिए उसकी नियमित सर्विस कराना कितना जरूरी है? आज हम बात करेंगे कि <strong>AC Service कितने महीने में करानी चाहिए</strong> और इसके क्या फायदे हैं।</p>
@@ -54,7 +54,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 12, 2026',
     readTime: '5 min read',
     category: 'AC Services',
-    imageUrl: '/ac_service.webp',
+    imageUrl: '/ac-repair-greater-noida.jpg',
     content: `
 <h2>AC की ठंडी हवा कम होने के मुख्य कारण</h2>
 <p>कड़कड़ाती धूप में जब घर का एसी ठंडी हवा देना बंद कर दे, तो परेशानी बहुत बढ़ जाती है। अक्सर लोग सोचते हैं कि एसी पुराना हो गया है, इसलिए कूलिंग कम हो रही है, लेकिन ऐसा नहीं है। एसी कूलिंग कम होने के पीछे कुछ खास तकनीकी और व्यावहारिक कारण होते हैं जिन्हें आसानी से पहचाना और सुधारा जा सकता है।</p>
@@ -85,7 +85,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 08, 2026',
     readTime: '4 min read',
     category: 'RO Services',
-    imageUrl: '/ro_service.webp',
+    imageUrl: '/ro-water-purifier-repair-noida-extension.jpg',
     content: `
 <h2>अपने आरओ वाटर प्यूरीफायर को हमेशा सुरक्षित रखें</h2>
 <p>शुद्ध पानी सेहत की पहली सीढ़ी है। आज लगभग हर घर में आरओ (Reverse Osmosis) प्यूरीफायर लगा हुआ है। लेकिन क्या आप जानते हैं कि अगर समय पर आरओ के फिल्टर्स न बदले जाएं, तो फिल्टर पानी को शुद्ध करने के बजाय उसमें हानिकारक बैक्टीरिया और भारी धातुओं की मात्रा बढ़ा सकते हैं? आइए जानते हैं आरओ मेंटेनेंस की पूरी जानकारी.</p>
@@ -138,7 +138,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 05, 2026',
     readTime: '3 min read',
     category: 'AC Services',
-    imageUrl: '/ac_service.webp',
+    imageUrl: '/ac_service_pro.jpg',
     content: `
 <h2>भीषण गर्मियों में एसी की देखभाल कैसे करें?</h2>
 <p>उत्तर भारत में तापमान जब 45 डिग्री के पार चला जाता है, तो एयर कंडीशनर पर लोड बहुत ज्यादा बढ़ जाता है। कई बार एसी ओवरहीट होकर बंद हो जाते हैं या उनकी वायरिंग जल जाती है। इन समस्याओं से बचने और बिजली बिल को काबू में रखने के लिए अपनाएं ये 5 आसान और बेहद असरदार टिप्स.</p>
@@ -159,22 +159,22 @@ const LOCATIONS = [
 ];
 
 const SERVICES = [
-  { name: 'AC Service & Cleaning', category: 'AC Services', img: '/ac_service.webp' },
-  { name: 'AC Repair & Diagnosis', category: 'AC Services', img: '/ac_service.webp' },
-  { name: 'AC Installation Service', category: 'AC Services', img: '/ac_service.webp' },
-  { name: 'AC Rental Solutions', category: 'AC Services', img: '/ac_service.webp' },
-  { name: 'RO Purifier Filter Change', category: 'RO Services', img: '/ro_service.webp' },
-  { name: 'RO Purifier Repair Service', category: 'RO Services', img: '/ro_service.webp' },
-  { name: 'Electrician Fault Repair', category: 'Electrician', img: '/electrician_service.webp' },
-  { name: 'Modular Switchboard Fitting', category: 'Electrician', img: '/electrician_service.webp' },
-  { name: 'House Rewiring Services', category: 'Electrician', img: '/electrician_service.webp' },
-  { name: 'Washing Machine Repair', category: 'Washing Machine', img: '/washing_machine_repair.webp' },
-  { name: 'Refrigerator Gas Charging', category: 'Refrigerator', img: '/refrigerator_repair.webp' },
-  { name: 'Kitchen Chimney Service', category: 'Kitchen Chimney', img: '/chimney_service.webp' },
-  { name: 'Geyser Repair & Service', category: 'Geyser', img: '/geyser_service.webp' },
-  { name: 'Ceiling Fan Installation', category: 'Ceiling Fan', img: '/fan_service.webp' },
-  { name: 'LED Lighting Fitting', category: 'Lighting', img: '/light_service.webp' },
-  { name: 'Microwave Oven Repair', category: 'Microwave', img: '/microwave_service.webp' }
+  { name: 'AC Service & Cleaning', category: 'AC Services', img: '/ac-service-gaur-city.jpg' },
+  { name: 'AC Repair & Diagnosis', category: 'AC Services', img: '/ac-repair-greater-noida.jpg' },
+  { name: 'AC Installation Service', category: 'AC Services', img: '/ac-installation-noida-extension.jpg' },
+  { name: 'AC Rental Solutions', category: 'AC Services', img: '/ac-rental-gaur-city.png' },
+  { name: 'RO Purifier Filter Change', category: 'RO Services', img: '/best-ro-service-greater-noida.jpg' },
+  { name: 'RO Purifier Repair Service', category: 'RO Services', img: '/ro-water-purifier-repair-noida-extension.jpg' },
+  { name: 'Electrician Fault Repair', category: 'Electrician', img: '/electrician_pro.jpg' },
+  { name: 'Modular Switchboard Fitting', category: 'Electrician', img: '/switchboard-repair-greater-noida.jpg' },
+  { name: 'House Rewiring Services', category: 'Electrician', img: '/electrical_safety_service.jpg' },
+  { name: 'Washing Machine Repair', category: 'Washing Machine', img: '/washing-machine-repair-gaur-city.jpg' },
+  { name: 'Refrigerator Gas Charging', category: 'Refrigerator', img: '/refrigerator-gas-charging-greater-noida.jpg' },
+  { name: 'Kitchen Chimney Service', category: 'Kitchen Chimney', img: '/kitchen-chimney-repair-gaur-city.jpg' },
+  { name: 'Geyser Repair & Service', category: 'Geyser', img: '/geyser-repair-noida-extension.jpg' },
+  { name: 'Ceiling Fan Installation', category: 'Ceiling Fan', img: '/ceiling-fan-repair-greater-noida.jpg' },
+  { name: 'LED Lighting Fitting', category: 'Lighting', img: '/ceiling-panel-light-installation-gaur-city.jpg' },
+  { name: 'Microwave Oven Repair', category: 'Microwave', img: '/microwave-repair-greater-noida.webp' }
 ];
 
 const TOPIC_TEMPLATES = [
