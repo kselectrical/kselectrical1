@@ -36,6 +36,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ defaul
 const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
 const ACOnRentPage = lazy(() => import('./pages/ACOnRentPage').then(m => ({ default: m.ACOnRentPage })));
 const LocalLandingPage = lazy(() => import('./pages/LocalLandingPage'));
+const LocalDirectoryPage = lazy(() => import('./pages/LocalDirectoryPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
@@ -1220,6 +1221,9 @@ const App: React.FC = () => {
                 businessConfig={businessConfigState}
               />
             } />
+
+            {/* Local Areas Directory Page */}
+            <Route path="/local-landing" element={<LocalDirectoryPage />} />
 
             {/* Custom 404 Route */}
             <Route path="/404" element={<NotFound />} />
