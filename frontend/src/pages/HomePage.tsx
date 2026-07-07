@@ -10,7 +10,6 @@ import { ServiceGrid } from '../components/ServiceGrid';
 import { blogPostsData } from '../blogData';
 import type { TechnicalService, CartItem } from '../types';
 import type { BusinessConfig } from '../data';
-import type { BlogPost } from '../blogData';
 
 interface HomePageProps {
   searchQuery: string;
@@ -41,7 +40,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   onProceedToCheckout,
   businessConfig
 }) => {
-  const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(null);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [faqSearchQuery, setFaqSearchQuery] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -202,15 +200,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     }))
   };
 
-  const handleOpenBlog = (blog: BlogPost) => {
-    setSelectedBlog(blog);
-    document.body.style.overflow = 'hidden';
-  };
 
-  const handleCloseBlog = () => {
-    setSelectedBlog(null);
-    document.body.style.overflow = 'unset';
-  };
 
   const handleSliderMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
@@ -915,7 +905,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {blogPostsData.map((blog, idx) => (
+            {blogPostsData.slice(0, 3).map((blog, idx) => (
               <article
                 key={idx}
                 className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between text-left"
@@ -943,18 +933,44 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
 
                   <div className="pt-4 border-t border-slate-100 select-none">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenBlog(blog)}
+                    <Link
+                      to={`/blog/${blog.slug}`}
                       className="w-full bg-slate-50 hover:bg-orange-50 text-slate-800 hover:text-[#F97316] border border-slate-250 hover:border-orange-300 rounded-xl py-2.5 text-xs font-black uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
                     >
                       <BookOpen size={12} />
                       <span>Read Article</span>
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </article>
             ))}
+          </div>
+
+          {/* SEO Directory - 1000+ Troubleshooting Guides Index Links */}
+          <div className="mt-16 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 text-left">
+            <div className="border-b border-slate-150 pb-4">
+              <h3 className="text-slate-950 font-black text-lg tracking-tight">
+                Appliance Care & Maintenance Index (1000+ Guides)
+              </h3>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">
+                Direct links to our complete troubleshooting encyclopedia
+              </p>
+            </div>
+            
+            <div className="max-h-80 overflow-y-auto pr-2 space-y-4 no-scrollbar">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {blogPostsData.map((blog) => (
+                  <Link
+                    key={blog.slug}
+                    to={`/blog/${blog.slug}`}
+                    className="text-xs font-bold text-slate-500 hover:text-brand-orange hover:underline truncate"
+                    title={blog.title}
+                  >
+                    • {blog.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -994,55 +1010,6 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
       </section>
-
-      {/* Modal Blog Reader */}
-      {selectedBlog && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto font-sans animate-in fade-in duration-200">
-          <div className="bg-white border border-slate-300 w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="border-b border-slate-150 p-4 sm:p-5 flex items-center justify-between bg-slate-50">
-              <div className="flex flex-col text-left space-y-1 pr-6">
-                <span className="text-[9px] font-black uppercase tracking-wider text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded self-start">
-                  {selectedBlog.category}
-                </span>
-                <h3 className="text-gray-900 font-black text-sm sm:text-base leading-tight truncate max-w-[500px]">
-                  {selectedBlog.title}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseBlog}
-                className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition-colors cursor-pointer shrink-0 shadow-xs"
-              >
-                <span>✕</span>
-              </button>
-            </div>
-
-            <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-left">
-              <div className="aspect-video w-full rounded-xl bg-slate-100 overflow-hidden border border-slate-200 shadow-sm">
-                <img src={selectedBlog.imageUrl} alt={selectedBlog.title} className="w-full h-full object-cover" />
-              </div>
-              <div className="flex items-center space-x-6 text-xs text-gray-500 font-bold border-b border-slate-105 pb-4">
-                <span className="flex items-center"><Calendar size={13} className="mr-1.5 text-blue-600" />Published: {selectedBlog.publishDate}</span>
-                <span className="flex items-center"><Clock size={13} className="mr-1.5 text-blue-600" />Read Time: {selectedBlog.readTime}</span>
-              </div>
-              <div 
-                className="prose max-w-none text-gray-800 text-sm sm:text-base leading-relaxed space-y-4 font-normal"
-                dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
-              />
-            </div>
-
-            <div className="border-t border-slate-150 p-4 bg-slate-50 flex justify-end select-none">
-              <button
-                type="button"
-                onClick={handleCloseBlog}
-                className="bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer"
-              >
-                Close Article
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

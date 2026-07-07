@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, ChevronLeft, Phone, MessageSquare } from 'lucide-react';
-import { blogPostsData } from '../blogData';
+import { blogPostsData, generateDynamicBlogContent } from '../blogData';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export const BlogPostPage: React.FC = () => {
@@ -85,7 +85,7 @@ export const BlogPostPage: React.FC = () => {
           {/* Post Body */}
           <div className="lg:col-span-2 space-y-6 prose prose-blue max-w-none text-gray-750 font-normal leading-relaxed text-sm sm:text-base">
             <div 
-              dangerouslySetInnerHTML={{ __html: post.content }} 
+              dangerouslySetInnerHTML={{ __html: post.content || generateDynamicBlogContent(post) }} 
               className="blog-content-renderer space-y-6"
             />
           </div>
