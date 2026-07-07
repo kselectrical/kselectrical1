@@ -146,16 +146,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Column: Quick Contacts, Nav Links, Utilities */}
           <div className="flex items-center space-x-5 shrink-0">
             {/* Navigation Links */}
-            <div className="hidden lg:flex items-center space-x-5 mr-2">
+            <div className="hidden lg:flex items-center space-x-3 mr-1">
               <Link 
                 to="/services"
-                className="text-slate-700 hover:text-brand-blue font-bold text-xs uppercase tracking-wider transition-colors duration-200"
+                className="flex items-center justify-center px-4 h-10 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 select-none"
               >
                 Our Services
               </Link>
               <Link
                 to="/ac-on-rent"
-                className="text-slate-700 hover:text-brand-blue font-bold text-xs uppercase tracking-wider transition-colors duration-200"
+                className="flex items-center justify-center px-4 h-10 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 select-none"
               >
                 AC on Rent
               </Link>
