@@ -15,15 +15,22 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// Register dynamic offline Service Worker for progressive web app (PWA) installation
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => {
-        console.log('SW: Service Worker registered successfully on scope:', reg.scope);
-      })
-      .catch(err => {
-        console.error('SW: Service Worker registration failed:', err);
-      });
+// Unregister any active service worker and clear caches to prevent white-screen issues from stale caching of index.html
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister()
+        .then(() => console.log('SW: Unregistered active service worker successfully'))
+        .catch(err => console.error('SW: Unregistration failed:', err));
+    }
   });
 }
+
+if ('caches' in window) {
+  caches.keys().then((names) => {
+    for (const name of names) {
+      caches.delete(name);
+    }
+  });
+}
+
