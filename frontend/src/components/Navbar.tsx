@@ -175,82 +175,89 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Quick Contacts, Reviews & Shopping Cart */}
-          <div className="flex items-center space-x-3 shrink-0">
-            {/* Our Services Link */}
-            <Link 
-              to="/services"
-              className="hidden md:flex items-center space-x-1 px-4 h-10 border rounded-2xl text-xs font-semibold transition-all duration-200 select-none cursor-pointer shadow-sm bg-brand-blue text-white border-brand-blue shadow-button hover:bg-brand-blue-dark"
-            >
-              <span>Our Services</span>
-            </Link>
+          {/* Right Column: Quick Contacts, Nav Links, Utilities */}
+          <div className="flex items-center space-x-5 shrink-0">
+            {/* Navigation Links */}
+            <div className="hidden lg:flex items-center space-x-5 mr-2">
+              <Link 
+                to="/services"
+                className="text-slate-700 hover:text-brand-blue font-bold text-xs uppercase tracking-wider transition-colors duration-200"
+              >
+                Our Services
+              </Link>
+              <Link
+                to="/ac-on-rent"
+                className="text-slate-700 hover:text-brand-blue font-bold text-xs uppercase tracking-wider transition-colors duration-200"
+              >
+                AC on Rent
+              </Link>
+            </div>
 
-
-
-            {/* Direct Calls - Stronger Orange CTA */}
+            {/* Primary CTA: Call Now */}
             <a 
               href={`tel:${businessConfig.contacts[0]}`}
-              className="flex items-center space-x-1.5 px-4 h-10 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-2xl text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-button hover:shadow-card-hover hover:scale-[1.01] active:scale-95 select-none"
+              className="flex items-center space-x-1.5 px-4 h-10 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 select-none"
             >
               <Phone size={13} fill="currentColor" className="shrink-0" />
               <span className="hidden sm:inline">Call Now</span>
               <span className="sm:hidden">Call</span>
             </a>
 
-            {/* AC on Rent CTA */}
-            <Link
-              to="/ac-on-rent"
-              className="hidden md:flex items-center space-x-1.5 px-4 h-10 bg-gradient-to-r from-brand-orange to-[#F97316] hover:from-[#F97316] hover:to-orange-500 text-white rounded-2xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 shadow-lg select-none"
-              title="AC on Rent"
-            >
-              <span>AC on Rent</span>
-            </Link>
+            {/* Utility Group: Cart, Staff Portal, Login */}
+            <div className="flex items-center space-x-2.5">
+              {/* Cart Icon Badge */}
+              <button
+                onClick={onCartClick}
+                aria-label={`Shopping Cart, ${cartCount} items`}
+                className="relative h-10 w-10 flex items-center justify-center bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl text-slate-700 transition-all duration-200 select-none cursor-pointer hover:scale-105 active:scale-95"
+              >
+                <ShoppingCart size={18} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-orange text-white rounded-full flex items-center justify-center text-[9px] font-black shadow-md border border-white animate-in zoom-in duration-200">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
 
-            {/* Staff Portal Button */}
-            <a 
-              href="/admin/login"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center space-x-1.5 px-4 h-10 bg-slate-950 hover:bg-brand-blue border border-slate-900 hover:border-brand-blue text-white rounded-2xl text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-button hover:scale-[1.01] active:scale-95 cursor-pointer select-none"
-            >
-              <span className="w-1.5 h-1.5 bg-brand-orange rounded-full animate-ping shrink-0" />
-              <span>Staff Portal</span>
-            </a>
+              {/* Staff Portal Profile Icon */}
+              <a 
+                href="/admin/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full border border-slate-200 hover:border-brand-blue overflow-hidden transition-all duration-200 select-none shadow-sm flex items-center justify-center shrink-0 hover:scale-105"
+                title="Staff Portal"
+              >
+                <img 
+                  src={getAssetPath('/profile.webp')} 
+                  alt="Staff Portal" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = getAssetPath('/profile.jpg');
+                  }}
+                />
+              </a>
 
-            {/* Cart Icon Badge */}
-            <button
-              onClick={onCartClick}
-              aria-label={`Shopping Cart, ${cartCount} items`}
-              className="relative h-10 w-10 flex items-center justify-center bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl text-slate-700 transition-all duration-200 select-none cursor-pointer hover:scale-105 active:scale-95 mr-1"
-            >
-              <ShoppingCart size={18} />
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-orange text-white rounded-full flex items-center justify-center text-[9px] font-black shadow-md border border-white animate-in zoom-in duration-200">
-                  {cartCount}
-                </span>
+              {/* Customer Profile / Login */}
+              {isLoggedIn && currentUser ? (
+                <button
+                  onClick={userRole === 'admin' ? onAdminPanelClick : onProfileClick}
+                  aria-label={userRole === 'admin' ? "Go to Admin Panel" : `Dashboard for ${currentUser.name}`}
+                  className="w-10 h-10 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold text-xs flex items-center justify-center border border-blue-200 shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none uppercase shrink-0"
+                  title={userRole === 'admin' ? "Go to Admin Panel" : `Logged in as ${currentUser.name}`}
+                >
+                  {currentUser.name ? currentUser.name[0] : 'C'}
+                </button>
+              ) : (
+                <button
+                  onClick={onLoginClick}
+                  aria-label="Login or Sign Up"
+                  className="flex items-center space-x-1.5 px-4 h-10 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all duration-200 hover:scale-102 active:scale-98 cursor-pointer select-none shrink-0"
+                >
+                  <User size={13} className="shrink-0" />
+                  <span className="hidden sm:inline">Login</span>
+                </button>
               )}
-            </button>
-
-            {/* Customer Profile / Login */}
-            {isLoggedIn && currentUser ? (
-              <button
-                onClick={userRole === 'admin' ? onAdminPanelClick : onProfileClick}
-                aria-label={userRole === 'admin' ? "Go to Admin Panel" : `Dashboard for ${currentUser.name}`}
-                className="w-10 h-10 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold text-xs flex items-center justify-center border border-blue-200 shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none uppercase shrink-0"
-                title={userRole === 'admin' ? "Go to Admin Panel" : `Logged in as ${currentUser.name}`}
-              >
-                {currentUser.name ? currentUser.name[0] : 'C'}
-              </button>
-            ) : (
-              <button
-                onClick={onLoginClick}
-                aria-label="Login or Sign Up"
-                className="flex items-center space-x-1.5 px-4 h-10 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all duration-200 hover:scale-102 active:scale-98 cursor-pointer select-none shrink-0"
-              >
-                <User size={13} className="shrink-0" />
-                <span className="hidden sm:inline">Login</span>
-              </button>
-            )}
+            </div>
           </div>
 
         </div>
