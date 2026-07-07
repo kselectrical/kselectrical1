@@ -350,16 +350,22 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Hero CTAs */}
-            <div className="flex items-center gap-3 mt-6">
+            <div className="flex flex-wrap items-center gap-3 mt-6">
+              <Link
+                to="/services"
+                className="inline-flex items-center justify-center rounded-2xl bg-brand-orange px-5 py-3 text-sm font-black text-white transition hover:bg-orange-500 shadow-sm"
+              >
+                Our Services
+              </Link>
               <Link
                 to="/ac-on-rent"
-                className="inline-flex items-center justify-center rounded-2xl bg-brand-orange px-5 py-3 text-sm font-black text-white transition hover:bg-orange-500"
+                className="inline-flex items-center justify-center rounded-2xl bg-brand-orange px-5 py-3 text-sm font-black text-white transition hover:bg-orange-500 shadow-sm"
               >
                 AC on Rent
               </Link>
               <a
                 href={`tel:${businessConfig.contacts[0]}`}
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-900 transition hover:bg-slate-100"
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-900 transition hover:bg-slate-100 shadow-sm"
               >
                 Call Now
               </a>
