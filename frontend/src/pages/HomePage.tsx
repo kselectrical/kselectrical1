@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { 
   Clock, Flame, Wrench, Droplets, Zap, Shield, 
   Settings, BookOpen, Calendar, Phone, MessageSquare, 
-  Search, ChevronDown, ChevronUp
+  Search, ChevronDown, ChevronUp, Star
 } from 'lucide-react';
 import { ServiceGrid } from '../components/ServiceGrid';
 import { blogPostsData } from '../blogData';
@@ -368,6 +368,15 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-900 transition hover:bg-slate-100 shadow-sm"
               >
                 Call Now
+              </a>
+              <a
+                href={businessConfig.reviewLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-900 transition hover:bg-slate-100 shadow-sm"
+              >
+                <Star size={14} className="fill-amber-400 text-amber-400 shrink-0" />
+                <span>Google Review</span>
               </a>
             </div>
           </div>
