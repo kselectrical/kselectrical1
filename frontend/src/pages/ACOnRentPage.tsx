@@ -691,11 +691,7 @@ export const ACOnRentPage: React.FC<{ businessConfig: BusinessConfig }> = ({ bus
 
                   <a
                     href={`tel:${businessConfig.contacts[0]}`}
-                    className={`w-full inline-flex items-center justify-center space-x-2 font-bold px-4 py-3 rounded-xl transition-all ${
-                      plan.popular
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                    }`}
+                    className="w-full inline-flex items-center justify-center space-x-2 font-bold px-4 py-3 rounded-xl transition-all bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                   >
                     <Phone size={13} />
                     <span>Inquire Now</span>
