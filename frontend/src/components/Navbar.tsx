@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Phone, MapPin, ChevronDown, ShoppingCart, Star, User } from 'lucide-react';
+import { Phone, MapPin, ChevronDown, ShoppingCart, User } from 'lucide-react';
 import { servicesData } from '../data';
 import type { BusinessConfig } from '../data';
 import { getAssetPath } from '../firebase';
@@ -185,17 +185,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Our Services</span>
             </Link>
 
-            {/* Reviews Badge */}
-            <a 
-              href="/reviews"
-              className="hidden lg:flex items-center space-x-2 px-4 h-10 bg-slate-50 hover:bg-slate-100 border border-slate-300 hover:border-slate-400 rounded-2xl text-xs font-semibold text-slate-800 transition-all duration-200 select-none shadow-sm"
-              title="View 1000+ Verified Customer Reviews"
-            >
-              <Star size={12} fill="#F97316" className="text-brand-orange shrink-0" />
-              <span className="font-extrabold text-slate-900">4.9</span>
-              <span className="text-slate-300">|</span>
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">1000+ Reviews</span>
-            </a>
+
 
             {/* Direct Calls - Stronger Orange CTA */}
             <a 
