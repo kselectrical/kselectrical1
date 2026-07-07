@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Phone, MapPin, ChevronDown, ShoppingCart, User } from 'lucide-react';
-import { servicesData } from '../data';
 import type { BusinessConfig } from '../data';
 import { getAssetPath } from '../firebase';
-import { getServiceSlugById } from '../serviceCatalog';
 
 interface NavbarProps {
   selectedLocation: string;
@@ -59,38 +57,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <nav className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-300 z-50 shadow-soft transition-all duration-300">
       
-      {/* Scrollable Service Links Utility Bar - Above the Header */}
-      <div className="w-full bg-slate-950 border-b border-slate-900 py-2.5 px-4 overflow-x-auto whitespace-nowrap flex items-center space-x-3 select-none text-white no-scrollbar">
-        <span className="text-[8px] font-black uppercase tracking-widest text-brand-orange bg-brand-orange/10 border border-brand-orange/20 px-2 py-1 rounded-full shrink-0">
-          Quick Details Menu:
-        </span>
-        <Link 
-          to="/services"
-          className={`inline-flex items-center text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md transition-all active:scale-95 shrink-0 ${
-            location.pathname === '/services'
-              ? 'bg-brand-orange text-white border border-brand-orange'
-              : 'bg-brand-blue text-white border border-brand-blue hover:bg-brand-blue-dark'
-          }`}
-        >
-          <span>✨ Our Services</span>
-        </Link>
-        {servicesData.map((service) => {
-          const slug = getServiceSlugById(service.id) || service.id;
-          return (
-            <Link 
-              key={service.id}
-              to={`/services/${slug}`}
-              className="inline-flex items-center text-[9px] font-semibold uppercase tracking-wider text-slate-300 hover:text-white px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-brand-orange hover:bg-brand-orange rounded-full transition-all duration-200 active:scale-95 shrink-0"
-            >
-              <span>{service.name}</span>
-              <span className="text-[8px] ml-1.5 bg-slate-800 text-slate-400 px-1 py-0.5 rounded font-medium">₹{service.price}</span>
-            </Link>
-          );
-        })}
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16">
           
           {/* Logo & Brand Name */}
           <div 
