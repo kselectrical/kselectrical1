@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { 
   Clock, Flame, Wrench, Droplets, Zap, Shield, 
   Settings, BookOpen, Calendar, Phone, MessageSquare, 
-  Search, ChevronDown, ChevronUp, Star
+  Search, ChevronDown, ChevronUp, ChevronRight, Star
 } from 'lucide-react';
 import { ServiceGrid } from '../components/ServiceGrid';
 import { blogPostsData } from '../blogData';
@@ -885,6 +885,17 @@ export const HomePage: React.FC<HomePageProps> = ({
                 )}
               </div>
             ))}
+          </div>
+
+          {/* View More FAQs Button */}
+          <div className="text-center pt-4 select-none">
+            <Link
+              to="/faq"
+              className="inline-flex items-center justify-center px-6 h-12 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer"
+            >
+              <span>More FAQs</span>
+              <ChevronRight size={13} className="ml-1.5 shrink-0" />
+            </Link>
           </div>
         </div>
       </section>
