@@ -187,24 +187,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </button>
 
-              {/* Staff Portal Profile Icon */}
-              <a 
-                href="/admin/login"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-slate-200 hover:border-brand-blue overflow-hidden transition-all duration-200 select-none shadow-sm flex items-center justify-center shrink-0 hover:scale-105"
-                title="Staff Portal"
-              >
-                <img 
-                  src={getAssetPath('/profile.webp')} 
-                  alt="Staff Portal" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = getAssetPath('/profile.jpg');
-                  }}
-                />
-              </a>
-
               {/* Customer Profile / Login */}
               {isLoggedIn && currentUser ? (
                 <button
@@ -225,6 +207,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className="hidden sm:inline">Login</span>
                 </button>
               )}
+
+              {/* Staff Portal Profile Icon */}
+              <a 
+                href="/admin/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full border border-slate-200 hover:border-brand-blue overflow-hidden transition-all duration-200 select-none shadow-sm flex items-center justify-center shrink-0 hover:scale-105"
+                title="Staff Portal"
+              >
+                <img 
+                  src={getAssetPath('/profile.webp')} 
+                  alt="Staff Portal" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = getAssetPath('/profile.jpg');
+                  }}
+                />
+              </a>
             </div>
           </div>
 
