@@ -213,6 +213,7 @@ export const ServiceDetailsPage: React.FC<ServiceDetailsPageProps> = ({
                 <img 
                   src={getAssetPath(service.imageUrl)} 
                   alt={service.name} 
+                  loading="lazy"
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';

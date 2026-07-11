@@ -60,7 +60,7 @@ export const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
             </div>
             <div>
               <h2 className="text-gray-900 font-black text-base tracking-tight">My Customer Profile</h2>
-              <p className="text-[10px] text-gray-450 font-bold uppercase tracking-wider">Bookings & History dashboard</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Bookings & History dashboard</p>
             </div>
           </div>
           <button 
@@ -82,7 +82,7 @@ export const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
               </div>
               <div className="space-y-1">
                 <h3 className="text-gray-900 font-black text-base leading-tight tracking-tight">{currentUser.name}</h3>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-gray-550">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-gray-500">
                   <span className="flex items-center gap-1">
                     <Phone size={12} className="text-gray-400" />
                     +91 {currentUser.phone || 'N/A'}
@@ -124,7 +124,7 @@ export const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                   <ShoppingBag size={20} />
                 </div>
                 <h5 className="text-gray-800 font-bold text-sm">No bookings found</h5>
-                <p className="text-xs text-gray-450 mt-1 max-w-xs mx-auto">
+                <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">
                   You haven't booked any electrical or AC services yet. Place your first booking to see your records here!
                 </p>
                 <button

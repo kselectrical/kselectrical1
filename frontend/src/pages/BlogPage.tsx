@@ -102,6 +102,7 @@ export const BlogPage: React.FC = () => {
                     <img 
                       src={post.imageUrl} 
                       alt={post.title}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                       onError={(e) => { e.currentTarget.src = '/svc_ac_repair.jpg'; }}
                     />

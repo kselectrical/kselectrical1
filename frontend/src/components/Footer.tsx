@@ -98,55 +98,55 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
             </h4>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2.5 text-xs font-semibold">
               <li>
-                <Link to="/" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Home (होम)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/services" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/services" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Our Services (सेवाएं)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/ac-on-rent" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/ac-on-rent" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>AC on Rent (एसी किराए पर)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/about" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>About Us (हमारे बारे में)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/contact" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Contact Us (संपर्क करें)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/reviews" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/reviews" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Reviews (समीक्षाएं)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/faq" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>FAQs (सामान्य प्रश्न)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/privacy-policy" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/privacy-policy" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Privacy (गोपनीयता)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/terms-and-cond" className="text-slate-450 hover:text-white transition-colors hover:underline flex items-center">
+                <Link to="/terms-and-cond" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Terms (नियम व शर्तें)</span>
                 </Link>

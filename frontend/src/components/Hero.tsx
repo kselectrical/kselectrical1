@@ -29,7 +29,7 @@ export const Hero: React.FC<HeroProps> = ({
   };
 
   return (
-    <section className="relative bg-slate-950 text-white pt-20 pb-16 px-4 sm:px-6 lg:px-8 border-b border-slate-900 font-sans overflow-hidden">
+    <section className="hero-critical-bg relative bg-slate-950 text-white pt-20 pb-16 px-4 sm:px-6 lg:px-8 border-b border-slate-900 font-sans overflow-hidden">
       {/* Premium Background Gradient Glowing Accents */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-orange/10 rounded-full blur-3xl select-none pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl select-none pointer-events-none" />
@@ -111,6 +111,9 @@ export const Hero: React.FC<HeroProps> = ({
                 src={getAssetPath('/hero_technician.jpg')}
                 alt="KS Electrical professional technician servicing AC"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
               <div className="absolute bottom-4 left-4 text-left">
@@ -200,6 +203,7 @@ export const Hero: React.FC<HeroProps> = ({
                 <img 
                   src={getAssetPath(cat.img)} 
                   alt={cat.name} 
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 brightness-[0.55]"
                 />
                 {/* Category Dark overlay */}
@@ -211,7 +215,7 @@ export const Hero: React.FC<HeroProps> = ({
                   <span className="text-white text-xs sm:text-sm font-black leading-tight block">
                     {cat.name}
                   </span>
-                  <span className="text-[9px] text-slate-350 font-semibold block leading-tight mt-1 truncate max-w-full">
+                  <span className="text-[9px] text-slate-300 font-semibold block leading-tight mt-1 truncate max-w-full">
                     {cat.desc}
                   </span>
                 </div>

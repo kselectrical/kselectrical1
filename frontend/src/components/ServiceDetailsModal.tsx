@@ -92,7 +92,7 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
               </h2>
               
               {/* Rating */}
-              <div className="flex items-center space-x-1.5 text-xs text-gray-550 font-bold select-none">
+              <div className="flex items-center space-x-1.5 text-xs text-gray-500 font-bold select-none">
                 <div className="flex items-center text-yellow-500">
                   <Star size={12} fill="currentColor" />
                 </div>
@@ -202,6 +202,7 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
               <img 
                 src="https://images.unsplash.com/photo-1622044939413-0b829c342434?auto=format&fit=crop&w=150&q=80" 
                 alt="Verified Technician" 
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -219,7 +220,7 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
             <div className="flex items-center space-x-6 select-none bg-gray-50 p-4 rounded-xl border border-gray-150">
               <div className="text-center">
                 <span className="text-3xl sm:text-4xl font-black text-gray-900 leading-none">4.8</span>
-                <span className="text-xs text-gray-450 block font-bold mt-1">out of 5</span>
+                <span className="text-xs text-gray-400 block font-bold mt-1">out of 5</span>
               </div>
               <div className="flex-1 space-y-1">
                 {[

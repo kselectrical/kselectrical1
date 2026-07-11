@@ -274,6 +274,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                           <img 
                             src={getAssetPath(service.imageUrl)} 
                             alt={`${service.name} in Greater Noida, Noida Extension & Gaur City - KS Electrical`} 
+                            loading="lazy"
                             className="w-full h-full object-cover rounded-2xl border border-slate-300 shadow-sm"
                           />
                           
@@ -362,7 +363,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
               <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-yellow-200 text-yellow-600 text-[10px] font-bold shrink-0">
                 ⭐ 100%
               </div>
-              <div className="text-[10px] text-gray-450 leading-tight font-medium">
+              <div className="text-[10px] text-gray-400 leading-tight font-medium">
                 Our technicians are strictly trained with 300+ hours in domestic repairs.
               </div>
             </div>
@@ -372,7 +373,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
           <div className="ui-card p-5 space-y-4 text-left font-sans">
             <h3 className="font-extrabold text-gray-900 text-sm flex items-center justify-between border-b border-gray-100 pb-3">
               <span>Shopping Cart</span>
-              <span className="text-[11px] font-bold text-gray-450 uppercase">{cartCount} items</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase">{cartCount} items</span>
             </h3>
 
             {cartCount === 0 ? (
@@ -397,7 +398,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                             {item.brand}
                           </span>
                         )}
-                        <div className="text-[10px] text-gray-455 font-bold mt-1">₹{item.price} each</div>
+                        <div className="text-[10px] text-gray-500 font-bold mt-1">₹{item.price} each</div>
                       </div>
 
                       {/* Quantity Modifier */}
@@ -405,7 +406,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                         <button
                           type="button"
                           onClick={() => onRemoveFromCart(item.serviceId, item.brand)}
-                          className="w-5 h-5 rounded border border-gray-250 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-55 cursor-pointer text-[10px]"
+                          className="w-5 h-5 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 cursor-pointer text-[10px]"
                         >
                           <Minus size={10} />
                         </button>
@@ -413,7 +414,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                         <button
                           type="button"
                           onClick={() => onAddToCart({ id: item.serviceId, name: item.serviceName, price: item.price } as TechnicalService, item.brand)}
-                          className="w-5 h-5 rounded border border-gray-255 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-55 cursor-pointer text-[10px]"
+                          className="w-5 h-5 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 cursor-pointer text-[10px]"
                         >
                           <Plus size={10} />
                         </button>

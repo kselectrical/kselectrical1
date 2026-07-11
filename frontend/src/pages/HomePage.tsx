@@ -251,7 +251,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   At Your Doorstep
                 </span>
               </h1>
-              <p className="text-slate-350 text-sm sm:text-base max-w-xl font-medium leading-relaxed">
+              <p className="text-slate-300 text-sm sm:text-base max-w-xl font-medium leading-relaxed">
                 Experience premium convenience similar to top international startups. Certified mechanics, upfront flat prices, and genuine spare parts.
               </p>
             </div>
@@ -390,7 +390,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   Premium Standard
                 </span>
                 <p className="text-white font-extrabold text-base mt-2">Professional Doorstep Diagnostic & Repair</p>
-                <p className="text-slate-350 text-xs mt-0.5 font-medium">Equipped with advanced calibrations & calibration tools.</p>
+                <p className="text-slate-300 text-xs mt-0.5 font-medium">Equipped with advanced calibrations & calibration tools.</p>
               </div>
             </div>
           </div>
@@ -494,7 +494,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
                     <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
                       <div>
-                        <span className="block text-[9px] text-slate-450 font-black uppercase tracking-wider">Starting From</span>
+                        <span className="block text-[9px] text-slate-400 font-black uppercase tracking-wider">Starting From</span>
                         <span className="block text-slate-900 font-black text-base mt-0.5">{card.startingPrice}</span>
                       </div>
                       <Link
@@ -573,7 +573,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           <div className="lg:col-span-7 flex justify-center">
             <div 
-              className="relative w-full max-w-xl aspect-[16/10] rounded-2xl overflow-hidden border border-slate-350 shadow-2xl cursor-ew-resize select-none"
+              className="relative w-full max-w-xl aspect-[16/10] rounded-2xl overflow-hidden border border-slate-300 shadow-2xl cursor-ew-resize select-none"
               onMouseMove={handleSliderMove}
               onTouchMove={handleSliderMove}
             >
@@ -581,6 +581,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <img 
                 src="/ac_service_pro.jpg" 
                 alt="Before repair service" 
+                loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover select-none"
               />
               
@@ -592,6 +593,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <img 
                   src="/ro_service_pro.jpg" 
                   alt="After repair service" 
+                  loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover select-none"
                   style={{ width: '100%', maxWidth: 'none', transform: `translateX(-${sliderPosition}%)` }}
                 />
@@ -675,6 +677,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <img
                       src={serviceExpert.img}
                       alt={serviceExpert.name}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -800,7 +803,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   activeGalleryFilter === filter 
                     ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-white border border-slate-250 text-slate-700 hover:bg-slate-50'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 {filter}
@@ -818,6 +821,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <img
                     src={item.img}
                     alt={item.title}
+                    loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
@@ -925,6 +929,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <img
                     src={blog.imageUrl}
                     alt={blog.title}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                     onError={(e) => { e.currentTarget.src = '/svc_ac_repair.jpg'; }}
                   />
@@ -946,7 +951,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <div className="pt-4 border-t border-slate-100 select-none">
                     <Link
                       to={`/blog/${blog.slug}`}
-                      className="w-full bg-slate-50 hover:bg-orange-50 text-slate-800 hover:text-[#F97316] border border-slate-250 hover:border-orange-300 rounded-xl py-2.5 text-xs font-black uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+                      className="w-full bg-slate-50 hover:bg-orange-50 text-slate-800 hover:text-[#F97316] border border-slate-200 hover:border-orange-300 rounded-xl py-2.5 text-xs font-black uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
                     >
                       <BookOpen size={12} />
                       <span>Read Article</span>
@@ -996,7 +1001,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
               Need Appliance Repairs Today?
             </h2>
-            <p className="text-slate-350 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
+            <p className="text-slate-300 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
               Book a verified engineer in under 30 seconds. No advance deposit required. Pay only after the diagnostic repairs are done.
             </p>
           </div>

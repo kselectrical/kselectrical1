@@ -213,6 +213,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 href="/admin/login"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Staff Portal"
                 className="w-10 h-10 rounded-full border border-slate-200 hover:border-brand-blue overflow-hidden transition-all duration-200 select-none shadow-sm flex items-center justify-center shrink-0 hover:scale-105"
                 title="Staff Portal"
               >

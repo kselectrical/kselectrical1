@@ -3,7 +3,18 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'lazy-load-css',
+      transformIndexHtml(html) {
+        return html.replace(
+          /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)"\s*\/?>/g,
+          '<link rel="stylesheet" crossorigin href="$1" media="print" onload="this.onload=null;this.media=\'all\'">'
+        );
+      }
+    }
+  ],
   base: '/',
   build: {
     minify: 'oxc',

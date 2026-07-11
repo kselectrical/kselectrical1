@@ -153,6 +153,7 @@ export const GallerySlider: React.FC = () => {
               <img
                 src={getAssetPath(slide.image)}
                 alt={slide.title}
+                loading="lazy"
                 className="w-full h-full object-cover brightness-[0.7]"
               />
               
@@ -174,6 +175,7 @@ export const GallerySlider: React.FC = () => {
 
         {/* Arrow Controls (Hidden on mobile, shows on hover/desktop) */}
         <button
+          type="button"
           onClick={handlePrev}
           className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-2 rounded-full backdrop-blur-xs transition z-30 opacity-0 group-hover:opacity-100 hidden md:block"
           aria-label="Previous Slide"
@@ -181,6 +183,7 @@ export const GallerySlider: React.FC = () => {
           <ChevronLeft size={24} />
         </button>
         <button
+          type="button"
           onClick={handleNext}
           className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-2 rounded-full backdrop-blur-xs transition z-30 opacity-0 group-hover:opacity-100 hidden md:block"
           aria-label="Next Slide"
@@ -192,6 +195,7 @@ export const GallerySlider: React.FC = () => {
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-30">
           {slides.map((_, index) => (
             <button
+              type="button"
               key={index}
               onClick={() => handleDotClick(index)}
               className={`h-2 rounded-full transition-all duration-300 ${

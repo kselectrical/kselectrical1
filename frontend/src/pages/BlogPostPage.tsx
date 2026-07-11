@@ -75,6 +75,7 @@ export const BlogPostPage: React.FC = () => {
           <img 
             src={post.imageUrl} 
             alt={post.title} 
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         </div>

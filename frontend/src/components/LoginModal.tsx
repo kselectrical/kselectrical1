@@ -165,7 +165,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <Sparkles size={20} className="animate-pulse" />
           </div>
           <h2 className="text-gray-900 font-black text-lg tracking-tight">KS Portal Access</h2>
-          <p className="text-[10px] text-gray-450 font-bold uppercase tracking-wider mt-0.5">Secure authentication gate</p>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Secure authentication gate</p>
         </div>
 
         {/* Customer Login Form */}
@@ -179,7 +179,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     <label htmlFor="customer-name" className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">Your Name</label>
                     <span className="text-[9px] text-brand-blue font-bold px-1.5 py-0.5 bg-blue-50 border border-blue-100 rounded">New User</span>
                   </div>
-                  <div className="flex border border-gray-250 rounded-lg overflow-hidden focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-blue-100 transition-all bg-white">
+                  <div className="flex border border-gray-200 rounded-lg overflow-hidden focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-blue-100 transition-all bg-white">
                     <div className="border-r border-gray-200 px-2.5 py-2 text-gray-400 flex items-center bg-gray-50">
                       <User size={13} />
                     </div>
@@ -203,7 +203,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {/* Mobile Number */}
               <div className="space-y-1">
                 <label htmlFor="customer-phone" className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">Mobile Number</label>
-                <div className="flex border border-gray-250 rounded-lg overflow-hidden focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-blue-100 transition-all bg-white">
+                <div className="flex border border-gray-200 rounded-lg overflow-hidden focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-blue-100 transition-all bg-white">
                   <div className="border-r border-gray-200 px-2.5 py-2 text-gray-400 flex items-center bg-gray-50">
                     <span className="text-xs font-bold text-gray-400">+91</span>
                   </div>
@@ -222,7 +222,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       if (error) setError('');
                     }}
                     placeholder="10-digit mobile number"
-                    className="flex-1 bg-white text-gray-800 text-xs font-semibold px-2.5 py-2 focus:outline-none placeholder-gray-400 disabled:bg-gray-50 disabled:text-gray-450"
+                    className="flex-1 bg-white text-gray-800 text-xs font-semibold px-2.5 py-2 focus:outline-none placeholder-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
                     autoComplete="tel"
                     aria-label="Enter your 10-digit mobile number"
                   />
@@ -261,7 +261,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               )}
             </button>
 
-            <p className="text-[9px] text-gray-450 font-semibold leading-normal text-center">
+            <p className="text-[9px] text-gray-400 font-semibold leading-normal text-center">
               Your data is fully secure. Same-day service activation.
             </p>
           </form>

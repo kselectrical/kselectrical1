@@ -63,6 +63,66 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" />
     </noscript>
 
+    <!-- Critical CSS for Hero above-the-fold rendering -->
+    <style id="critical-path-css">
+      :root {
+        color-scheme: light;
+        --text-strong: #0f172a;
+      }
+      html {
+        scroll-behavior: smooth;
+        box-sizing: border-box;
+      }
+      *, *::before, *::after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: var(--text-strong);
+        font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      .bg-slate-950 {
+        background-color: #020617 !important;
+      }
+      .text-white {
+        color: #ffffff !important;
+      }
+      .hero-critical-bg {
+        position: relative;
+        background-color: #020617;
+        color: #ffffff;
+        padding-top: 5rem;
+        padding-bottom: 4rem;
+        border-bottom: 1px solid #0f172a;
+        overflow: hidden;
+      }
+      .max-w-6xl {
+        max-w: 72rem;
+      }
+      .mx-auto {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .grid {
+        display: grid;
+      }
+      @media (min-width: 1024px) {
+        .lg\:grid-cols-12 {
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+        .lg\:col-span-7 {
+          grid-column: span 7 / span 7;
+        }
+        .lg\:col-span-5 {
+          grid-column: span 5 / span 5;
+        }
+      }
+    </style>
+
     <!-- Preload LCP hero image — critical for Core Web Vitals -->
     <link rel="preload" as="image" href="/hero_technician.jpg" fetchpriority="high" />
 
@@ -125,10 +185,10 @@
         "logo": "https://www.kselectrical.in/log.webp",
         "address": {
           "@type": "PostalAddress",
-          "streetAddress": "Gaur City 1, Greater Noida West",
-          "addressLocality": "Greater Noida",
+          "streetAddress": "Gaur City 1, Noida Extension",
+          "addressLocality": "Noida Extension",
           "addressRegion": "Uttar Pradesh",
-          "postalCode": "201318",
+          "postalCode": "201301",
           "addressCountry": "IN"
         },
         "geo": {
