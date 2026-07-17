@@ -108,7 +108,7 @@ export const Hero: React.FC<HeroProps> = ({
             {/* Big Hero Image */}
             <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-800 h-48 sm:h-56 group">
               <img
-                src={getAssetPath('/hero_technician.jpg')}
+                src={getAssetPath('/hero_technician.webp')}
                 alt="KS Electrical professional technician servicing AC"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 fetchPriority="high"
@@ -166,7 +166,7 @@ export const Hero: React.FC<HeroProps> = ({
 
               <div className="absolute right-[-8px] bottom-[-8px] w-24 h-24 opacity-90 group-hover:scale-105 transition-transform duration-500 shrink-0">
                 <img 
-                  src={getAssetPath('/team_trust.jpg')} 
+                  src={getAssetPath('/team_trust.webp')} 
                   alt="Verified technician team" 
                   className="w-full h-full object-cover rounded-tl-3xl border border-slate-800 shadow-md"
                 />
@@ -186,10 +186,10 @@ export const Hero: React.FC<HeroProps> = ({
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { id: 'AC Services', name: 'AC Services', desc: 'Gas leaks, jet cleaning & install', img: '/ac_service_pro.jpg', label: 'AC Services' },
-              { id: 'Electrician Services', name: 'Electrician Services', desc: 'Wiring, MCBs, lighting fitting', img: '/electrician_pro.jpg', label: 'Electrician Services' },
-              { id: 'Appliance Repair', name: 'RO & Appliance Repair', desc: 'RO servicing, fridges & geysers', img: '/ro_service_pro.jpg', label: 'RO & Appliance Repair' },
-              { id: 'Home Installations', name: 'Home Installations', desc: 'Chimney wash, balcony nets, locks', img: '/washing_machine_pro.jpg', label: 'Home Installations' }
+              { id: 'AC Services', name: 'AC Services', desc: 'Gas leaks, jet cleaning & install', img: '/ac_service_pro.webp', label: 'AC Services' },
+              { id: 'Electrician Services', name: 'Electrician Services', desc: 'Wiring, MCBs, lighting fitting', img: '/electrician_pro.webp', label: 'Electrician Services' },
+              { id: 'Appliance Repair', name: 'RO & Appliance Repair', desc: 'RO servicing, fridges & geysers', img: '/ro_service_pro.webp', label: 'RO & Appliance Repair' },
+              { id: 'Home Installations', name: 'Home Installations', desc: 'Chimney wash, balcony nets, locks', img: '/washing_machine_pro.webp', label: 'Home Installations' }
             ].map((cat) => (
               <div
                 key={cat.id}

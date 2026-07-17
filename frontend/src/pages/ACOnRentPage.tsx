@@ -309,8 +309,8 @@ export const ACOnRentPage: React.FC<{ businessConfig: BusinessConfig }> = ({ bus
       name: businessConfig.name,
       image: [
         getAssetPath(businessConfig.logoUrl),
-        getAssetPath('/ac-rental-gaur-city.png'),
-        getAssetPath('/ac-rental-noida-extension.png'),
+        getAssetPath('/ac-rental-gaur-city.webp'),
+        getAssetPath('/ac-rental-noida-extension.webp'),
       ],
       description: 'Professional AC rental services in Gaur City, Noida Extension, Greater Noida West. We offer Split AC, Window AC, 1Ton, 1.5Ton, 2Ton, Inverter and Non-Inverter ACs on rent with installation, maintenance, and support.',
       telephone: `+91${businessConfig.contacts[0]}`,
@@ -425,7 +425,7 @@ export const ACOnRentPage: React.FC<{ businessConfig: BusinessConfig }> = ({ bus
           <link rel="canonical" href="https://kselectrical.in/ac-on-rent" />
           <meta property="og:title" content="AC on Rent in Gaur City | Noida Extension | Greater Noida West" />
           <meta property="og:description" content="Affordable AC on rent services in Gaur City, Noida Extension, Greater Noida West. Rent Split AC, 1Ton, 1.5Ton, 2Ton ACs with installation, maintenance & support. Same day delivery available." />
-          <meta property="og:image" content="https://kselectrical.in/ac-rental-gaur-city.png" />
+          <meta property="og:image" content="https://kselectrical.in/ac-rental-gaur-city.webp" />
           <meta property="og:url" content="https://kselectrical.in/ac-on-rent" />
           <meta property="og:type" content="website" />
           <meta name="twitter:card" content="summary_large_image" />
@@ -461,7 +461,7 @@ export const ACOnRentPage: React.FC<{ businessConfig: BusinessConfig }> = ({ bus
           <link rel="canonical" href="https://kselectrical.in/ac-on-rent" />
           <meta property="og:title" content="AC on Rent in Gaur City | Noida Extension | Greater Noida West" />
           <meta property="og:description" content="Affordable AC on rent services in Gaur City, Noida Extension, Greater Noida West. Rent Split AC, Window AC, 1Ton, 1.5Ton, 2Ton ACs with installation, maintenance & support. Same day delivery available." />
-          <meta property="og:image" content="https://kselectrical.in/ac-rental-gaur-city.png" />
+          <meta property="og:image" content="https://kselectrical.in/ac-rental-gaur-city.webp" />
           <meta property="og:url" content="https://kselectrical.in/ac-on-rent" />
           <meta property="og:type" content="website" />
           <meta name="twitter:card" content="summary_large_image" />
@@ -503,7 +503,7 @@ export const ACOnRentPage: React.FC<{ businessConfig: BusinessConfig }> = ({ bus
         <link rel="canonical" href="https://kselectrical.in/ac-on-rent" />
         <meta property="og:title" content="AC on Rent in Gaur City | Noida Extension | Greater Noida West | KS Electrical" />
         <meta property="og:description" content="Affordable AC on rent services in Gaur City, Noida Extension, Greater Noida West. Rent Split AC, Window AC, 1Ton, 1.5Ton, 2Ton ACs with installation, maintenance & support. Same day delivery available. Low upfront cost, ideal for tenants, students, families, offices." />
-        <meta property="og:image" content="https://kselectrical.in/ac-rental-gaur-city.png" />
+        <meta property="og:image" content="https://kselectrical.in/ac-rental-gaur-city.webp" />
         <meta property="og:url" content="https://kselectrical.in/ac-on-rent" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />

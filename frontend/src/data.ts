@@ -40,7 +40,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (1.2k reviews)",
     "price": 299,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/ac-repair-greater-noida.jpg",
+    "imageUrl": "/images/services/ac-repair-greater-noida.webp",
     "specifications": [
       {
         "label": "Cooling Guarantee",
@@ -68,7 +68,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (840 reviews)",
     "price": 1099,
     "warranty": "90 Days Warranty",
-    "imageUrl": "/ac-installation-noida-extension.jpg",
+    "imageUrl": "/images/services/ac-installation-noida-extension.webp",
     "specifications": [
       {
         "label": "Gas Top-up Check",
@@ -96,7 +96,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (520 reviews)",
     "price": 699,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_ac_uninstall.jpg",
+    "imageUrl": "/images/services/svc_ac_uninstall.webp",
     "specifications": [
       {
         "label": "Gas Recovery",
@@ -124,7 +124,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (2.1k reviews)",
     "price": 399,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/ac-service-gaur-city.jpg",
+    "imageUrl": "/images/services/ac-service-gaur-city.webp",
     "specifications": [
       {
         "label": "Jet Pressure",
@@ -152,7 +152,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (980 reviews)",
     "price": 1499,
     "warranty": "60 Days Warranty",
-    "imageUrl": "/svc_ac_gas_refill.jpg",
+    "imageUrl": "/images/services/svc_ac_gas_refill.webp",
     "specifications": [
       {
         "label": "Gas Type",
@@ -180,7 +180,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.4k reviews)",
     "price": 99,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/ceiling-fan-repair-greater-noida.jpg",
+    "imageUrl": "/images/services/ceiling-fan-repair-greater-noida.webp",
     "specifications": [
       {
         "label": "Fan Type",
@@ -208,7 +208,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (610 reviews)",
     "price": 99,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_fan_basic_uninstall.jpg",
+    "imageUrl": "/images/services/svc_fan_basic_uninstall.webp",
     "specifications": [
       {
         "label": "Wire Capping",
@@ -236,7 +236,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.1k reviews)",
     "price": 149,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_fan_basic_repair.jpg",
+    "imageUrl": "/images/services/svc_fan_basic_repair.webp",
     "specifications": [
       {
         "label": "Capacitor Spec",
@@ -264,7 +264,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (780 reviews)",
     "price": 249,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/bldc-fan-service-gaur-city.jpg",
+    "imageUrl": "/images/services/bldc-fan-service-gaur-city.webp",
     "specifications": [
       {
         "label": "Fan Type",
@@ -292,7 +292,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (290 reviews)",
     "price": 149,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_fan_bldc_uninstall.jpg",
+    "imageUrl": "/images/services/svc_fan_bldc_uninstall.webp",
     "specifications": [
       {
         "label": "Receiver Module",
@@ -320,7 +320,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (190 reviews)",
     "price": 199,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_fan_bldc_service.jpg",
+    "imageUrl": "/images/services/svc_fan_bldc_service.webp",
     "specifications": [
       {
         "label": "Blade Cleaning",
@@ -348,7 +348,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (410 reviews)",
     "price": 469,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/fancy-fan-installation-noida-extension.jpg",
+    "imageUrl": "/images/services/fancy-fan-installation-noida-extension.webp",
     "specifications": [
       {
         "label": "Fan Type",
@@ -376,7 +376,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (150 reviews)",
     "price": 249,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_fan_fancy_uninstall.jpg",
+    "imageUrl": "/images/services/svc_fan_fancy_uninstall.webp",
     "specifications": [
       {
         "label": "Blade Protection",
@@ -404,7 +404,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (210 reviews)",
     "price": 299,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_fan_fancy_repair.jpg",
+    "imageUrl": "/images/services/svc_fan_fancy_repair.webp",
     "specifications": [
       {
         "label": "LED Light Fix",
@@ -432,7 +432,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (920 reviews)",
     "price": 49,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/bulb-holder-repair-greater-noida.jpg",
+    "imageUrl": "/images/services/bulb-holder-repair-greater-noida.webp",
     "specifications": [
       {
         "label": "Holder Type",
@@ -460,7 +460,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (430 reviews)",
     "price": 69,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_light_bulb_repair.jpg",
+    "imageUrl": "/images/services/svc_light_bulb_repair.webp",
     "specifications": [
       {
         "label": "Terminal Check",
@@ -488,7 +488,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.1k reviews)",
     "price": 99,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/tube-light-installation-greater-noida.jpg",
+    "imageUrl": "/images/services/tube-light-installation-greater-noida.webp",
     "specifications": [
       {
         "label": "Tube Type",
@@ -516,7 +516,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (540 reviews)",
     "price": 99,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_light_tube_repair.jpg",
+    "imageUrl": "/images/services/svc_light_tube_repair.webp",
     "specifications": [
       {
         "label": "Driver Replaced",
@@ -544,7 +544,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (240 reviews)",
     "price": 79,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_light_tube_uninstall.jpg",
+    "imageUrl": "/images/services/svc_light_tube_uninstall.webp",
     "specifications": [
       {
         "label": "Wire Capping",
@@ -572,7 +572,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (490 reviews)",
     "price": 149,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/fancy-light-repair-noida-extension.jpg",
+    "imageUrl": "/images/services/fancy-light-repair-noida-extension.webp",
     "specifications": [
       {
         "label": "Light Type",
@@ -600,7 +600,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (270 reviews)",
     "price": 149,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_light_fancy_repair.jpg",
+    "imageUrl": "/images/services/svc_light_fancy_repair.webp",
     "specifications": [
       {
         "label": "LED Driver",
@@ -628,7 +628,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (680 reviews)",
     "price": 89,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/ceiling-panel-light-installation-gaur-city.jpg",
+    "imageUrl": "/images/services/ceiling-panel-light-installation-gaur-city.webp",
     "specifications": [
       {
         "label": "Panel Type",
@@ -656,7 +656,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (340 reviews)",
     "price": 499,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/chandelier-installation-noida-extension.jpg",
+    "imageUrl": "/images/services/chandelier-installation-noida-extension.webp",
     "specifications": [
       {
         "label": "Mount Anchor",
@@ -684,7 +684,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (380 reviews)",
     "price": 129,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_light_ceiling_repair.jpg",
+    "imageUrl": "/images/services/svc_light_ceiling_repair.webp",
     "specifications": [
       {
         "label": "LED Driver",
@@ -712,7 +712,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (920 reviews)",
     "price": 69,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/switchboard-repair-greater-noida.jpg",
+    "imageUrl": "/images/services/switchboard-repair-greater-noida.webp",
     "specifications": [
       {
         "label": "Safety Standard",
@@ -740,7 +740,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (680 reviews)",
     "price": 99,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_elec_switchboard_repair.jpg",
+    "imageUrl": "/images/services/svc_elec_switchboard_repair.webp",
     "specifications": [
       {
         "label": "Board Grade",
@@ -768,7 +768,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (340 reviews)",
     "price": 149,
     "warranty": "60 Days Warranty",
-    "imageUrl": "/svc_elec_newbox_install.jpg",
+    "imageUrl": "/images/services/svc_elec_newbox_install.webp",
     "specifications": [
       {
         "label": "Conduit Laying",
@@ -796,7 +796,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (720 reviews)",
     "price": 399,
     "warranty": "90 Days Warranty",
-    "imageUrl": "/svc_mcb_upgrade.jpg",
+    "imageUrl": "/images/services/svc_mcb_upgrade.webp",
     "specifications": [
       {
         "label": "Trip Response",
@@ -824,7 +824,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.6k reviews)",
     "price": 999,
     "warranty": "90 Days Warranty",
-    "imageUrl": "/svc_house_wiring.jpg",
+    "imageUrl": "/images/services/svc_house_wiring.webp",
     "specifications": [
       {
         "label": "Wire Grade",
@@ -852,7 +852,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (310 reviews)",
     "price": 99,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/doorbell-repair-greater-noida.jpg",
+    "imageUrl": "/images/services/doorbell-repair-greater-noida.webp",
     "specifications": [
       {
         "label": "Intercom Lines",
@@ -880,7 +880,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (510 reviews)",
     "price": 249,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/inverter-battery-service-greater-noida.jpg",
+    "imageUrl": "/images/services/inverter-battery-service-greater-noida.webp",
     "specifications": [
       {
         "label": "Backup Test",
@@ -908,7 +908,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (1.2k reviews)",
     "price": 299,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/ro-water-purifier-repair-noida-extension.jpg",
+    "imageUrl": "/images/services/ro-water-purifier-repair-noida-extension.webp",
     "specifications": [
       {
         "label": "Diagnostics",
@@ -936,7 +936,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.8k reviews)",
     "price": 399,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_ro_filter_service.jpg",
+    "imageUrl": "/images/services/svc_ro_filter_service.webp",
     "specifications": [
       {
         "label": "Sediment Filter",
@@ -964,7 +964,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (640 reviews)",
     "price": 499,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/best-ro-service-greater-noida.jpg",
+    "imageUrl": "/images/services/best-ro-service-greater-noida.webp",
     "specifications": [
       {
         "label": "Wall Mount",
@@ -992,7 +992,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (280 reviews)",
     "price": 299,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_app_ro_uninstall.jpg",
+    "imageUrl": "/images/services/svc_app_ro_uninstall.webp",
     "specifications": [
       {
         "label": "Tank Drainage",
@@ -1020,7 +1020,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (1.4k reviews)",
     "price": 249,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/washing-machine-repair-gaur-city.jpg",
+    "imageUrl": "/images/services/washing-machine-repair-gaur-city.webp",
     "specifications": [
       {
         "label": "Diagnostics",
@@ -1048,7 +1048,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (880 reviews)",
     "price": 399,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/washing-machine-service-greater-noida.jpg",
+    "imageUrl": "/images/services/washing-machine-service-greater-noida.webp",
     "specifications": [
       {
         "label": "Transit Bolts",
@@ -1076,7 +1076,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (320 reviews)",
     "price": 199,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_app_washing_uninstall.jpg",
+    "imageUrl": "/images/services/svc_app_washing_uninstall.webp",
     "specifications": [
       {
         "label": "Transit Bolt Setup",
@@ -1104,7 +1104,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.1k reviews)",
     "price": 499,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_washing_tub_clean.jpg",
+    "imageUrl": "/images/services/svc_washing_tub_clean.webp",
     "specifications": [
       {
         "label": "Scale Removal",
@@ -1132,7 +1132,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (1.2k reviews)",
     "price": 299,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/geyser-repair-noida-extension.jpg",
+    "imageUrl": "/images/services/geyser-repair-noida-extension.webp",
     "specifications": [
       {
         "label": "Thermostat Tripped",
@@ -1160,7 +1160,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.4k reviews)",
     "price": 599,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/svc_geyser_descaling.jpg",
+    "imageUrl": "/images/services/svc_geyser_descaling.webp",
     "specifications": [
       {
         "label": "Tank Descaling",
@@ -1188,7 +1188,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (920 reviews)",
     "price": 499,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/geyser-service-greater-noida.jpg",
+    "imageUrl": "/images/services/geyser-service-greater-noida.webp",
     "specifications": [
       {
         "label": "Anchor Bolts",
@@ -1216,7 +1216,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (380 reviews)",
     "price": 199,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_app_geyser_uninstall.jpg",
+    "imageUrl": "/images/services/svc_app_geyser_uninstall.webp",
     "specifications": [
       {
         "label": "Tank Drainage",
@@ -1244,7 +1244,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (1.1k reviews)",
     "price": 249,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/fridge-repair-greater-noida.jpg",
+    "imageUrl": "/images/services/fridge-repair-greater-noida.webp",
     "specifications": [
       {
         "label": "Relay Check",
@@ -1272,7 +1272,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (820 reviews)",
     "price": 999,
     "warranty": "90 Days Warranty",
-    "imageUrl": "/svc_fridge_gas_charging.jpg",
+    "imageUrl": "/images/services/svc_fridge_gas_charging.webp",
     "specifications": [
       {
         "label": "Gas Code",
@@ -1300,7 +1300,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (740 reviews)",
     "price": 1499,
     "warranty": "90 Days Warranty",
-    "imageUrl": "/refrigerator-gas-charging-greater-noida.jpg",
+    "imageUrl": "/images/services/refrigerator-gas-charging-greater-noida.webp",
     "specifications": [
       {
         "label": "Gas Code",
@@ -1328,7 +1328,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (580 reviews)",
     "price": 299,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/refrigerator-service-gaur-city.jpg",
+    "imageUrl": "/images/services/refrigerator-service-gaur-city.webp",
     "specifications": [
       {
         "label": "Sanitization",
@@ -1356,7 +1356,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (510 reviews)",
     "price": 299,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/microwave-repair-greater-noida.webp",
+    "imageUrl": "/images/services/microwave-repair-greater-noida.webp",
     "specifications": [
       {
         "label": "Magnetron Check",
@@ -1384,7 +1384,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (240 reviews)",
     "price": 199,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_microwave_cleaning.jpg",
+    "imageUrl": "/images/services/svc_microwave_cleaning.webp",
     "specifications": [
       {
         "label": "Steam Degreasing",
@@ -1412,7 +1412,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (620 reviews)",
     "price": 299,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/kitchen-chimney-repair-gaur-city.jpg",
+    "imageUrl": "/images/services/kitchen-chimney-repair-gaur-city.webp",
     "specifications": [
       {
         "label": "Suction diagnostics",
@@ -1440,7 +1440,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (790 reviews)",
     "price": 799,
     "warranty": "90 Days Warranty",
-    "imageUrl": "/kitchen-chimney-installation-gaur-city.jpg",
+    "imageUrl": "/images/services/kitchen-chimney-installation-gaur-city.webp",
     "specifications": [
       {
         "label": "Drilling Mount",
@@ -1468,7 +1468,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (310 reviews)",
     "price": 399,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/svc_app_chimney_uninstall.jpg",
+    "imageUrl": "/images/services/svc_app_chimney_uninstall.webp",
     "specifications": [
       {
         "label": "Safe Dismount",
@@ -1496,7 +1496,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (1.2k reviews)",
     "price": 499,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/chimney-cleaning-service-greater-noida.jpg",
+    "imageUrl": "/images/services/chimney-cleaning-service-greater-noida.webp",
     "specifications": [
       {
         "label": "Grease Boil Wash",
@@ -1524,7 +1524,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (640 reviews)",
     "price": 1200,
     "warranty": "3 Year Warranty",
-    "imageUrl": "/balcony-pigeon-net-installation-greater-noida.jpg",
+    "imageUrl": "/images/services/balcony-pigeon-net-installation-greater-noida.webp",
     "specifications": [
       {
         "label": "Net Mesh",
@@ -1552,7 +1552,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.7 ★ (1.1k reviews)",
     "price": 199,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/images/services/plumbing-services-greater-noida.jpg",
+    "imageUrl": "/images/services/plumbing-services-greater-noida.webp",
     "specifications": [
       {
         "label": "Pipe Sealants",
@@ -1580,7 +1580,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.8 ★ (820 reviews)",
     "price": 249,
     "warranty": "15 Days Warranty",
-    "imageUrl": "/images/services/carpentry-work-gaur-city.jpg",
+    "imageUrl": "/images/services/carpentry-work-gaur-city.webp",
     "specifications": [
       {
         "label": "SS Hinge Check",
@@ -1608,7 +1608,7 @@ export const servicesData: TechnicalService[] = [
     "rating": "4.9 ★ (210 reviews)",
     "price": 4999,
     "warranty": "5 Year Warranty",
-    "imageUrl": "/images/services/gypsum-false-ceiling-noida-extension.jpg",
+    "imageUrl": "/images/services/gypsum-false-ceiling-noida-extension.webp",
     "specifications": [
       {
         "label": "Gypsum Board",

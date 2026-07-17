@@ -21,7 +21,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 10, 2026',
     readTime: '4 min read',
     category: 'AC Services',
-    imageUrl: '/ac-service-gaur-city.jpg',
+    imageUrl: '/ac-service-gaur-city.webp',
     content: `
 <h2>एसी सर्विस (AC Service) कब और क्यों करानी चाहिए?</h2>
 <p>भारत में गर्मियों के मौसम में एयर कंडीशनर (AC) हमारी जिंदगी का एक बेहद अहम हिस्सा बन जाता है। लेकिन क्या आप जानते हैं कि एक एयर कंडीशनर को सुचारू रूप से चलाने के लिए और बिजली का बिल कम रखने के लिए उसकी नियमित सर्विस कराना कितना जरूरी है? आज हम बात करेंगे कि <strong>AC Service कितने महीने में करानी चाहिए</strong> और इसके क्या फायदे हैं।</p>
@@ -54,7 +54,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 12, 2026',
     readTime: '5 min read',
     category: 'AC Services',
-    imageUrl: '/ac-repair-greater-noida.jpg',
+    imageUrl: '/ac-repair-greater-noida.webp',
     content: `
 <h2>AC की ठंडी हवा कम होने के मुख्य कारण</h2>
 <p>कड़कड़ाती धूप में जब घर का एसी ठंडी हवा देना बंद कर दे, तो परेशानी बहुत बढ़ जाती है। अक्सर लोग सोचते हैं कि एसी पुराना हो गया है, इसलिए कूलिंग कम हो रही है, लेकिन ऐसा नहीं है। एसी कूलिंग कम होने के पीछे कुछ खास तकनीकी और व्यावहारिक कारण होते हैं जिन्हें आसानी से पहचाना और सुधारा जा सकता है।</p>
@@ -85,7 +85,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 08, 2026',
     readTime: '4 min read',
     category: 'RO Services',
-    imageUrl: '/ro-water-purifier-repair-noida-extension.jpg',
+    imageUrl: '/ro-water-purifier-repair-noida-extension.webp',
     content: `
 <h2>अपने आरओ वाटर प्यूरीफायर को हमेशा सुरक्षित रखें</h2>
 <p>शुद्ध पानी सेहत की पहली सीढ़ी है। आज लगभग हर घर में आरओ (Reverse Osmosis) प्यूरीफायर लगा हुआ है। लेकिन क्या आप जानते हैं कि अगर समय पर आरओ के फिल्टर्स न बदले जाएं, तो फिल्टर पानी को शुद्ध करने के बजाय उसमें हानिकारक बैक्टीरिया और भारी धातुओं की मात्रा बढ़ा सकते हैं? आइए जानते हैं आरओ मेंटेनेंस की पूरी जानकारी.</p>
@@ -138,7 +138,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 05, 2026',
     readTime: '3 min read',
     category: 'AC Services',
-    imageUrl: '/ac_service_pro.jpg',
+    imageUrl: '/ac_service_pro.webp',
     content: `
 <h2>भीषण गर्मियों में एसी की देखभाल कैसे करें?</h2>
 <p>उत्तर भारत में तापमान जब 45 डिग्री के पार चला जाता है, तो एयर कंडीशनर पर लोड बहुत ज्यादा बढ़ जाता है। कई बार एसी ओवरहीट होकर बंद हो जाते हैं या उनकी वायरिंग जल जाती है। इन समस्याओं से बचने और बिजली बिल को काबू में रखने के लिए अपनाएं ये 5 आसान और बेहद असरदार टिप्स.</p>
@@ -156,7 +156,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 15, 2026',
     readTime: '5 min read',
     category: 'AC Services',
-    imageUrl: '/ac-repair-greater-noida.jpg',
+    imageUrl: '/ac-repair-greater-noida.webp',
     content: `
 <h2>एसी से गैस लीक (AC Gas Leakage) क्यों होती है?</h2>
 <p>भीषण गर्मियों में एसी का अचानक से ठंडा करना बंद कर देना किसी आफत से कम नहीं होता। अक्सर इसका मुख्य कारण कंप्रेसर या कॉइल से गैस (refrigerant) का लीक हो जाना होता है। नोएडा एक्सटेंशन (Noida Extension) और ग्रेटर नोएडा वेस्ट की सोसायटियों में नालों के पास होने के कारण हवा में सल्फर की मात्रा अधिक होती है, जो कॉपर पाइप्स को धीरे-धीरे नुकसान पहुंचाती है।</p>
@@ -192,7 +192,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 18, 2026',
     readTime: '4 min read',
     category: 'Home Installations',
-    imageUrl: '/balcony-pigeon-net-installation-greater-noida.jpg',
+    imageUrl: '/balcony-pigeon-net-installation-greater-noida.webp',
     content: `
 <h2>गौर सिटी में बालकनी पीजन नेट क्यों है जरूरी?</h2>
 <p>गौर सिटी 1 और गौर सिटी 2 की ऊंची इमारतों में रहने वाले लोगों के लिए कबूतरों का बालकनी में आना और वहां घोंसला बनाना एक आम समस्या बन चुका है। कबूतर न केवल गंदगी फैलाते हैं, बल्कि उनके पंख और बीट (droppings) से गंभीर सांस की बीमारियां, अस्थमा और त्वचा के संक्रमण (allergies) फैलने का खतरा रहता है। बालकनी को साफ और सुरक्षित रखने का एकमात्र उपाय **Balcony Pigeon Net Installation** है।</p>
@@ -225,7 +225,7 @@ const staticBlogPosts: BlogPost[] = [
     publishDate: 'June 20, 2026',
     readTime: '4 min read',
     category: 'Electrician Services',
-    imageUrl: '/electrical_safety_service.jpg',
+    imageUrl: '/electrical_safety_service.webp',
     content: `
 <h2>घर में बिजली ट्रिप होने के पीछे क्या कारण हैं?</h2>
 <p>नोएडा एक्सटेंशन और गौर सिटी के अपार्टमेंट्स में अक्सर बिजली के उपकरणों के ओवरलोड या शॉर्ट सर्किट की वजह से वितरण बॉक्स (Distribution Box) की MCB (Miniature Circuit Breaker) ट्रिप हो जाती है। यह एक सुरक्षा फीचर है जो आपके घर के महंगे उपकरणों को जलने और आग लगने से बचाता है। लेकिन अगर एमसीबी बार-बार ट्रिप हो रही है, तो इसे नजरअंदाज नहीं करना चाहिए।</p>
@@ -259,21 +259,21 @@ const LOCATIONS = [
 ];
 
 const SERVICES = [
-  { name: 'AC Service & Cleaning', category: 'AC Services', img: '/ac-service-gaur-city.jpg' },
-  { name: 'AC Repair & Diagnosis', category: 'AC Services', img: '/ac-repair-greater-noida.jpg' },
-  { name: 'AC Installation Service', category: 'AC Services', img: '/ac-installation-noida-extension.jpg' },
-  { name: 'AC Rental Solutions', category: 'AC Services', img: '/ac-rental-gaur-city.png' },
-  { name: 'RO Purifier Filter Change', category: 'RO Services', img: '/best-ro-service-greater-noida.jpg' },
-  { name: 'RO Purifier Repair Service', category: 'RO Services', img: '/ro-water-purifier-repair-noida-extension.jpg' },
-  { name: 'Electrician Fault Repair', category: 'Electrician', img: '/electrician_pro.jpg' },
-  { name: 'Modular Switchboard Fitting', category: 'Electrician', img: '/switchboard-repair-greater-noida.jpg' },
-  { name: 'House Rewiring Services', category: 'Electrician', img: '/electrical_safety_service.jpg' },
-  { name: 'Washing Machine Repair', category: 'Washing Machine', img: '/washing-machine-repair-gaur-city.jpg' },
-  { name: 'Refrigerator Gas Charging', category: 'Refrigerator', img: '/refrigerator-gas-charging-greater-noida.jpg' },
-  { name: 'Kitchen Chimney Service', category: 'Kitchen Chimney', img: '/kitchen-chimney-repair-gaur-city.jpg' },
-  { name: 'Geyser Repair & Service', category: 'Geyser', img: '/geyser-repair-noida-extension.jpg' },
-  { name: 'Ceiling Fan Installation', category: 'Ceiling Fan', img: '/ceiling-fan-repair-greater-noida.jpg' },
-  { name: 'LED Lighting Fitting', category: 'Lighting', img: '/ceiling-panel-light-installation-gaur-city.jpg' },
+  { name: 'AC Service & Cleaning', category: 'AC Services', img: '/ac-service-gaur-city.webp' },
+  { name: 'AC Repair & Diagnosis', category: 'AC Services', img: '/ac-repair-greater-noida.webp' },
+  { name: 'AC Installation Service', category: 'AC Services', img: '/ac-installation-noida-extension.webp' },
+  { name: 'AC Rental Solutions', category: 'AC Services', img: '/ac-rental-gaur-city.webp' },
+  { name: 'RO Purifier Filter Change', category: 'RO Services', img: '/best-ro-service-greater-noida.webp' },
+  { name: 'RO Purifier Repair Service', category: 'RO Services', img: '/ro-water-purifier-repair-noida-extension.webp' },
+  { name: 'Electrician Fault Repair', category: 'Electrician', img: '/electrician_pro.webp' },
+  { name: 'Modular Switchboard Fitting', category: 'Electrician', img: '/switchboard-repair-greater-noida.webp' },
+  { name: 'House Rewiring Services', category: 'Electrician', img: '/electrical_safety_service.webp' },
+  { name: 'Washing Machine Repair', category: 'Washing Machine', img: '/washing-machine-repair-gaur-city.webp' },
+  { name: 'Refrigerator Gas Charging', category: 'Refrigerator', img: '/refrigerator-gas-charging-greater-noida.webp' },
+  { name: 'Kitchen Chimney Service', category: 'Kitchen Chimney', img: '/kitchen-chimney-repair-gaur-city.webp' },
+  { name: 'Geyser Repair & Service', category: 'Geyser', img: '/geyser-repair-noida-extension.webp' },
+  { name: 'Ceiling Fan Installation', category: 'Ceiling Fan', img: '/ceiling-fan-repair-greater-noida.webp' },
+  { name: 'LED Lighting Fitting', category: 'Lighting', img: '/ceiling-panel-light-installation-gaur-city.webp' },
   { name: 'Microwave Oven Repair', category: 'Microwave', img: '/microwave-repair-greater-noida.webp' }
 ];
 

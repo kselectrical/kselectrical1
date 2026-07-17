@@ -9,16 +9,16 @@ interface CatalogProps {
 }
 
 const LOCAL_IMAGE_PRESETS = [
-  { name: 'AC Service', path: '/ac_service.jpg' },
-  { name: 'Electrician Safety', path: '/electrical_safety_service.jpg' },
-  { name: 'Electric Switch', path: '/electric_switch.jpg' },
-  { name: 'Ceiling Fan', path: '/fan_repair_service.jpg' },
-  { name: 'Geyser Service', path: '/geyser_service.jpg' },
-  { name: 'RO Purifier', path: '/ro_service.jpg' },
-  { name: 'Washing Machine', path: '/washing_machine_service.jpg' },
-  { name: 'Refrigerator', path: '/refrigerator_service.jpg' },
-  { name: 'Microwave Oven', path: '/microwave_service.jpg' },
-  { name: 'Tube Light', path: '/tube_light.jpg' }
+  { name: 'AC Service', path: '/ac_service.webp' },
+  { name: 'Electrician Safety', path: '/electrical_safety_service.webp' },
+  { name: 'Electric Switch', path: '/electric_switch.webp' },
+  { name: 'Ceiling Fan', path: '/fan_repair_service.webp' },
+  { name: 'Geyser Service', path: '/geyser_service.webp' },
+  { name: 'RO Purifier', path: '/ro_service.webp' },
+  { name: 'Washing Machine', path: '/washing_machine_service.webp' },
+  { name: 'Refrigerator', path: '/refrigerator_service.webp' },
+  { name: 'Microwave Oven', path: '/microwave_service.webp' },
+  { name: 'Tube Light', path: '/tube_light.webp' }
 ];
 
 export const Catalog: React.FC<CatalogProps> = ({ services, onUpdateServices }) => {
@@ -32,7 +32,7 @@ export const Catalog: React.FC<CatalogProps> = ({ services, onUpdateServices }) 
   const [formSubcategory, setFormSubcategory] = useState('Service');
   const [formPrice, setFormPrice] = useState(0);
   const [formDesc, setFormDesc] = useState('');
-  const [formImg, setFormImg] = useState('/ac_service.jpg');
+  const [formImg, setFormImg] = useState('/ac_service.webp');
   const [formWarranty, setFormWarranty] = useState('30 Days Warranty');
 
   const startEdit = (srv: TechnicalService) => {
@@ -55,7 +55,7 @@ export const Catalog: React.FC<CatalogProps> = ({ services, onUpdateServices }) 
     setFormSubcategory('Service');
     setFormPrice(199);
     setFormDesc('');
-    setFormImg('/ac_service.jpg');
+    setFormImg('/ac_service.webp');
     setFormWarranty('30 Days Warranty');
   };
 
@@ -242,7 +242,7 @@ export const Catalog: React.FC<CatalogProps> = ({ services, onUpdateServices }) 
                   required
                   value={formImg}
                   onChange={(e) => setFormImg(e.target.value)}
-                  placeholder="/ac_service.jpg"
+                  placeholder="/ac_service.webp"
                   className="flex-1 bg-white text-gray-800 text-xs font-semibold px-3 py-2 focus:outline-none"
                 />
               </div>

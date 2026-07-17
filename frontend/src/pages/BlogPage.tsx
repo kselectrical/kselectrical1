@@ -104,7 +104,7 @@ export const BlogPage: React.FC = () => {
                       alt={post.title}
                       loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
-                      onError={(e) => { e.currentTarget.src = '/svc_ac_repair.jpg'; }}
+                      onError={(e) => { e.currentTarget.src = '/svc_ac_repair.webp'; }}
                     />
                     <span className="absolute top-4 left-4 bg-brand-blue text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-sm">
                       {post.category}

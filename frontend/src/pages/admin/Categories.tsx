@@ -49,7 +49,7 @@ export const Categories: React.FC<CategoriesProps> = ({ services, onUpdateServic
       subcategory: 'Service',
       description: `Placeholder listing created to initialize the ${newCategoryName} category. You can edit or delete this.`,
       price: 0,
-      imageUrl: '/ac_service.jpg',
+      imageUrl: '/ac_service.webp',
       warranty: '15 Days Warranty',
       duration: '30 mins',
       rating: '5.0 ★',

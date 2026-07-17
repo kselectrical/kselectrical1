@@ -163,10 +163,10 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   const galleryItems = [
-    { title: 'Split AC Pressure Jet Cleaning in Gaur City Noida Extension', category: 'AC', img: '/ac_service_pro.jpg' },
-    { title: 'RO Water Purifier Filtration Service at Noida Extension Sector 4', category: 'RO', img: '/ro_service_pro.jpg' },
-    { title: 'Smart MCB & Distribution Board Upgrade in Gaur City 1', category: 'Electrical', img: '/electrician_pro.jpg' },
-    { title: 'Heavy Chandelier & Light Fixture Installation in Noida Extension', category: 'Electrical', img: '/washing_machine_pro.jpg' }
+    { title: 'Split AC Pressure Jet Cleaning in Gaur City Noida Extension', category: 'AC', img: '/ac_service_pro.webp' },
+    { title: 'RO Water Purifier Filtration Service at Noida Extension Sector 4', category: 'RO', img: '/ro_service_pro.webp' },
+    { title: 'Smart MCB & Distribution Board Upgrade in Gaur City 1', category: 'Electrical', img: '/electrician_pro.webp' },
+    { title: 'Heavy Chandelier & Light Fixture Installation in Noida Extension', category: 'Electrical', img: '/washing_machine_pro.webp' }
   ];
 
   const filteredGallery = activeGalleryFilter === 'ALL' 
@@ -219,13 +219,13 @@ export const HomePage: React.FC<HomePageProps> = ({
         <link rel="canonical" href="https://www.kselectrical.in/" />
         <meta property="og:title" content="KS Electrical & AC Services | Professional Doorstep Repair" />
         <meta property="og:description" content="Certified same-day AC repair, RO service, electrician & appliance repair in Noida, Greater Noida & Ghaziabad. 4.9★ on Google, 5000+ satisfied customers." />
-        <meta property="og:image" content="https://www.kselectrical.in/hero_technician.jpg" />
+        <meta property="og:image" content="https://www.kselectrical.in/hero_technician.webp" />
         <meta property="og:url" content="https://www.kselectrical.in/" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="KS Electrical & AC Services | Doorstep Repair" />
         <meta name="twitter:description" content="Same-day AC, RO, electrician & appliance repair in Noida, Greater Noida. Verified technicians. 4.9★ rated." />
-        <meta name="twitter:image" content="https://www.kselectrical.in/hero_technician.jpg" />
+        <meta name="twitter:image" content="https://www.kselectrical.in/hero_technician.webp" />
         <script type="application/ld+json">
           {JSON.stringify(faqSchema)}
         </script>
@@ -375,7 +375,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="lg:col-span-5 relative flex items-center justify-center">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-[#0c223c] p-2 aspect-[4/3] w-full max-w-md group">
               <img
-                src="/hero_technician.jpg"
+                src="/hero_technician.webp"
                 alt="KS Electrical certified technician servicing home AC unit at customer doorstep in Gaur City 1 Noida Extension"
                 width={800}
                 height={600}
@@ -579,7 +579,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             >
               {/* Before Image */}
               <img 
-                src="/ac_service_pro.jpg" 
+                src="/ac_service_pro.webp" 
                 alt="Dirty split AC indoor unit filter clogged with dust before wet pressure jet wash service" 
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover select-none"
@@ -591,7 +591,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 style={{ left: `${sliderPosition}%` }}
               >
                 <img 
-                  src="/ro_service_pro.jpg" 
+                  src="/ro_service_pro.webp" 
                   alt="Clean AC indoor cooling coil after 120-Bar deep cleaning jet wash service by KS Electrical" 
                   loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover select-none"
@@ -931,7 +931,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     alt={blog.title}
                     loading="lazy"
                     className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.src = '/svc_ac_repair.jpg'; }}
+                    onError={(e) => { e.currentTarget.src = '/svc_ac_repair.webp'; }}
                   />
                   <span className="absolute top-3 left-3 bg-[#F97316] text-white text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-sm border border-orange-400">
                     {blog.category}

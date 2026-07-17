@@ -222,7 +222,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   alt="Staff Portal" 
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = getAssetPath('/profile.jpg');
+                    (e.target as HTMLImageElement).src = getAssetPath('/profile.webp');
                   }}
                 />
               </a>

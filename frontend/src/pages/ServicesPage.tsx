@@ -69,7 +69,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     "provider": {
       "@type": "LocalBusiness",
       "name": businessConfig.name,
-      "image": `${siteDomain}/hero_technician.jpg`,
+      "image": `${siteDomain}/hero_technician.webp`,
       "telephone": "+91-9599055506",
       "url": siteDomain
     },
@@ -100,13 +100,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         <meta property="og:url" content={`${siteDomain}/services`} />
         <meta property="og:title" content={`All Doorstep Repair Services | ${businessConfig.name}`} />
         <meta property="og:description" content="Explore our full range of technical home repair and maintenance services. Upfront rates, same-day scheduling, and certified technicians." />
-        <meta property="og:image" content={`${siteDomain}/hero_technician.jpg`} />
+        <meta property="og:image" content={`${siteDomain}/hero_technician.webp`} />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`All Doorstep Repair & Appliance Services | ${businessConfig.name}`} />
         <meta name="twitter:description" content="Book certified electricians, AC jet cleaning, RO service, and appliance repair in Noida, Greater Noida, and Ghaziabad." />
-        <meta name="twitter:image" content={`${siteDomain}/hero_technician.jpg`} />
+        <meta name="twitter:image" content={`${siteDomain}/hero_technician.webp`} />
 
         {/* JSON-LD Schemas */}
         <script type="application/ld+json">
