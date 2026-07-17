@@ -163,10 +163,10 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   const galleryItems = [
-    { title: 'Split AC Cleaning', category: 'AC', img: '/ac_service_pro.jpg' },
-    { title: 'RO Filtration Service', category: 'RO', img: '/ro_service_pro.jpg' },
-    { title: 'Smart MCB Upgrade', category: 'Electrical', img: '/electrician_pro.jpg' },
-    { title: 'Heavy Chandelier Installation', category: 'Electrical', img: '/washing_machine_pro.jpg' }
+    { title: 'Split AC Pressure Jet Cleaning in Gaur City Noida Extension', category: 'AC', img: '/ac_service_pro.jpg' },
+    { title: 'RO Water Purifier Filtration Service at Noida Extension Sector 4', category: 'RO', img: '/ro_service_pro.jpg' },
+    { title: 'Smart MCB & Distribution Board Upgrade in Gaur City 1', category: 'Electrical', img: '/electrician_pro.jpg' },
+    { title: 'Heavy Chandelier & Light Fixture Installation in Noida Extension', category: 'Electrical', img: '/washing_machine_pro.jpg' }
   ];
 
   const filteredGallery = activeGalleryFilter === 'ALL' 
@@ -376,7 +376,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-[#0c223c] p-2 aspect-[4/3] w-full max-w-md group">
               <img
                 src="/hero_technician.jpg"
-                alt="KS Electrical certified technician servicing home AC unit at customer doorstep"
+                alt="KS Electrical certified technician servicing home AC unit at customer doorstep in Gaur City 1 Noida Extension"
                 width={800}
                 height={600}
                 className="w-full h-full object-cover rounded-2xl group-hover:scale-103 transition-transform duration-700 brightness-95"
@@ -580,7 +580,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               {/* Before Image */}
               <img 
                 src="/ac_service_pro.jpg" 
-                alt="Before repair service" 
+                alt="Dirty split AC indoor unit filter clogged with dust before wet pressure jet wash service" 
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover select-none"
               />
@@ -592,7 +592,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               >
                 <img 
                   src="/ro_service_pro.jpg" 
-                  alt="After repair service" 
+                  alt="Clean AC indoor cooling coil after 120-Bar deep cleaning jet wash service by KS Electrical" 
                   loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover select-none"
                   style={{ width: '100%', maxWidth: 'none', transform: `translateX(-${sliderPosition}%)` }}

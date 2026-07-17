@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Star, ShieldCheck, Search, ChevronLeft, ChevronRight, MapPin, Sparkles, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Star, ShieldCheck, Search, ChevronLeft, ChevronRight, MapPin, Sparkles, AlertCircle, ArrowLeft, X } from 'lucide-react';
 
 interface Review {
   id: number;
@@ -158,6 +158,7 @@ export const ReviewsPage: React.FC = () => {
   const [ratingFilter, setRatingFilter] = useState<number | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showFloatingCTA, setShowFloatingCTA] = useState(true);
 
   // Filtered reviews calculation
   const filteredReviews = useMemo(() => {
@@ -292,6 +293,15 @@ export const ReviewsPage: React.FC = () => {
               <ShieldCheck size={14} className="text-brand-orange" />
               <span>100% Verified Reviews</span>
             </div>
+
+            <a
+              href="https://reviewthis.biz/b4d5f51f"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3.5 w-full flex items-center justify-center gap-1.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md hover:scale-[1.01] cursor-pointer"
+            >
+              <Star size={13} fill="#fff" /> Write a Google Review
+            </a>
           </div>
         </div>
       </section>
@@ -496,6 +506,40 @@ export const ReviewsPage: React.FC = () => {
         )}
 
       </section>
+
+      {/* Floating GMB Review Booster CTA */}
+      {showFloatingCTA && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-white/95 backdrop-blur-md border border-slate-200 shadow-2xl p-5 rounded-2xl flex items-start gap-4 animate-in fade-in slide-in-from-bottom-5 duration-500">
+          <button
+            onClick={() => setShowFloatingCTA(false)}
+            className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
+            title="Dismiss"
+          >
+            <X size={14} />
+          </button>
+          
+          <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-brand-orange shrink-0 animate-bounce">
+            <Star size={20} fill="#F97316" className="text-brand-orange" />
+          </div>
+          
+          <div className="space-y-1.5 text-left pr-4">
+            <h4 className="text-slate-900 font-extrabold text-sm leading-tight">
+              Share Your Experience!
+            </h4>
+            <p className="text-slate-500 text-[10px] font-semibold leading-normal">
+              Loved our same-day AC, RO or electrical service in Gaur City or Noida Extension? Leave a 5-star review on Google.
+            </p>
+            <a
+              href="https://reviewthis.biz/b4d5f51f"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+            >
+              Review Us on Google
+            </a>
+          </div>
+        </div>
+      )}
 
     </div>
   );

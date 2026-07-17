@@ -40,7 +40,10 @@ const blogRoutes = [
   '/blog/how-often-should-we-do-ac-service',
   '/blog/why-ac-cooling-drops',
   '/blog/ro-water-purifier-maintenance-guide',
-  '/blog/summer-ac-maintenance-tips'
+  '/blog/summer-ac-maintenance-tips',
+  '/blog/ac-gas-leakage-reasons-solutions-noida-extension',
+  '/blog/best-balcony-pigeon-netting-guide-gaur-city',
+  '/blog/short-circuit-mcb-tripping-prevention-tips'
 ];
 
 // Generate dynamic local landing routes (13 services x 38 locations)

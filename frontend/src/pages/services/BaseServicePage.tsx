@@ -633,20 +633,20 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
       )}
 
       {/* Local Internal Links Cluster */}
-      {displayCity && (
-        <div className="bg-white py-12 border-b border-gray-150 text-left font-sans select-none">
-          <div className="max-w-4xl mx-auto px-6 space-y-6">
-            
-            {/* 1. Other Services in this location */}
-            <div className="space-y-3">
-              <h3 className="text-gray-900 font-extrabold text-lg">
-                Other Doorstep Services in {displayCity}
-              </h3>
-              <p className="text-xs text-gray-500 font-semibold">
-                Find reliable certified technicians and transparent billing rates in your neighborhood:
-              </p>
-              <div className="flex flex-wrap gap-2.5 pt-1">
-                {getCityInternalLinks(serviceSlug, displayCity).map((link, idx) => (
+      <div className="bg-white py-12 border-b border-gray-150 text-left font-sans select-none">
+        <div className="max-w-4xl mx-auto px-6 space-y-6">
+          
+          {/* 1. Other Services in this location / General */}
+          <div className="space-y-3">
+            <h3 className="text-gray-900 font-extrabold text-lg">
+              {displayCity ? `Other Doorstep Services in ${displayCity}` : "Other Doorstep Appliance & Repair Services"}
+            </h3>
+            <p className="text-xs text-gray-500 font-semibold">
+              Find reliable certified technicians and transparent billing rates:
+            </p>
+            <div className="flex flex-wrap gap-2.5 pt-1">
+              {displayCity ? (
+                getCityInternalLinks(serviceSlug, displayCity).map((link, idx) => (
                   <Link
                     key={idx}
                     to={link.path}
@@ -654,20 +654,47 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
                   >
                     {link.label}
                   </Link>
-                ))}
-              </div>
+                ))
+              ) : (
+                [
+                  { slug: 'ac-service', label: 'AC Service & Jet Wash' },
+                  { slug: 'ro-service', label: 'RO Purifier Service' },
+                  { slug: 'electrician-service', label: 'Electrician Doorstep Services' },
+                  { slug: 'washing-machine-repair', label: 'Washing Machine Repair' },
+                  { slug: 'refrigerator-repair', label: 'Refrigerator Repair' },
+                  { slug: 'chimney-service', label: 'Kitchen Chimney Service' },
+                  { slug: 'geyser-service', label: 'Geyser Repair & Service' },
+                  { slug: 'home-installations', label: 'Home Installations & Pigeon Nets' },
+                  { slug: 'microwave-service', label: 'Microwave Oven Repair' }
+                ]
+                  .filter(s => s.slug !== serviceSlug.toLowerCase() && (s.slug !== 'electrician-service' || serviceSlug.toLowerCase() !== 'electrician'))
+                  .map((link, idx) => (
+                    <Link
+                      key={idx}
+                      to={`/services/${link.slug}`}
+                      className="bg-gray-50 hover:bg-orange-50 border border-gray-200 hover:border-orange-200 text-gray-700 hover:text-brand-orange rounded-xl px-4 py-2 text-xs font-black transition-all shadow-xs cursor-pointer"
+                    >
+                      {link.label}
+                    </Link>
+                  ))
+              )}
             </div>
+          </div>
 
-            {/* 2. Nearby locations for this service */}
-            <div className="space-y-3 pt-3 border-t border-slate-100">
-              <h3 className="text-gray-900 font-extrabold text-sm uppercase tracking-wider">
-                {serviceName} Serviced Areas Nearby
-              </h3>
-              <p className="text-xs text-slate-500 font-semibold">
-                Get express 90-minute dispatch assignments to adjacent sectors and apartment complexes:
-              </p>
-              <div className="flex flex-wrap gap-2.5 pt-1">
-                {getNearbyLocationLinks(serviceSlug, displayCity).map((link, idx) => (
+          {/* 2. Nearby locations for this service / General Locations Directory */}
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <h3 className="text-gray-900 font-extrabold text-sm uppercase tracking-wider">
+              {displayCity ? `${serviceName} Serviced Areas Nearby` : `${serviceName} Service Locations`}
+            </h3>
+            <p className="text-xs text-slate-500 font-semibold">
+              {displayCity 
+                ? "Get express 90-minute dispatch assignments to adjacent sectors and apartment complexes:"
+                : "Get same-day certified technician dispatch across priority zones in Noida, Gaur City, and Ghaziabad:"
+              }
+            </p>
+            <div className="flex flex-wrap gap-2.5 pt-1">
+              {displayCity ? (
+                getNearbyLocationLinks(serviceSlug, displayCity).map((link, idx) => (
                   <Link
                     key={idx}
                     to={link.path}
@@ -675,37 +702,57 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
                   >
                     {serviceName} in {link.label}
                   </Link>
+                ))
+              ) : (
+                [
+                  { slug: 'gaur-city-1', label: 'Gaur City 1' },
+                  { slug: 'gaur-city-2', label: 'Gaur City 2' },
+                  { slug: 'noida-extension', label: 'Noida Extension' },
+                  { slug: 'greater-noida-west', label: 'Greater Noida West' },
+                  { slug: 'indirapuram', label: 'Indirapuram' },
+                  { slug: 'vaishali', label: 'Vaishali' },
+                  { slug: 'vasundhara', label: 'Vasundhara' },
+                  { slug: 'raj-nagar-extension', label: 'Raj Nagar Extension' },
+                  { slug: 'crossings-republik', label: 'Crossings Republik' }
+                ].map((link, idx) => (
+                  <Link
+                    key={idx}
+                    to={`/services/${serviceSlug}/${link.slug}`}
+                    className="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-slate-700 hover:text-blue-600 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                  >
+                    {serviceName} in {link.label}
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* 3. Related blogs for this service */}
+          {getRelatedBlogLinks(serviceSlug).length > 0 && (
+            <div className="space-y-3 pt-3 border-t border-slate-100">
+              <h3 className="text-gray-900 font-extrabold text-sm uppercase tracking-wider">
+                Helpful Guides & Troubleshooting Tips
+              </h3>
+              <p className="text-xs text-slate-500 font-semibold">
+                Read expert advice from Kaushindra Singh to save on electricity bills and prevent faults:
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                {getRelatedBlogLinks(serviceSlug).map((link, idx) => (
+                  <Link
+                    key={idx}
+                    to={link.path}
+                    className="bg-white hover:bg-orange-50 border border-slate-200 hover:border-brand-orange/30 p-3.5 rounded-xl shadow-3xs transition-all flex items-center space-x-2 text-xs font-extrabold text-slate-700 hover:text-brand-orange"
+                  >
+                    <span>📖</span>
+                    <span>{link.label}</span>
+                  </Link>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* 3. Related blogs for this service */}
-            {getRelatedBlogLinks(serviceSlug).length > 0 && (
-              <div className="space-y-3 pt-3 border-t border-slate-100">
-                <h3 className="text-gray-900 font-extrabold text-sm uppercase tracking-wider">
-                  Helpful Guides & Troubleshooting Tips
-                </h3>
-                <p className="text-xs text-slate-500 font-semibold">
-                  Read expert advice from Kaushindra Singh to save on electricity bills and prevent faults:
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                  {getRelatedBlogLinks(serviceSlug).map((link, idx) => (
-                    <Link
-                      key={idx}
-                      to={link.path}
-                      className="bg-white hover:bg-orange-50 border border-slate-200 hover:border-brand-orange/30 p-3.5 rounded-xl shadow-3xs transition-all flex items-center space-x-2 text-xs font-extrabold text-slate-700 hover:text-brand-orange"
-                    >
-                      <span>📖</span>
-                      <span>{link.label}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-          </div>
         </div>
-      )}
+      </div>
 
       {/* Brands We Serve Tag Cloud */}
       <div className="bg-slate-50 py-12 border-b border-slate-200 text-left font-sans select-none">
