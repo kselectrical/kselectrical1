@@ -55,10 +55,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
         onProfileClick={onProfileClick}
         businessConfig={businessConfig}
       />
-      <main className="w-full pt-16">
+      <main className="w-full pt-20 md:pt-24 pb-16 md:pb-0 min-h-[calc(100vh-80px)]">
         <Outlet />
       </main>
-      <div className="reveal-section reveal-delay-6">
+      <div className="reveal-section reveal-delay-6 pb-16 md:pb-0">
         <Footer businessConfig={businessConfig} />
       </div>
     </div>

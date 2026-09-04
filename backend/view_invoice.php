@@ -80,7 +80,7 @@ $amount_in_words = getIndianCurrencyInWords($invoice['grand_total']);
     <!-- Appending time() forces browser to clear cached CSS instantly -->
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
     <!-- html2pdf.js for Client-Side PDF Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 </head>
 <body>
 

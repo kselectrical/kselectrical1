@@ -23,7 +23,7 @@ export const businessConfig: BusinessConfig = {
   website: 'www.kselectrical.in',
   reviewLink: 'https://reviewthis.biz/b4d5f51f',
   serviceAreas: ['Gaur City 1', 'Gaur City 2', 'Noida Extension', 'Ghaziabad'],
-  logoUrl: '/log.webp',
+  logoUrl: '/log.png',
   profileUrl: '/profile.webp'
 };
 

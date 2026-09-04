@@ -6,9 +6,9 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { 
   loadServicesFromDb, getBookingsFromCloud, saveBookingToCloud,
   loadBusinessConfigFromDb, saveCustomerToCloud, getCustomersFromFirestore,
-  getInvoicesFromCloud, signOutUser, auth, isFirebaseConfigured, isAdminEmail,
-  runMigrationToFirestore, loadCategoriesFromDb, saveAdminLogToCloud, getAssetPath,
-  db, getBookingsForCustomerFromCloud
+  getCustomerProfileFromFirestore, getInvoicesFromCloud, signOutUser, auth,
+  isFirebaseConfigured, isAdminEmail, runMigrationToFirestore, loadCategoriesFromDb,
+  saveAdminLogToCloud, getAssetPath, db, getBookingsForCustomerFromCloud
 } from './firebase';
 import { servicesData, businessConfig } from './data';
 import { serviceCatalog } from './serviceCatalog';
@@ -24,52 +24,86 @@ import { AdminLayout } from './layouts/AdminLayout';
 // Shared Components
 import { LoginModal } from './components/LoginModal';
 import { CustomerProfileModal } from './components/CustomerProfileModal';
+import { ScrollToTop } from './components/ScrollToTop';
+
+// Pages - Lazy loaded with auto-retry on stale chunk load errors
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function lazyWithRetry<T extends React.ComponentType<any>>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  factory: () => Promise<{ default: T } | any>,
+  name?: string
+) {
+  return lazy(async () => {
+    const key = `retry-chunk-${name || 'page'}`;
+    try {
+      const module = await factory();
+      sessionStorage.removeItem(key);
+      return module.default ? module : { default: module };
+    } catch (error) {
+      console.warn(`Dynamic import error for module ${name || 'chunk'}:`, error);
+      const hasRetried = sessionStorage.getItem(key);
+      if (!hasRetried) {
+        sessionStorage.setItem(key, 'true');
+        window.location.reload();
+      }
+      throw error;
+    }
+  });
+}
 
 // Pages - Lazy loaded
-const HomePage = lazy(() => import('./pages/HomePage'));
-const ServicesPage = lazy(() => import('./pages/ServicesPage'));
-const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
-const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
-const FAQPage = lazy(() => import('./pages/FAQPage').then(m => ({ default: m.FAQPage })));
-const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
-const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
-const ACOnRentPage = lazy(() => import('./pages/ACOnRentPage').then(m => ({ default: m.ACOnRentPage })));
-const LocalLandingPage = lazy(() => import('./pages/LocalLandingPage'));
-const LocalDirectoryPage = lazy(() => import('./pages/LocalDirectoryPage'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
-const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
-const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then(m => ({ default: m.BlogPostPage })));
-const CareersPage = lazy(() => import('./pages/CareersPage').then(m => ({ default: m.CareersPage })));
-const AntiDiscriminationPage = lazy(() => import('./pages/AntiDiscriminationPage').then(m => ({ default: m.AntiDiscriminationPage })));
+const HomePage = lazyWithRetry(() => import('./pages/HomePage'), 'HomePage');
+const ServicesPage = lazyWithRetry(() => import('./pages/ServicesPage'), 'ServicesPage');
+const CheckoutPage = lazyWithRetry(() => import('./pages/CheckoutPage'), 'CheckoutPage');
+const AboutPage = lazyWithRetry(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })), 'AboutPage');
+const ContactPage = lazyWithRetry(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })), 'ContactPage');
+const FAQPage = lazyWithRetry(() => import('./pages/FAQPage').then(m => ({ default: m.FAQPage })), 'FAQPage');
+const PrivacyPage = lazyWithRetry(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })), 'PrivacyPage');
+const TermsPage = lazyWithRetry(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })), 'TermsPage');
+const ACOnRentPage = lazyWithRetry(() => import('./pages/ACOnRentPage').then(m => ({ default: m.ACOnRentPage })), 'ACOnRentPage');
+const BookServicePage = lazyWithRetry(() => import('./pages/BookServicePage').then(m => ({ default: m.BookServicePage })), 'BookServicePage');
+const EmergencyElectricianPage = lazyWithRetry(() => import('./pages/EmergencyElectricianPage').then(m => ({ default: m.EmergencyElectricianPage })), 'EmergencyElectricianPage');
+const AreaHubPage = lazyWithRetry(() => import('./pages/AreaHubPage').then(m => ({ default: m.AreaHubPage })), 'AreaHubPage');
+const LocalLandingPage = lazyWithRetry(() => import('./pages/LocalLandingPage'), 'LocalLandingPage');
+const LocalDirectoryPage = lazyWithRetry(() => import('./pages/LocalDirectoryPage'), 'LocalDirectoryPage');
+const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound');
+const ReviewsPage = lazyWithRetry(() => import('./pages/ReviewsPage'), 'ReviewsPage');
+const BlogPage = lazyWithRetry(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })), 'BlogPage');
+const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPostPage').then(m => ({ default: m.BlogPostPage })), 'BlogPostPage');
+const CareersPage = lazyWithRetry(() => import('./pages/CareersPage').then(m => ({ default: m.CareersPage })), 'CareersPage');
+const AntiDiscriminationPage = lazyWithRetry(() => import('./pages/AntiDiscriminationPage').then(m => ({ default: m.AntiDiscriminationPage })), 'AntiDiscriminationPage');
 
 // Service Pages - Lazy loaded
-const ACService = lazy(() => import('./pages/services/ACService'));
-const ROService = lazy(() => import('./pages/services/ROService'));
-const ElectricianService = lazy(() => import('./pages/services/ElectricianService'));
-const WashingMachineRepair = lazy(() => import('./pages/services/WashingMachineRepair'));
-const RefrigeratorRepair = lazy(() => import('./pages/services/RefrigeratorRepair'));
-const ChimneyService = lazy(() => import('./pages/services/ChimneyService'));
-const GeyserService = lazy(() => import('./pages/services/GeyserService'));
-const FanService = lazy(() => import('./pages/services/FanService'));
-const LightService = lazy(() => import('./pages/services/LightService'));
-const HomeInstallations = lazy(() => import('./pages/services/HomeInstallations'));
-const MicrowaveService = lazy(() => import('./pages/services/MicrowaveService'));
-const ServiceDetailsPage = lazy(() => import('./pages/services/ServiceDetailsPage'));
+const ACService = lazyWithRetry(() => import('./pages/services/ACService'), 'ACService');
+const ROService = lazyWithRetry(() => import('./pages/services/ROService'), 'ROService');
+const ElectricianService = lazyWithRetry(() => import('./pages/services/ElectricianService'), 'ElectricianService');
+const WashingMachineRepair = lazyWithRetry(() => import('./pages/services/WashingMachineRepair'), 'WashingMachineRepair');
+const RefrigeratorRepair = lazyWithRetry(() => import('./pages/services/RefrigeratorRepair'), 'RefrigeratorRepair');
+const ChimneyService = lazyWithRetry(() => import('./pages/services/ChimneyService'), 'ChimneyService');
+const GeyserService = lazyWithRetry(() => import('./pages/services/GeyserService'), 'GeyserService');
+const FanService = lazyWithRetry(() => import('./pages/services/FanService'), 'FanService');
+const LightService = lazyWithRetry(() => import('./pages/services/LightService'), 'LightService');
+const HomeInstallations = lazyWithRetry(() => import('./pages/services/HomeInstallations'), 'HomeInstallations');
+const MicrowaveService = lazyWithRetry(() => import('./pages/services/MicrowaveService'), 'MicrowaveService');
+const ServiceDetailsPage = lazyWithRetry(() => import('./pages/services/ServiceDetailsPage'), 'ServiceDetailsPage');
 
 // Admin Dashboard Pages - Lazy loaded
-const Login = lazy(() => import('./pages/admin/Login'));
-const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const CustomerDashboard = lazy(() => import('./pages/customer/Dashboard'));
-const TechnicianDashboard = lazy(() => import('./pages/technician/Dashboard'));
-const Catalog = lazy(() => import('./pages/admin/Catalog'));
-const Categories = lazy(() => import('./pages/admin/Categories'));
-const Branding = lazy(() => import('./pages/admin/Branding'));
-const Customers = lazy(() => import('./pages/admin/Customers'));
-const Requests = lazy(() => import('./pages/admin/Requests'));
-const BillBook = lazy(() => import('./pages/admin/BillBook'));
-const CreateManualInvoice = lazy(() => import('./pages/admin/CreateManualInvoice'));
+const Login = lazyWithRetry(() => import('./pages/admin/Login'), 'AdminLogin');
+const Dashboard = lazyWithRetry(() => import('./pages/admin/Dashboard'), 'AdminDashboard');
+const CustomerDashboard = lazyWithRetry(() => import('./pages/customer/Dashboard'), 'CustomerDashboard');
+const CustomerLoginPage = lazyWithRetry(() => import('./pages/customer/Login'), 'CustomerLoginPage');
+const TechnicianDashboard = lazyWithRetry(() => import('./pages/technician/Dashboard'), 'TechnicianDashboard');
+const Catalog = lazyWithRetry(() => import('./pages/admin/Catalog'), 'AdminCatalog');
+const Categories = lazyWithRetry(() => import('./pages/admin/Categories'), 'AdminCategories');
+const Branding = lazyWithRetry(() => import('./pages/admin/Branding'), 'AdminBranding');
+const Customers = lazyWithRetry(() => import('./pages/admin/Customers'), 'AdminCustomers');
+const Requests = lazyWithRetry(() => import('./pages/admin/Requests'), 'AdminRequests');
+const BillBook = lazyWithRetry(() => import('./pages/admin/BillBook'), 'AdminBillBook');
+const CreateManualInvoice = lazyWithRetry(() => import('./pages/admin/CreateManualInvoice'), 'CreateManualInvoice');
+const AdminProducts = lazyWithRetry(() => import('./pages/admin/Products'), 'AdminProducts');
+const ShopPage = lazyWithRetry(() => import('./pages/shop/ShopPage'), 'ShopPage');
+const ProductDetail = lazyWithRetry(() => import('./pages/shop/ProductDetail'), 'ProductDetail');
+const ShopCheckoutPage = lazyWithRetry(() => import('./pages/shop/ShopCheckoutPage'), 'ShopCheckoutPage');
 
 // Ambient Loading Screen Placeholder
 // Ambient Isolated Sub-components for CPU-efficient DOM updates
@@ -482,13 +516,36 @@ const App: React.FC = () => {
                 await saveAdminLogToCloud(email, 'admin_refresh');
               }
             } else {
-              // It is a customer
+              // It is a customer — fetch fresh profile directly from Cloud Firestore
               role = 'customer';
-              const phone = email.endsWith('@kselectrical.in') ? email.split('@')[0] : '';
-              activeUser = { name, email, photoUrl, phone };
+              let phone = email.endsWith('@kselectrical.in') ? email.split('@')[0] : (firebaseUser.phoneNumber || parsed?.currentUser?.phone || '');
+              if (!phone && email) {
+                const savedPhone = localStorage.getItem(`ks_customer_phone_${email}`) || localStorage.getItem('ks_last_customer_phone');
+                if (savedPhone) phone = savedPhone;
+              }
+
+              let custName = parsed?.currentUser?.name || name;
+              let custAddress = parsed?.currentUser?.address || '';
+              let custPhoto = photoUrl;
+
+              if (phone) {
+                const profile = await getCustomerProfileFromFirestore(phone);
+                if (profile) {
+                  custName = profile.name || custName;
+                  custAddress = profile.address || custAddress;
+                  custPhoto = profile.photoUrl || custPhoto;
+                }
+              }
+
+              activeUser = { name: custName, email, photoUrl: custPhoto, phone, address: custAddress };
               setIsLoggedIn(true);
               setUserRole('customer');
               setCurrentUser(activeUser);
+
+              if (phone) {
+                localStorage.setItem('ks_last_customer_phone', phone);
+                if (email) localStorage.setItem(`ks_customer_phone_${email}`, phone);
+              }
             }
             localStorage.setItem('ks_auth_session', JSON.stringify({
               isLoggedIn: true,
@@ -682,6 +739,21 @@ const App: React.FC = () => {
       }
       setLoginTriggerSource(null);
     }, 100);
+  };
+
+  const handleUpdateCurrentUser = (updatedUser: { name: string; email?: string; photoUrl: string; phone?: string; address?: string }) => {
+    setCurrentUser(updatedUser);
+    const saved = localStorage.getItem('ks_auth_session');
+    const parsed = saved ? JSON.parse(saved) : {};
+    parsed.currentUser = updatedUser;
+    localStorage.setItem('ks_auth_session', JSON.stringify(parsed));
+
+    if (updatedUser.phone) {
+      localStorage.setItem('ks_last_customer_phone', updatedUser.phone);
+      if (updatedUser.email) {
+        localStorage.setItem(`ks_customer_phone_${updatedUser.email}`, updatedUser.phone);
+      }
+    }
   };
 
   const handleLogout = async () => {
@@ -993,17 +1065,13 @@ const App: React.FC = () => {
   // Cart checkout bar visibility checks
   const showMobileCartBar = cartCount > 0 && !location.pathname.startsWith('/admin') && location.pathname !== '/checkout';
 
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans">
-        <div className="w-10 h-10 border-4 border-gray-200 border-t-brand-blue rounded-full animate-spin mb-4"></div>
-        <p className="text-xs font-bold text-gray-550 uppercase tracking-widest animate-pulse">Initializing Security Gate...</p>
-      </div>
-    );
-  }
+  // NOTE: We intentionally do NOT block render on isAuthLoading to prevent hero section blink.
+  // Auth state is resolved in background — UI renders immediately with guest state.
+
 
   return (
     <div className="relative min-h-screen bg-white">
+      <ScrollToTop />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           {/* Public customer pages layout */}
@@ -1015,7 +1083,7 @@ const App: React.FC = () => {
               isLoggedIn={isLoggedIn}
               userRole={userRole}
               currentUser={currentUser}
-              onLoginClick={() => { setLoginTriggerSource('navbar'); setShowLoginModal(true); }}
+              onLoginClick={() => navigate('/customer/login')}
               onLogoutClick={handleLogout}
               onProfileClick={() => navigate('/customer/dashboard')}
               businessConfig={businessConfigState}
@@ -1025,6 +1093,22 @@ const App: React.FC = () => {
             <Route path="/index.html" element={<Navigate to="/" replace />} />
             <Route path="/services/ac-repair" element={<Navigate to="/services/ac-service" replace />} />
             <Route path="/services/ac-installation" element={<Navigate to="/services/ac-service" replace />} />
+
+            {/* Top-level Service Route Aliases to prevent 404s when accessed directly */}
+            <Route path="/ac-service" element={<Navigate to="/services/ac-service" replace />} />
+            <Route path="/ac-repair" element={<Navigate to="/services/ac-service" replace />} />
+            <Route path="/ac-installation" element={<Navigate to="/services/ac-service" replace />} />
+            <Route path="/ro-service" element={<Navigate to="/services/ro-service" replace />} />
+            <Route path="/electrician-service" element={<Navigate to="/services/electrician-service" replace />} />
+            <Route path="/electrician" element={<Navigate to="/services/electrician-service" replace />} />
+            <Route path="/washing-machine-repair" element={<Navigate to="/services/washing-machine-repair" replace />} />
+            <Route path="/refrigerator-repair" element={<Navigate to="/services/refrigerator-repair" replace />} />
+            <Route path="/chimney-service" element={<Navigate to="/services/chimney-service" replace />} />
+            <Route path="/geyser-service" element={<Navigate to="/services/geyser-service" replace />} />
+            <Route path="/fan-service" element={<Navigate to="/services/fan-service" replace />} />
+            <Route path="/light-service" element={<Navigate to="/services/light-service" replace />} />
+            <Route path="/home-installations" element={<Navigate to="/services/home-installations" replace />} />
+            <Route path="/microwave-service" element={<Navigate to="/services/microwave-service" replace />} />
 
             <Route path="/" element={
               <HomePage 
@@ -1188,14 +1272,36 @@ const App: React.FC = () => {
               />
             } />
 
+            <Route path="/customer/login" element={
+              <CustomerLoginPage
+                onLoginSuccess={handleLoginSuccess}
+                isLoggedIn={isLoggedIn && userRole === 'customer'}
+              />
+            } />
+
             <Route path="/customer/dashboard" element={
               <CustomerDashboard 
                 currentUser={currentUser}
                 bookings={bookings}
                 services={services}
                 onLogout={handleLogout}
-                onUpdateCurrentUser={setCurrentUser}
+                onUpdateCurrentUser={handleUpdateCurrentUser}
                 handleGenerateInvoice={handleGenerateInvoice}
+              />
+            } />
+
+            <Route path="/shop" element={
+              <ShopPage isLoggedIn={isLoggedIn} />
+            } />
+
+            <Route path="/shop/product/:id" element={
+              <ProductDetail isLoggedIn={isLoggedIn} />
+            } />
+
+            <Route path="/shop/checkout" element={
+              <ShopCheckoutPage 
+                currentUser={currentUser}
+                isLoggedIn={isLoggedIn}
               />
             } />
 
@@ -1205,6 +1311,24 @@ const App: React.FC = () => {
                 onUpdateBookingStatus={handleUpdateBookingStatus}
               />
             } />
+
+            {/* Direct Booking & Scheduling Pages */}
+            <Route path="/book" element={<BookServicePage onBookingComplete={handleBookingSubmit} />} />
+            <Route path="/schedule" element={<BookServicePage onBookingComplete={handleBookingSubmit} />} />
+            <Route path="/book-service" element={<BookServicePage onBookingComplete={handleBookingSubmit} />} />
+            <Route path="/schedule-service" element={<BookServicePage onBookingComplete={handleBookingSubmit} />} />
+
+            {/* 24x7 Emergency Electrician SEO Landing Pages */}
+            <Route path="/emergency-electrician" element={<EmergencyElectricianPage />} />
+            <Route path="/24x7-electrician" element={<EmergencyElectricianPage />} />
+            <Route path="/emergency-electrician-near-me" element={<EmergencyElectricianPage />} />
+            <Route path="/24-hour-electrician-greater-noida-west" element={<EmergencyElectricianPage />} />
+
+            {/* We Serve Area Directory Hub & SEO Pages */}
+            <Route path="/we-serve" element={<AreaHubPage onAddToCart={handleAddToCart} cart={cart} />} />
+            <Route path="/service-areas" element={<AreaHubPage onAddToCart={handleAddToCart} cart={cart} />} />
+            <Route path="/locations" element={<AreaHubPage onAddToCart={handleAddToCart} cart={cart} />} />
+            <Route path="/we-serve/:areaSlug" element={<AreaHubPage onAddToCart={handleAddToCart} cart={cart} />} />
 
             {/* Informational Pages */}
             <Route path="/reviews" element={<ReviewsPage />} />
@@ -1311,6 +1435,7 @@ const App: React.FC = () => {
                 handleGenerateInvoice={handleGenerateInvoice}
               />
             } />
+            <Route path="/admin/products" element={<AdminProducts />} />
           </Route>
         </Routes>
       </Suspense>
@@ -1362,4 +1487,69 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+class AppErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('AppErrorBoundary caught error:', error, errorInfo);
+    if (
+      error.message &&
+      (error.message.includes('Loading chunk') ||
+       error.message.includes('dynamically imported module') ||
+       error.message.includes('Failed to fetch'))
+    ) {
+      const key = 'boundary_chunk_reload';
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, 'true');
+        window.location.reload();
+      }
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans">
+          <div className="w-16 h-16 bg-blue-600/20 text-blue-400 rounded-3xl flex items-center justify-center mx-auto mb-2 border border-blue-500/30">
+            <svg className="w-8 h-8 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" strokeOpacity="0.25"></circle>
+              <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"></path>
+            </svg>
+          </div>
+          <h2 className="text-xl font-black text-white">KS Electrical & AC Services</h2>
+          <p className="text-sm text-slate-300 max-w-sm font-medium">
+            Loading latest version...
+          </p>
+          <button
+            onClick={() => {
+              sessionStorage.clear();
+              window.location.reload();
+            }}
+            className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase px-6 py-3 rounded-2xl transition-all shadow-md cursor-pointer"
+          >
+            🔄 Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const AppWithErrorBoundary: React.FC = () => (
+  <AppErrorBoundary>
+    <App />
+  </AppErrorBoundary>
+);
+
+export default AppWithErrorBoundary;

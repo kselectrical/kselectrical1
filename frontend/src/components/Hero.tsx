@@ -125,23 +125,23 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Two Promo Cards */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
             
             {/* Promo Card 1: Super Saver */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800/80 rounded-2xl p-5 text-left flex flex-col justify-between h-44 shadow-md relative overflow-hidden group select-none transition-premium hover:shadow-card hover:-translate-y-1 hover:border-brand-orange/30">
-              <div className="space-y-2 relative z-10">
-                <span className="bg-brand-orange text-white font-extrabold text-[8px] uppercase tracking-widest px-2 py-0.5 rounded shadow-xs">
+            <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800/80 rounded-2xl p-4 sm:p-5 text-left flex flex-col justify-between min-h-[155px] sm:min-h-[175px] shadow-md relative overflow-hidden group select-none transition-premium hover:shadow-card hover:-translate-y-1 hover:border-brand-orange/30">
+              <div className="space-y-1.5 relative z-10 pr-12 sm:pr-0">
+                <span className="bg-brand-orange text-white font-extrabold text-[8px] uppercase tracking-widest px-2 py-0.5 rounded shadow-xs inline-block">
                   Super Saver
                 </span>
-                <h3 className="text-white font-extrabold text-base tracking-tight leading-snug pt-1">
+                <h3 className="text-white font-extrabold text-sm sm:text-base tracking-tight leading-snug pt-0.5">
                   Repairs <br />from ₹49
                 </h3>
-                <p className="text-[9px] text-slate-400 font-semibold leading-normal">
+                <p className="text-[9px] text-slate-400 font-semibold leading-normal hidden xs:block">
                   Fuses, switches & diagnostics.
                 </p>
               </div>
               
-              <div className="absolute right-[-8px] bottom-[-8px] w-24 h-24 opacity-90 group-hover:scale-105 transition-transform duration-500 shrink-0">
+              <div className="absolute right-[-6px] bottom-[-6px] w-20 h-20 sm:w-24 sm:h-24 opacity-85 group-hover:scale-105 transition-transform duration-500 shrink-0 pointer-events-none">
                 <img 
                   src={getAssetPath('/electric_switch.webp')} 
                   alt="Repair illustration" 
@@ -151,20 +151,20 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Promo Card 2: Safe & Verified */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800/80 rounded-2xl p-5 text-left flex flex-col justify-between h-44 shadow-md relative overflow-hidden group select-none transition-premium hover:shadow-card hover:-translate-y-1 hover:border-blue-500/30">
-              <div className="space-y-2 relative z-10">
-                <span className="bg-blue-600 text-white font-extrabold text-[8px] uppercase tracking-widest px-2 py-0.5 rounded shadow-xs">
+            <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800/80 rounded-2xl p-4 sm:p-5 text-left flex flex-col justify-between min-h-[155px] sm:min-h-[175px] shadow-md relative overflow-hidden group select-none transition-premium hover:shadow-card hover:-translate-y-1 hover:border-blue-500/30">
+              <div className="space-y-1.5 relative z-10 pr-12 sm:pr-0">
+                <span className="bg-blue-600 text-white font-extrabold text-[8px] uppercase tracking-widest px-2 py-0.5 rounded shadow-xs inline-block">
                   KS Certified
                 </span>
-                <h3 className="text-white font-extrabold text-base tracking-tight leading-snug pt-1">
+                <h3 className="text-white font-extrabold text-sm sm:text-base tracking-tight leading-snug pt-0.5">
                   Verified <br />Experts
                 </h3>
-                <p className="text-[9px] text-slate-400 font-semibold leading-normal">
+                <p className="text-[9px] text-slate-400 font-semibold leading-normal hidden xs:block">
                   Trained & background checked.
                 </p>
               </div>
 
-              <div className="absolute right-[-8px] bottom-[-8px] w-24 h-24 opacity-90 group-hover:scale-105 transition-transform duration-500 shrink-0">
+              <div className="absolute right-[-6px] bottom-[-6px] w-20 h-20 sm:w-24 sm:h-24 opacity-85 group-hover:scale-105 transition-transform duration-500 shrink-0 pointer-events-none">
                 <img 
                   src={getAssetPath('/team_trust.webp')} 
                   alt="Verified technician team" 

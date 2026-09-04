@@ -88,7 +88,8 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
     const id = `sec-${name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
     const element = document.getElementById(id);
     if (element) {
-      const offset = 100;
+      const isMobile = window.innerWidth < 768;
+      const offset = isMobile ? 130 : 100;
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -275,6 +276,13 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                             src={getAssetPath(service.imageUrl)} 
                             alt={`${service.name} in Greater Noida, Noida Extension & Gaur City - KS Electrical`} 
                             loading="lazy"
+                            width={112}
+                            height={112}
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.onerror = null;
+                              target.src = `https://placehold.co/112x112/f1f5f9/94a3b8?text=${encodeURIComponent(service.name.split(' ')[0])}`;
+                            }}
                             className="w-full h-full object-cover rounded-2xl border border-slate-300 shadow-sm"
                           />
                           
@@ -304,7 +312,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleAddClick(service)}
-                                className="bg-white hover:bg-orange-50 text-brand-orange hover:text-brand-orange-dark border border-brand-orange/40 hover:border-brand-orange shadow-md rounded-2xl py-1 px-4 text-xs font-semibold transition-all cursor-pointer min-w-[76px] h-7 flex items-center justify-center active:scale-95 hover:scale-[1.02] duration-200"
+                                className="bg-[#f97316] hover:bg-[#ea580c] text-white border-0 shadow-[0_3px_10px_0_rgba(249,115,22,0.40)] hover:shadow-[0_5px_14px_0_rgba(249,115,22,0.50)] rounded-2xl py-1 px-4 text-xs font-extrabold tracking-wide transition-all cursor-pointer min-w-[76px] h-7 flex items-center justify-center active:scale-95 hover:-translate-y-[1px] duration-200"
                               >
                                 <span>Add +</span>
                               </button>

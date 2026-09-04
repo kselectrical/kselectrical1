@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Phone, MapPin, ChevronDown, ShoppingCart, User } from 'lucide-react';
+import {
+  Phone, MapPin, ChevronDown, ShoppingCart, User,
+  ShoppingBag, Menu, X, Home, Wrench, Calendar, ShieldCheck
+} from 'lucide-react';
 import type { BusinessConfig } from '../data';
-import { getAssetPath } from '../firebase';
 
 interface NavbarProps {
   selectedLocation: string;
@@ -17,6 +19,7 @@ interface NavbarProps {
   onAdminPanelClick: () => void;
   onProfileClick: () => void;
   businessConfig: BusinessConfig;
+
 }
 
 const LOCATIONS = [
@@ -43,6 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogoClick = () => {
     if (location.pathname === '/') {
@@ -52,139 +56,158 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-300 z-50 shadow-soft transition-all duration-300">
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          
-          {/* Logo & Brand Name */}
-          <div 
-            onClick={handleLogoClick}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleLogoClick(); }}
-            role="link"
-            tabIndex={0}
-            aria-label="KS Electrical & AC Services - Go to homepage"
-            className="flex items-center space-x-2.5 cursor-pointer select-none shrink-0 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded-xl"
-          >
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-slate-300 shadow-soft transition-transform hover:scale-105">
-              <img 
-                src={getAssetPath(businessConfig.logoUrl)} 
-                alt="KS Logo" 
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  const parent = e.currentTarget.parentElement;
-                  if (parent) {
-                    const fallbackSpan = document.createElement('span');
-                    fallbackSpan.className = 'text-brand-blue font-extrabold text-sm';
-                    fallbackSpan.innerText = 'KS';
-                    parent.appendChild(fallbackSpan);
-                  }
-                }}
-              />
-            </div>
-            
-            <div className="flex flex-col text-left">
-              <span className="font-sans font-black text-slate-900 tracking-tight text-base sm:text-lg leading-tight hover:text-brand-blue transition-colors">
-                KS Electrical
-              </span>
-              <span className="font-sans text-[10px] text-slate-500 font-bold tracking-wide">
-                And AC Services
-              </span>
-            </div>
-          </div>
+    <>
+      {/* Desktop and Mobile Navigation */}
+      <nav className="fixed top-0 left-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-neutral-200/50 transition-all duration-300 backdrop-filter backdrop-filter-blur-sm">
+        <div className="px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+          <div className="flex flex-wrap items-center justify-between gap-4 py-4">
+            {/* Logo & Brand Name */}
+            <div
+              onClick={handleLogoClick}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleLogoClick(); }}
+              role="link"
+              tabIndex={0}
+              aria-label="KS Electrical & AC Services - Go to homepage"
+              className="flex items-center space-x-3 flex-shrink-0"
+            >
+              <div className="flex h-10 md:h-12 items-center justify-center bg-transparent overflow-hidden shrink-0">
+                <img
+                  src="/log.webp"
+                  alt="KS Electrical & AC Services Logo"
+                  className="h-full w-auto max-w-[140px] md:max-w-[180px] object-contain"
+                  loading="eager"
+                  fetchPriority="high"
+                  width={180}
+                  height={48}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.onerror = null;
+                    target.src = '/log.png';
+                  }}
+                />
+              </div>
 
-          {/* Center Column: Location Selector */}
-          <div className="hidden md:flex items-center relative">
-            {/* Location Selector Dropdown */}
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setShowLocationDropdown(!showLocationDropdown)}
-                aria-expanded={showLocationDropdown}
-                aria-haspopup="listbox"
-                aria-label={`Selected location: ${selectedLocation}. Click to change`}
-                className="h-10 flex items-center space-x-1.5 px-4 bg-slate-50 hover:bg-slate-100 border border-slate-300 hover:border-slate-400 rounded-2xl text-xs font-semibold text-slate-700 select-none cursor-pointer transition-all duration-200 max-w-[200px] truncate shadow-sm"
+              <div className="flex flex-col space-y-0.5">
+                <span className="font-bold text-lg text-primary">KS Electrical</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">AC Services</span>
+              </div>
+            </div>
+
+            {/* Navigation Links (Hidden on Mobile) */}
+            <div className="hidden lg:flex flex-1 items-center justify-center space-x-6">
+              <Link
+                to="/"
+                className={`${location.pathname === '/' ? 'text-primary font-bold' : 'text-muted-foreground hover:text-primary'} transition-colors px-3 py-2 rounded-md text-sm font-medium`}
               >
-                <MapPin size={14} className="text-slate-400 shrink-0" />
-                <span className="truncate">{selectedLocation}</span>
-                <ChevronDown size={12} className="text-slate-400 shrink-0" />
-              </button>
-
-              {showLocationDropdown && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setShowLocationDropdown(false)}
-                  />
-                  <div className="absolute left-0 mt-2 w-64 bg-white border border-slate-300 rounded-2xl shadow-dropdown z-50 py-1.5 font-sans text-xs animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="px-3 py-2 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100 select-none">
-                      Select Service Location
-                    </div>
-                    {LOCATIONS.map((loc) => (
-                      <button
-                        key={loc}
-                        onClick={() => {
-                          setSelectedLocation(loc);
-                          setShowLocationDropdown(false);
-                        }}
-                        className={`w-full text-left px-3 py-2.5 hover:bg-slate-50 font-semibold transition-colors flex items-center justify-between cursor-pointer ${
-                          selectedLocation === loc ? 'text-brand-blue bg-blue-50/20 font-bold' : 'text-slate-700'
-                        }`}
-                      >
-                        <span>{loc}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column: Quick Contacts, Nav Links, Utilities */}
-          <div className="flex items-center space-x-5 shrink-0">
-            {/* Navigation Links */}
-            <div className="hidden lg:flex items-center space-x-3 mr-1">
-              <Link 
-                to="/services"
-                className="flex items-center justify-center px-4 h-10 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 select-none"
-              >
-                Our Services
+                Home
               </Link>
               <Link
-                to="/ac-on-rent"
-                className="flex items-center justify-center px-4 h-10 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 select-none"
+                to="/services"
+                className={`${location.pathname.startsWith('/services') ? 'text-primary font-bold' : 'text-muted-foreground hover:text-primary'} transition-colors px-3 py-2 rounded-md text-sm font-medium`}
               >
-                AC on Rent
+                Services
               </Link>
+              <Link
+                to="/shop"
+                className={`${location.pathname.startsWith('/shop') ? 'text-primary font-bold' : 'text-muted-foreground hover:text-primary'} transition-colors px-3 py-2 rounded-md text-sm font-medium`}
+              >
+                Shop
+              </Link>
+              <Link
+                to="/book"
+                className={`${location.pathname === '/book' ? 'text-primary font-bold' : 'text-muted-foreground hover:text-primary'} transition-colors px-3 py-2 rounded-md text-sm font-medium`}
+              >
+                Book Service
+              </Link>
+              <a
+                href={`tel:${businessConfig.contacts[0]}`}
+                className="btn-cta text-sm px-4 py-2 flex items-center gap-2"
+              >
+                <Phone size={16} />
+                <span>Call Us</span>
+              </a>
             </div>
 
-            {/* Primary CTA: Call Now */}
-            <a 
-              href={`tel:${businessConfig.contacts[0]}`}
-              className="flex items-center space-x-1.5 px-4 h-10 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 select-none"
-            >
-              <Phone size={13} fill="currentColor" className="shrink-0" />
-              <span className="hidden sm:inline">Call Now</span>
-              <span className="sm:hidden">Call</span>
-            </a>
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-3">
+              {/* Location Selector (Desktop) */}
+              <div className="hidden lg:flex items-center gap-3">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                    aria-expanded={showLocationDropdown}
+                    aria-haspopup="listbox"
+                    aria-label={`Selected location: ${selectedLocation}. Click to change`}
+                    className="flex items-center gap-2 px-3 py-2 rounded-md border border-neutral-200/50 bg-background hover:bg-accent/50 text-sm font-medium transition-colors"
+                  >
+                    <MapPin size={16} className="text-muted-foreground" />
+                    <span className="truncate max-w-[200px]">{selectedLocation}</span>
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${showLocationDropdown ? 'rotate-180' : ''}`}
+                    />
+                  </button>
 
-            {/* Utility Group: Cart, Staff Portal, Login */}
-            <div className="flex items-center space-x-2.5">
+                  {showLocationDropdown && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowLocationDropdown(false)}
+                      />
+                      <div className="absolute left-0 mt-2 w-56 bg-popover border border-border rounded-lg shadow-lg py-2 z-50 w-[200px]">
+                        <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Select Service Location
+                        </div>
+                        {LOCATIONS.map((loc) => (
+                          <button
+                            key={loc}
+                            onClick={() => {
+                              setSelectedLocation(loc);
+                              setShowLocationDropdown(false);
+                            }}
+                            className={`${selectedLocation === loc ? 'bg-primary/10 text-primary' : 'hover:bg-accent'} w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors`}
+                          >
+                            <span>{loc}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
               {/* Cart Icon Badge */}
               <button
                 onClick={onCartClick}
                 aria-label={`Shopping Cart, ${cartCount} items`}
-                className="relative h-10 w-10 flex items-center justify-center bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl text-slate-700 transition-all duration-200 select-none cursor-pointer hover:scale-105 active:scale-95"
+                className="relative flex h-10 w-10 items-center justify-center rounded-md border border-neutral-200/50 bg-background hover:bg-accent/50 text-muted-foreground transition-colors"
               >
-                <ShoppingCart size={18} />
+                <ShoppingCart size={20} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-orange text-white rounded-full flex items-center justify-center text-[9px] font-black shadow-md border border-white animate-in zoom-in duration-200">
+                  <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black">
                     {cartCount}
-                  </span>
+                  </div>
                 )}
+              </button>
+
+              {/* Dedicated Admin & Staff Portal Button */}
+              <button
+                onClick={() => {
+                  if (isLoggedIn && userRole === 'admin') {
+                    onAdminPanelClick();
+                  } else {
+                    navigate('/admin/login');
+                  }
+                }}
+                aria-label="Staff & Admin Panel Login"
+                title="Staff & Admin Control Panel"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 text-xs font-black transition-colors cursor-pointer"
+              >
+                <ShieldCheck size={16} />
+                <span>{isLoggedIn && userRole === 'admin' ? 'Admin Panel' : 'Staff / Admin'}</span>
               </button>
 
               {/* Customer Profile / Login */}
@@ -192,45 +215,187 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={userRole === 'admin' ? onAdminPanelClick : onProfileClick}
                   aria-label={userRole === 'admin' ? "Go to Admin Panel" : `Dashboard for ${currentUser.name}`}
-                  className="w-10 h-10 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold text-xs flex items-center justify-center border border-blue-200 shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none uppercase shrink-0"
-                  title={userRole === 'admin' ? "Go to Admin Panel" : `Logged in as ${currentUser.name}`}
+                  title={currentUser.name || 'My Profile'}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-black transition-colors cursor-pointer"
                 >
-                  {currentUser.name ? currentUser.name[0] : 'C'}
+                  <User size={16} />
+                  <span>{currentUser.name ? currentUser.name.split(' ')[0] : 'Profile'}</span>
                 </button>
               ) : (
                 <button
                   onClick={onLoginClick}
                   aria-label="Login or Sign Up"
-                  className="flex items-center space-x-1.5 px-4 h-10 bg-slate-950 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all duration-200 hover:scale-102 active:scale-98 cursor-pointer select-none shrink-0"
+                  className="flex h-10 w-10 items-center justify-center rounded-md border border-neutral-200/50 bg-background hover:bg-accent/50 text-muted-foreground transition-colors"
                 >
-                  <User size={13} className="shrink-0" />
-                  <span className="hidden sm:inline">Login</span>
+                  <User size={20} />
                 </button>
               )}
 
-              {/* Staff Portal Profile Icon */}
-              <a 
-                href="/admin/login"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Staff Portal"
-                className="w-10 h-10 rounded-full border border-slate-200 hover:border-brand-blue overflow-hidden transition-all duration-200 select-none shadow-sm flex items-center justify-center shrink-0 hover:scale-105"
-                title="Staff Portal"
+              {/* Mobile Menu Hamburger Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle Mobile Navigation Menu"
+                className="lg:hidden flex h-10 w-10 items-center justify-center rounded-md border border-neutral-200/50 bg-background hover:bg-accent/50 text-muted-foreground transition-colors"
               >
-                <img 
-                  src={getAssetPath('/profile.webp')} 
-                  alt="Staff Portal" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = getAssetPath('/profile.webp');
-                  }}
-                />
-              </a>
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
             </div>
           </div>
+        </div>
+      </nav>
 
+      {/* MOBILE SLIDE-DOWN MENU DRAWER */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden fixed top-[72px] left-0 right-0 bottom-16 bg-white/98 backdrop-blur-xl p-5 z-40 overflow-y-auto shadow-2xl border-b border-neutral-200/80 transition-all duration-300">
+          <div className="space-y-4">
+            <div className="border-b pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-primary">KS Electrical</h3>
+                <button onClick={closeMobileMenu} className="text-muted-foreground hover:text-primary">
+                  <X size={20} />
+                </button>
+              </div>
+              <p className="text-sm text-muted-foreground">{selectedLocation}</p>
+            </div>
+
+            <nav className="space-y-2">
+              <Link
+                to="/"
+                onClick={closeMobileMenu}
+                className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent/50 transition-colors"
+              >
+                <Home size={20} />
+                <span>Home</span>
+              </Link>
+              <Link
+                to="/services"
+                onClick={closeMobileMenu}
+                className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent/50 transition-colors"
+              >
+                <Wrench size={20} />
+                <span>Our Services</span>
+              </Link>
+              <Link
+                to="/shop"
+                onClick={closeMobileMenu}
+                className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent/50 transition-colors"
+              >
+                <ShoppingBag size={20} />
+                <span>Shop</span>
+              </Link>
+              <Link
+                to="/book"
+                onClick={closeMobileMenu}
+                className="flex w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent/50 transition-colors"
+              >
+                <Calendar size={20} />
+                <span>Book Service</span>
+              </Link>
+              <Link
+                to="/we-serve"
+                onClick={closeMobileMenu}
+                className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent/50 transition-colors"
+              >
+                <MapPin size={20} />
+                <span>We Serve Areas</span>
+              </Link>
+              <Link
+                to="/about"
+                onClick={closeMobileMenu}
+                className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent/50 transition-colors"
+              >
+                <User size={20} />
+                <span>About Us</span>
+              </Link>
+              <button
+                onClick={() => {
+                  closeMobileMenu();
+                  if (isLoggedIn && userRole === 'admin') {
+                    onAdminPanelClick();
+                  } else {
+                    navigate('/admin/login');
+                  }
+                }}
+                className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm font-bold text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 transition-colors text-left"
+              >
+                <ShieldCheck size={20} />
+                <span>{isLoggedIn && userRole === 'admin' ? 'Admin Panel' : 'Staff & Admin Login'}</span>
+              </button>
+            </nav>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center gap-3">
+                <a
+                  href={`tel:${businessConfig.contacts[0]}`}
+                  className="flex-1 flex items-center justify-center px-3 py-2 rounded-md border border-muted-background/50 bg-background hover:bg-accent/50 text-sm font-medium"
+                >
+                  <Phone size={20} />
+                  <span>Call Now</span>
+                </a>
+                <button
+                  onClick={onLoginClick}
+                  className="flex-1 flex items-center justify-center px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium"
+                >
+                  {isLoggedIn ? (userRole === 'admin' ? 'Admin Panel' : 'Profile') : 'Login'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE STICKY BOTTOM NAVIGATION BAR */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-muted-background/50 px-4 py-3 z-50">
+        <div className="flex justify-around">
+          <Link
+            to="/"
+            className={`flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-md ${
+              location.pathname === '/' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-primary'
+            } transition-colors text-xs`}
+          >
+            <Home size={20} />
+            <span>Home</span>
+          </Link>
+
+          <Link
+            to="/services"
+            className={`flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-md ${
+              location.pathname.startsWith('/services') ? 'text-primary font-medium' : 'text-muted-foreground hover:text-primary'
+            } transition-colors text-xs`}
+          >
+            <Wrench size={20} />
+            <span>Services</span>
+          </Link>
+
+          <Link
+            to="/shop"
+            className="flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-xs"
+          >
+            <ShoppingBag size={20} />
+            <span>Shop</span>
+          </Link>
+
+          <Link
+            to="/book"
+            className={`flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-md ${
+              location.pathname === '/book' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-primary'
+            } transition-colors text-xs`}
+          >
+            <Calendar size={20} />
+            <span>Book</span>
+          </Link>
+
+          <a
+            href={`tel:${businessConfig.contacts[0]}`}
+            className="flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-md hover:text-primary transition-colors text-xs"
+          >
+            <Phone size={20} />
+            <span>Call</span>
+          </a>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
+
+export default Navbar;

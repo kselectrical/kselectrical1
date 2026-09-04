@@ -1,14 +1,189 @@
-# KS Electrical — Apache SPA Rewrite Rules
-# Required for React Router client-side routing on InfinityFree/Apache.
-# Without this, direct URL access (e.g. /ac-on-rent) returns a 404
-# because Apache looks for a physical file that doesn't exist.
+# ============================================================
+# KS Electrical & AC Services — Apache Performance Config
+# InfinityFree & Apache SPA Routing Configuration
+# ============================================================
 
-Options -MultiViews
-RewriteEngine On
+ErrorDocument 404 /index.html
 
-# Serve existing files and directories as-is
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# ─────────────────────────────────────────────
+# 0. REACT SPA ROUTING
+# Redirects all unknown paths (/shop, /customer/login, /admin/products) to index.html
+# ─────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
 
-# Rewrite everything else to index.html so React Router can take over
-RewriteRule ^ /index.html [L]
+# ─────────────────────────────────────────────
+# 1. ENABLE COMPRESSION (Gzip)
+# Reduces file size by 60-80% over the wire
+# ─────────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE font/woff2
+  AddOutputFilterByType DEFLATE font/woff
+</IfModule>
+
+# ─────────────────────────────────────────────
+# 2. BROWSER CACHING (Cache-Control Headers)
+# Fixes Google PageSpeed "Serve static assets with efficient cache policy"
+# ─────────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Default
+  ExpiresDefault "access plus 1 month"
+
+  # HTML — short cache (content changes)
+  ExpiresByType text/html "access plus 1 hour"
+
+  # JS & CSS — 1 year (files have hash in name, so safe)
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+
+  # Images — 1 year
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType image/vnd.microsoft.icon "access plus 1 year"
+
+  # Fonts — 1 year
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+
+  # Manifest & JSON
+  ExpiresByType application/json "access plus 1 week"
+  ExpiresByType application/manifest+json "access plus 1 week"
+</IfModule>
+
+# Cache-Control Headers (reinforces Expires)
+<IfModule mod_headers.c>
+  # Long cache for versioned assets (JS/CSS with hash filenames)
+  <FilesMatch "\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Long cache for images
+  <FilesMatch "\.(webp|jpg|jpeg|png|gif|ico|svg)$">
+    Header set Cache-Control "public, max-age=31536000"
+  </FilesMatch>
+
+  # Long cache for fonts
+  <FilesMatch "\.(woff2|woff|ttf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # NO cache for HTML — always get fresh version (critical for Vite hash-based JS)
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Security Headers (also improve PageSpeed)
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+  # Enable Keep-Alive
+  Header set Connection keep-alive
+</IfModule>
+
+# ─────────────────────────────────────────────
+# 3. MIME TYPES for WebP & modern formats
+# ─────────────────────────────────────────────
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType font/woff2 .woff2
+  AddType application/manifest+json .webmanifest
+</IfModule>
+
+
+# ----------------------------------------------------------------------
+# | Browser Caching & Caching Headers (Cache-Control & Expires)        |
+# ----------------------------------------------------------------------
+
+# Enable Expires Headers
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+
+    # HTML document (never cache to ensure immediate updates)
+    ExpiresByType text/html "access plus 0 seconds"
+
+    # Data/Manifest/JSON/XML
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType application/ld+json "access plus 0 seconds"
+    ExpiresByType application/manifest+json "access plus 1 day"
+    ExpiresByType text/xml "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+
+    # Media: images, video, audio
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType image/vnd.microsoft.icon "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+
+    # Web fonts
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+</IfModule>
+
+# Cache-Control Headers for fine-grained control
+<IfModule mod_headers.c>
+    # Cache Vite-hashed assets (CSS and JS) which are immutable
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Cache media assets and web fonts for 1 year
+    <FilesMatch "\.(gif|jpe?g|png|webp|ico|svg|mp4|webm|woff2?|ttf|otf|eot)$">
+        Header set Cache-Control "public, max-age=31536000"
+    </FilesMatch>
+
+    # Do not cache HTML, JSON configs, and manifests to ensure updates are served instantly
+    <FilesMatch "\.(html|htm|json|xml)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </FilesMatch>
+
+    # Exempt manifest.json and sitemap.xml from no-store so they are updated moderately
+    <FilesMatch "(manifest\.json|sitemap\.xml)$">
+        Header set Cache-Control "public, max-age=86400"
+    </FilesMatch>
+</IfModule>

@@ -30,7 +30,10 @@ export interface BookingData {
   subtotal: number;
   status: 'Pending' | 'Completed' | 'Cancelled';
   createdAt: string;
+  email?: string;
   termsAndConditions?: string;
+  problemDescription?: string;
+  photoBase64?: string;
 }
 
 export interface CustomerUser {
@@ -120,15 +123,47 @@ export const isFirebaseConfigured = !!(
   !import.meta.env.VITE_FIREBASE_API_KEY.startsWith('YOUR_')
 );
 
-// Asset path resolver for subdirectory hosting (e.g. GitHub Pages)
+// Asset path resolver for subdirectory hosting (e.g. GitHub Pages) & automatic path normalization
 export const getAssetPath = (path: string): string => {
   if (!path) return '';
   if (path.startsWith('http') || path.startsWith('data:')) return path;
-  
+
+  let cleanPath = path;
+
+  // Auto-correct outdated extension (.jpg, .png, .jpeg -> .webp for service assets)
+  if (cleanPath.includes('/services/') || cleanPath.startsWith('/images/')) {
+    cleanPath = cleanPath.replace(/\.(jpg|png|jpeg)$/i, '.webp');
+  }
+
+  // Only prepend images/services/ if it is a bare relative filename without leading / or images/
+  if (!cleanPath.startsWith('/') && !cleanPath.startsWith('images/')) {
+    if (cleanPath.endsWith('.webp') || cleanPath.endsWith('.jpg') || cleanPath.endsWith('.png')) {
+      cleanPath = `images/services/${cleanPath.replace(/\.(jpg|png|jpeg)$/i, '.webp')}`;
+    }
+  }
+
   const base = import.meta.env.BASE_URL || '/';
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  const finalPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
   
-  return base.endsWith('/') ? `${base}${cleanPath}` : `${base}/${cleanPath}`;
+  return base.endsWith('/') ? `${base}${finalPath}` : `${base}/${finalPath}`;
+};
+
+/** Helper to recursively remove undefined properties before passing to Firestore setDoc / updateDoc */
+export function sanitizeForFirestore<T>(obj: T): T {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizeForFirestore) as unknown as T;
+  }
+  if (typeof obj === 'object' && !(obj instanceof Date)) {
+    const cleanObj: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleanObj[key] = sanitizeForFirestore(value);
+      }
+    }
+    return cleanObj as T;
+  }
+  return obj;
 };
 
 import type { Firestore } from 'firebase/firestore';
@@ -226,7 +261,11 @@ export const loadBusinessConfigFromDb = async (fallback: BusinessConfig): Promis
       const docRef = doc(db, 'branding', 'current_branding');
       const snap = await getDoc(docRef);
       if (snap.exists()) {
-        return snap.data() as BusinessConfig;
+        const data = snap.data() as BusinessConfig;
+        if (!data.logoUrl) {
+          data.logoUrl = fallback.logoUrl || '/log.png';
+        }
+        return data;
       }
       
       // Seed initial configs
@@ -241,7 +280,11 @@ export const loadBusinessConfigFromDb = async (fallback: BusinessConfig): Promis
   const local = localStorage.getItem('ks_business_config');
   if (local) {
     try {
-      return JSON.parse(local) as BusinessConfig;
+      const data = JSON.parse(local) as BusinessConfig;
+      if (!data.logoUrl) {
+        data.logoUrl = fallback.logoUrl || '/log.png';
+      }
+      return data;
     } catch (err) {
       console.error(err);
     }
@@ -280,16 +323,47 @@ export const saveBusinessConfigToDb = async (config: BusinessConfig): Promise<vo
    ========================================== */
 
 export const loadServicesFromDb = async (initialServices: TechnicalService[]): Promise<TechnicalService[]> => {
+  const initialMap = new Map(initialServices.map(s => [s.id, s]));
+  const nameMap = new Map(initialServices.map(s => [s.name?.toLowerCase(), s]));
+
+  const getSmartFallbackImage = (serviceName: string = '', category: string = '') => {
+    const name = serviceName.toLowerCase();
+    const cat = category.toLowerCase();
+    if (name.includes('switch') || name.includes('board') || name.includes('modular')) {
+      return '/images/services/switchboard-repair-greater-noida.webp';
+    }
+    if (name.includes('chandelier') || name.includes('light') || cat.includes('light')) {
+      return '/images/services/chandelier-installation-noida-extension.webp';
+    }
+    if (name.includes('fan') || cat.includes('fan')) {
+      return '/images/services/ceiling-fan-repair-greater-noida.webp';
+    }
+    if (name.includes('ac') || cat.includes('ac')) {
+      return '/images/services/ac-repair-greater-noida.webp';
+    }
+    return '/images/services/switchboard-repair-greater-noida.webp';
+  };
+
   if (isFirebaseConfigured && db) {
     try {
       const snap = await getDocs(collection(db, 'services'));
       if (!snap.empty && snap.size >= initialServices.length) {
         const loaded: TechnicalService[] = [];
         snap.forEach(doc => {
-          loaded.push(doc.data() as TechnicalService);
+          const s = doc.data() as TechnicalService;
+          // ALWAYS use local data.ts imageUrl — Firestore imageUrl may be stale/wrong
+          const fallback = initialMap.get(s.id) || nameMap.get(s.name?.toLowerCase());
+          if (fallback) {
+            s.imageUrl = fallback.imageUrl;
+            // Also ensure code is set for sorting
+            if (!s.code) s.code = fallback.code;
+          } else if (!s.imageUrl || !s.imageUrl.startsWith('/images/services/')) {
+            s.imageUrl = getSmartFallbackImage(s.name, s.category);
+          }
+          loaded.push(s);
         });
-        // Sort alphabetically by code
-        return loaded.sort((a, b) => a.code.localeCompare(b.code));
+        // Sort by code safely (handle missing code field)
+        return loaded.sort((a, b) => (a.code || a.id).localeCompare(b.code || b.id));
       }
       
       // Auto-seed collection if empty
@@ -307,7 +381,16 @@ export const loadServicesFromDb = async (initialServices: TechnicalService[]): P
   const local = localStorage.getItem('ks_services');
   if (local) {
     try {
-      return JSON.parse(local) as TechnicalService[];
+      const parsed = JSON.parse(local) as TechnicalService[];
+      return parsed.map(s => {
+        const fallback = initialMap.get(s.id) || nameMap.get(s.name?.toLowerCase());
+        if (fallback) {
+          s.imageUrl = fallback.imageUrl;
+        } else if (!s.imageUrl || !s.imageUrl.startsWith('/images/services/')) {
+          s.imageUrl = getSmartFallbackImage(s.name, s.category);
+        }
+        return s;
+      });
     } catch (err) {
       console.error(err);
     }
@@ -462,7 +545,7 @@ export const saveBookingToCloud = async (booking: Omit<BookingData, 'id' | 'crea
   if (isFirebaseConfigured && db) {
     try {
       // 1. Save booking
-      await setDoc(doc(db, 'bookings', newBooking.id), newBooking);
+      await setDoc(doc(db, 'bookings', newBooking.id), sanitizeForFirestore(newBooking));
       console.log(`☁️ Booking ${newBooking.id} saved to Firestore.`);
       
       // 2. Create/Update Customer Record (Only if authenticated to avoid guest permissions errors)
@@ -877,6 +960,24 @@ export const getCustomersFromFirestore = async (): Promise<CustomerUser[]> => {
   return getCustomersFromCloud();
 };
 
+export const getCustomerProfileFromFirestore = async (phone: string): Promise<CustomerUser | null> => {
+  const cleanPhone = phone.trim().replace(/\D/g, '');
+  if (!cleanPhone) return null;
+
+  if (isFirebaseConfigured && db) {
+    try {
+      const docRef = doc(db, 'Customers', cleanPhone);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data() as CustomerUser;
+      }
+    } catch (e) {
+      console.error("Error fetching single customer profile from Firestore:", e);
+    }
+  }
+  return null;
+};
+
 /* ==========================================
    7. LOGS & HISTORY RETRIEVALS
    ========================================== */
@@ -1160,3 +1261,345 @@ export const runMigrationToFirestore = async (): Promise<{ success: boolean; mig
     return { success: false, migratedCount: count };
   }
 };
+
+// ─────────────────────────────────────────────────────────────
+// MARKETPLACE — Products & Orders
+// ─────────────────────────────────────────────────────────────
+import type { Product, ProductOrder } from './types';
+
+/** Fetch all products from Firestore with LocalStorage fallback */
+export const getProductsFromDb = async (): Promise<Product[]> => {
+  let products: Product[] = [];
+  if (isFirebaseConfigured && db) {
+    try {
+      const snap = await getDocs(collection(db, 'products'));
+      if (!snap.empty) {
+        products = snap.docs.map(d => ({ id: d.id, ...d.data() } as Product));
+        localStorage.setItem('ks_products_catalog', JSON.stringify(products));
+        return products;
+      }
+    } catch (e) {
+      console.error('getProductsFromDb error:', e);
+    }
+  }
+
+  // Local fallback
+  const local = localStorage.getItem('ks_products_catalog');
+  if (local) {
+    try {
+      return JSON.parse(local) as Product[];
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  return products;
+};
+
+/** Fetch a single product by ID */
+export const getProductById = async (id: string): Promise<Product | null> => {
+  if (isFirebaseConfigured && db) {
+    try {
+      const snap = await getDoc(doc(db, 'products', id));
+      if (snap.exists()) return { id: snap.id, ...snap.data() } as Product;
+    } catch (e) {
+      console.error('getProductById error:', e);
+    }
+  }
+
+  const all = await getProductsFromDb();
+  return all.find(p => p.id === id) || null;
+};
+
+/** Save (create or update) a product — admin only */
+export const saveProductToDb = async (product: Product): Promise<boolean> => {
+  let cloudSaved = false;
+  const updatedProduct = {
+    ...product,
+    updatedAt: new Date().toISOString(),
+  };
+
+  // 1. Attempt Firestore save
+  if (isFirebaseConfigured && db) {
+    try {
+      await setDoc(doc(db, 'products', product.id), updatedProduct);
+      cloudSaved = true;
+      console.log(`☁️ Product ${product.id} saved in Firestore.`);
+    } catch (e) {
+      console.error('saveProductToDb Firestore error:', e);
+    }
+  }
+
+  // 2. Always sync to LocalStorage
+  try {
+    const existingStr = localStorage.getItem('ks_products_catalog');
+    const existingList: Product[] = existingStr ? JSON.parse(existingStr) : [];
+    const index = existingList.findIndex(p => p.id === product.id);
+    if (index >= 0) {
+      existingList[index] = updatedProduct;
+    } else {
+      existingList.push(updatedProduct);
+    }
+    localStorage.setItem('ks_products_catalog', JSON.stringify(existingList));
+    console.log(`💾 Product ${product.id} saved in LocalStorage.`);
+    return true; // Always successful if saved locally or in cloud
+  } catch (err) {
+    console.error('LocalStorage save error:', err);
+    return cloudSaved;
+  }
+};
+
+/** Delete a product — admin only */
+export const deleteProductFromDb = async (id: string): Promise<boolean> => {
+  let cloudDeleted = false;
+  if (isFirebaseConfigured && db) {
+    try {
+      await deleteDoc(doc(db, 'products', id));
+      cloudDeleted = true;
+    } catch (e) {
+      console.error('deleteProductFromDb error:', e);
+    }
+  }
+
+  try {
+    const existingStr = localStorage.getItem('ks_products_catalog');
+    if (existingStr) {
+      let existingList: Product[] = JSON.parse(existingStr);
+      existingList = existingList.filter(p => p.id !== id);
+      localStorage.setItem('ks_products_catalog', JSON.stringify(existingList));
+    }
+    return true;
+  } catch {
+    return cloudDeleted;
+  }
+};
+
+/** Place a new order */
+export const saveOrderToDb = async (order: ProductOrder): Promise<boolean> => {
+  let cloudSaved = false;
+  const updatedOrder = {
+    ...order,
+    createdAt: order.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (isFirebaseConfigured && db) {
+    try {
+      const sanitizedDoc = sanitizeForFirestore(updatedOrder);
+      await setDoc(doc(db, 'orders', order.id), sanitizedDoc);
+      cloudSaved = true;
+
+      if (order.phone) {
+        const rawPhone = order.phone.trim().replace(/\D/g, '');
+        const tenDigits = rawPhone.length >= 10 ? rawPhone.slice(-10) : rawPhone;
+        if (tenDigits) {
+          try {
+            const custRef = doc(db, 'Customers', tenDigits);
+            await setDoc(custRef, sanitizeForFirestore({
+              name: order.customerName,
+              phone: tenDigits,
+              address: order.address,
+              lastBookingDate: updatedOrder.createdAt
+            }), { merge: true });
+          } catch (custErr) {
+            console.warn('Customer directory sync from order error:', custErr);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('saveOrderToDb cloud save error:', e);
+    }
+  }
+
+  try {
+    const existingStr = localStorage.getItem('ks_product_orders');
+    const existingList: ProductOrder[] = existingStr ? JSON.parse(existingStr) : [];
+    const index = existingList.findIndex(o => o.id === order.id);
+    if (index >= 0) {
+      existingList[index] = updatedOrder;
+    } else {
+      existingList.unshift(updatedOrder);
+    }
+    localStorage.setItem('ks_product_orders', JSON.stringify(existingList));
+    return true;
+  } catch {
+    return cloudSaved;
+  }
+};
+
+/** Get all orders — admin */
+export const getAllOrdersFromDb = async (): Promise<ProductOrder[]> => {
+  let cloudOrders: ProductOrder[] = [];
+  if (isFirebaseConfigured && db) {
+    try {
+      const snap = await getDocs(collection(db, 'orders'));
+      if (!snap.empty) {
+        cloudOrders = snap.docs
+          .map(d => ({ id: d.id, ...d.data() } as ProductOrder))
+          .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+      }
+    } catch (e) {
+      console.error('getAllOrdersFromDb error:', e);
+    }
+  }
+
+  const localStr = localStorage.getItem('ks_product_orders');
+  let localOrders: ProductOrder[] = [];
+  if (localStr) {
+    try {
+      localOrders = JSON.parse(localStr) as ProductOrder[];
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Merge cloud orders and local orders by ID, with cloud taking precedence
+  const mergedMap = new Map<string, ProductOrder>();
+  localOrders.forEach(o => { if (o && o.id) mergedMap.set(o.id, o); });
+  cloudOrders.forEach(o => { if (o && o.id) mergedMap.set(o.id, o); });
+
+  const finalOrders = Array.from(mergedMap.values()).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  localStorage.setItem('ks_product_orders', JSON.stringify(finalOrders));
+  return finalOrders;
+};
+
+/** Get orders for a specific customer by phone */
+export const getOrdersByPhoneFromDb = async (phone: string): Promise<ProductOrder[]> => {
+  const rawClean = phone.trim().replace(/\D/g, '');
+  const targetTen = rawClean.length >= 10 ? rawClean.slice(-10) : rawClean;
+
+  const all = await getAllOrdersFromDb();
+  return all.filter(o => {
+    const oClean = (o.phone || '').replace(/\D/g, '');
+    const oTen = oClean.length >= 10 ? oClean.slice(-10) : oClean;
+    return oTen === targetTen;
+  });
+};
+
+/** Update order status — admin */
+export const updateOrderStatusInDb = async (
+  orderId: string,
+  status: ProductOrder['status'],
+  paymentStatus?: ProductOrder['paymentStatus'],
+  screenshotUrl?: string
+): Promise<boolean> => {
+  let cloudUpdated = false;
+  const updates: Partial<ProductOrder> = { status, updatedAt: new Date().toISOString() };
+  if (paymentStatus) updates.paymentStatus = paymentStatus;
+  if (screenshotUrl) updates.screenshotUrl = screenshotUrl;
+
+  if (isFirebaseConfigured && db) {
+    try {
+      await setDoc(doc(db, 'orders', orderId), sanitizeForFirestore(updates), { merge: true });
+      cloudUpdated = true;
+    } catch (e) {
+      console.error('updateOrderStatusInDb error:', e);
+    }
+  }
+
+  try {
+    const existingStr = localStorage.getItem('ks_product_orders');
+    if (existingStr) {
+      let existingList: ProductOrder[] = JSON.parse(existingStr);
+      existingList = existingList.map(o => o.id === orderId ? { ...o, ...updates } : o);
+      localStorage.setItem('ks_product_orders', JSON.stringify(existingList));
+    }
+    return true;
+  } catch {
+    return cloudUpdated;
+  }
+};
+
+export interface CustomerRecord {
+  name?: string;
+  phone?: string;
+  address?: string;
+  email?: string;
+  photoUrl?: string;
+}
+
+/** Get customer profile by 10-digit phone number from Firestore Customers, orders, bookings, or local session */
+export const getCustomerByPhoneFromDb = async (phone: string): Promise<CustomerRecord | null> => {
+  const rawClean = phone.trim().replace(/\D/g, '');
+  const tenDigits = rawClean.length >= 10 ? rawClean.slice(-10) : rawClean;
+  if (!tenDigits || tenDigits.length !== 10) return null;
+
+  // 1. Check Cloud Firestore Customers collection
+  if (isFirebaseConfigured && db) {
+    try {
+      let docRef = doc(db, 'Customers', tenDigits);
+      let docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        docRef = doc(db, 'Customers', `+91${tenDigits}`);
+        docSnap = await getDoc(docRef);
+      }
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data && (data.name || data.address)) {
+          return {
+            name: data.name || '',
+            phone: tenDigits,
+            address: data.address || '',
+            email: data.email || `${tenDigits}@kselectrical.in`,
+            photoUrl: data.photoUrl || '/profile.webp'
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('getCustomerByPhoneFromDb firestore lookup error:', e);
+    }
+  }
+
+  // 2. Check past orders for customer name and address
+  try {
+    const orders = await getOrdersByPhoneFromDb(tenDigits);
+    if (orders && orders.length > 0) {
+      const lastOrder = orders[0];
+      if (lastOrder.customerName || lastOrder.address) {
+        return {
+          name: lastOrder.customerName || '',
+          phone: tenDigits,
+          address: lastOrder.address || '',
+          email: `${tenDigits}@kselectrical.in`,
+          photoUrl: '/profile.webp'
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('getCustomerByPhoneFromDb orders lookup error:', err);
+  }
+
+  // 3. Check past bookings for customer name and address
+  try {
+    const bookings = await getBookingsForCustomerFromCloud(tenDigits);
+    if (bookings && bookings.length > 0) {
+      const lastBooking = bookings[0];
+      if (lastBooking.customerName || lastBooking.address) {
+        return {
+          name: lastBooking.customerName || '',
+          phone: tenDigits,
+          address: lastBooking.address || '',
+          email: lastBooking.email || `${tenDigits}@kselectrical.in`,
+          photoUrl: '/profile.webp'
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('getCustomerByPhoneFromDb bookings lookup error:', err);
+  }
+
+  // 4. Check local session
+  try {
+    const sessionStr = localStorage.getItem('ks_auth_session');
+    if (sessionStr) {
+      const session = JSON.parse(sessionStr);
+      if (session?.currentUser?.phone?.replace(/\D/g, '').slice(-10) === tenDigits) {
+        return session.currentUser;
+      }
+    }
+  } catch (err) {
+    console.warn('localStorage lookup error:', err);
+  }
+
+  return null;
+};
+

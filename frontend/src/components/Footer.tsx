@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Star, ShieldCheck } from 'lucide-react';
+import { Phone, Mail, MapPin, Star, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { servicesData } from '../data';
 import type { BusinessConfig } from '../data';
 import { getServiceSlugById } from '../serviceCatalog';
@@ -14,10 +14,8 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
   // Extract all categories dynamically from servicesData
   const categories = Array.from(new Set(servicesData.map(s => s.category)));
 
-
-
   return (
-    <footer className="bg-slate-950 border-t border-slate-900 text-slate-400 font-sans p-8 md:p-12 relative overflow-hidden select-none">
+    <footer className="bg-slate-950 border-t border-slate-900 text-slate-400 font-sans px-6 pt-8 pb-24 md:p-12 relative overflow-hidden select-none">
       
       {/* Decorative subtle ambient background glow */}
       <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-orange/5 rounded-full blur-3xl" />
@@ -104,6 +102,24 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
                 </Link>
               </li>
               <li>
+                <Link to="/emergency-electrician" className="text-red-400 font-bold hover:text-white transition-colors hover:underline flex items-center">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2 animate-ping" />
+                  <span>24x7 Emergency Electrician (इमरजेंसी इलेक्ट्रीशियन)</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/book" className="text-emerald-400 font-bold hover:text-white transition-colors hover:underline flex items-center">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2 animate-pulse" />
+                  <span>Book Service (सर्विस बुकिंग)</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/we-serve" className="text-blue-400 font-bold hover:text-white transition-colors hover:underline flex items-center">
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2" />
+                  <span>We Serve Areas (सर्विस एरिया)</span>
+                </Link>
+              </li>
+              <li>
                 <Link to="/services" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Our Services (सेवाएं)</span>
@@ -124,7 +140,7 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
               <li>
                 <Link to="/contact" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
-                  <span>Contact Us (संपर्क करें)</span>
+                  <span>Contact Us</span>
                 </Link>
               </li>
               <li>
@@ -149,6 +165,12 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
                 <Link to="/terms-and-cond" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>Terms (नियम व शर्तें)</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin" className="text-amber-400 font-bold hover:text-amber-300 transition-colors hover:underline flex items-center">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full mr-2 animate-pulse" />
+                  <span>Staff & Admin Portal (एडमिन पोर्टल)</span>
                 </Link>
               </li>
             </ul>
@@ -195,15 +217,26 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
             </div>
 
             <div className="pt-3 border-t border-slate-800/60 text-left space-y-4">
-              <a 
-                href={businessConfig.reviewLink || "https://reviewthis.biz/b4d5f51f"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 bg-yellow-500 hover:bg-yellow-600 text-slate-900 px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all duration-200 shadow-button hover:shadow-card-hover active:scale-95 cursor-pointer"
-              >
-                <Star size={13} fill="currentColor" />
-                <span>Write Google Review</span>
-              </a>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a 
+                  href={businessConfig.reviewLink || "https://reviewthis.biz/b4d5f51f"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center space-x-2 bg-yellow-500 hover:bg-yellow-600 text-slate-900 px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all duration-200 shadow-button hover:shadow-card-hover active:scale-95 cursor-pointer w-full sm:w-auto"
+                >
+                  <Star size={13} fill="currentColor" />
+                  <span>Write Google Review</span>
+                </a>
+                
+                <Link 
+                  to="/shop"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="inline-flex items-center justify-center space-x-2 bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black transition-all duration-200 shadow-lg hover:shadow-card-hover active:scale-95 cursor-pointer w-full sm:w-auto z-10"
+                >
+                  <ShoppingBag size={14} fill="currentColor" />
+                  <span>Visit Shop (शॉप स्टोर खोलें)</span>
+                </Link>
+              </div>
               
               <div className="pt-3 border-t border-slate-800/40 text-left space-y-1">
                 <span className="text-[9px] text-brand-orange font-black uppercase tracking-wider block">

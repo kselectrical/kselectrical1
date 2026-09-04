@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { Calendar, Clock, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft, ShieldAlert, Wrench } from 'lucide-react';
 import type { CartItem } from '../types';
 import type { BusinessConfig } from '../data';
-import { auth, isFirebaseConfigured } from '../firebase';
+import { auth, isFirebaseConfigured, getCustomerByPhoneFromDb } from '../firebase';
 
 interface BookingFormProps {
   cart: Record<string, CartItem>;
@@ -107,6 +108,23 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       }
     }, 0);
   }, []);
+
+  const handlePhoneInputChange = async (val: string) => {
+    const clean = val.replace(/\D/g, '');
+    setFormData(prev => ({ ...prev, phone: clean }));
+    if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
+
+    if (clean.length === 10) {
+      const existing = await getCustomerByPhoneFromDb(clean);
+      if (existing) {
+        setFormData(prev => ({
+          ...prev,
+          name: prev.name.trim() ? prev.name : (existing.name || prev.name),
+          address: prev.address.trim() ? prev.address : (existing.address || prev.address)
+        }));
+      }
+    }
+  };
 
   const cartItems = Object.values(cart);
   const cartSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -326,18 +344,21 @@ Please dispatch a technician. Thank you!`;
                   </label>
 
                   {cartItems.length === 0 ? (
-                    <div className="p-6 border border-dashed border-slate-300 rounded-2xl text-center bg-slate-50/80">
-                      <p className="text-xs text-gray-400 font-bold">Your cart is empty.</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const el = document.getElementById('services');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="text-xs text-brand-blue font-extrabold hover:underline mt-1 cursor-pointer"
+                    <div className="p-6 sm:p-8 border border-dashed border-slate-300 rounded-2xl text-center bg-slate-50/80 space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-blue-50 text-brand-blue border border-blue-100 flex items-center justify-center mx-auto">
+                        <Wrench size={22} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-800">Your cart is empty.</p>
+                        <p className="text-xs text-gray-500 font-medium mt-0.5">Please select a service to schedule your technician slot.</p>
+                      </div>
+                      <Link
+                        to="/services"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-extrabold text-xs shadow-md transition-all cursor-pointer"
                       >
-                        Browse Services above
-                      </button>
+                        <Wrench size={14} />
+                        <span>Browse &amp; Add Services</span>
+                      </Link>
                     </div>
                   ) : (
                     <div className="border border-slate-300 rounded-2xl overflow-hidden divide-y divide-slate-200 bg-white shadow-sm">
@@ -580,10 +601,7 @@ Please dispatch a technician. Thank you!`;
                         type="tel"
                         placeholder="e.g. 7895321472"
                         value={formData.phone}
-                        onChange={(e) => {
-                          setFormData({ ...formData, phone: e.target.value });
-                          if (errors.phone) setErrors({ ...errors, phone: '' });
-                        }}
+                        onChange={(e) => handlePhoneInputChange(e.target.value)}
                         className={`w-full bg-white text-gray-800 border pl-9 pr-4 py-2.5 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 text-sm font-semibold transition-all ${
                           errors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-300 focus:border-blue-500'
                         }`}

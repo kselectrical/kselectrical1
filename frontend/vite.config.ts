@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     {
+      // Non-blocking CSS load — prevents render-blocking stylesheet
       name: 'lazy-load-css',
       transformIndexHtml(html) {
         return html.replace(
@@ -20,25 +21,33 @@ export default defineConfig({
     minify: 'oxc',
     sourcemap: false,
     cssCodeSplit: true,
+    cssMinify: true,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 600,
+    // modulePreload: inlines module preload for faster chunk resolution
+    modulePreload: {
+      polyfill: true,
+    },
     rollupOptions: {
       output: {
-        // Granular code splitting for optimal long-term caching
+        // Granular code splitting — each chunk cached independently
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Firebase split into 3 separate chunks — only load what's needed
             if (id.includes('firebase/firestore')) return 'vendor-firestore';
             if (id.includes('firebase/auth')) return 'vendor-firebase-auth';
             if (id.includes('firebase')) return 'vendor-firebase-core';
+            // UI libraries
             if (id.includes('lucide-react') || id.includes('lucide')) return 'vendor-lucide';
+            // React core
             if (id.includes('react-dom')) return 'vendor-react-dom';
             if (id.includes('react-router')) return 'vendor-router';
             if (id.includes('react')) return 'vendor-react';
-            if (id.includes('react-helmet-async')) return 'vendor-helmet';
+            // Other vendors grouped together
             return 'vendor-others';
           }
         },
-        // Consistent asset naming for long-term caching
+        // Consistent hashed asset naming for long-term browser caching
         assetFileNames: 'assets/[name]-[hash].[ext]',
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
@@ -50,3 +59,4 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom'],
   },
 })
+

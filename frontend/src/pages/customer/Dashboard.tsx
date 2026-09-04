@@ -3,12 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { 
   User, Phone, Mail, MapPin, Clock, 
   FileText, ShieldCheck, History, BookOpen, LogOut, 
-  CheckCircle, ClipboardList, ShieldAlert 
+  CheckCircle, ClipboardList, ShieldAlert, ShoppingBag, Package, ZoomIn, X
 } from 'lucide-react';
 import type { BookingData } from '../../firebase';
-import type { TechnicalService } from '../../types';
-import { db } from '../../firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import type { TechnicalService, ProductOrder } from '../../types';
+import { saveCustomerToCloud, getOrdersByPhoneFromDb } from '../../firebase';
 
 interface CustomerDashboardProps {
   currentUser: { name: string; email?: string; photoUrl: string; phone?: string; address?: string } | null;
@@ -28,12 +27,16 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
   handleGenerateInvoice
 }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'track' | 'history' | 'warranties' | 'profile'>('track');
+  const [activeTab, setActiveTab] = useState<'track' | 'orders' | 'history' | 'warranties' | 'profile'>('track');
+  const [productOrders, setProductOrders] = useState<ProductOrder[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [viewingScreenshot, setViewingScreenshot] = useState<string | null>(null);
   
-  // Profile edit states
-  const [editName, setEditName] = useState(currentUser?.name || "");
-  const [editEmail, setEditEmail] = useState(currentUser?.email || "");
-  const [editAddress, setEditAddress] = useState(currentUser?.address || "");
+  // Profile edit states initialized from currentUser
+  const [editName, setEditName] = useState(() => currentUser?.name || "");
+  const [editEmail, setEditEmail] = useState(() => currentUser?.email || "");
+  const [editPhone, setEditPhone] = useState(() => currentUser?.phone || "");
+  const [editAddress, setEditAddress] = useState(() => currentUser?.address || "");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -42,14 +45,34 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     }
   }, [currentUser, navigate]);
 
-  if (!currentUser) return null;
+  const activePhone = (editPhone || currentUser?.phone || '').replace(/\D/g, '');
+  const cleanPhone = activePhone.length >= 10 ? activePhone.slice(-10) : activePhone;
 
-  const cleanPhone = currentUser.phone ? currentUser.phone.replace(/\D/g, '') : '';
+  useEffect(() => {
+    if (cleanPhone) {
+      let isMounted = true;
+      getOrdersByPhoneFromDb(cleanPhone).then(orders => {
+        if (isMounted) {
+          setProductOrders(orders);
+          setLoadingOrders(false);
+        }
+      });
+      return () => { isMounted = false; };
+    }
+  }, [cleanPhone]);
+
+  if (!currentUser) return null;
   
   // Filter bookings for this customer
   const customerBookings = bookings.filter(b => {
     const bPhone = b.phone ? b.phone.replace(/\D/g, '') : '';
-    return bPhone === cleanPhone || (bPhone.length >= 10 && cleanPhone.length >= 10 && bPhone.slice(-10) === cleanPhone.slice(-10));
+    const bTen = bPhone.length >= 10 ? bPhone.slice(-10) : bPhone;
+    const bEmail = (b.email || '').trim().toLowerCase();
+    const cEmail = (currentUser.email || '').trim().toLowerCase();
+
+    const phoneMatch = cleanPhone && bTen && bTen === cleanPhone;
+    const emailMatch = cEmail && bEmail && bEmail === cEmail;
+    return phoneMatch || emailMatch;
   });
 
   const activeBookings = customerBookings.filter(b => b.status === 'Pending');
@@ -87,24 +110,28 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
 
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    const rawClean = editPhone.trim().replace(/\D/g, '');
+    const validPhone = rawClean.length >= 10 ? rawClean.slice(-10) : rawClean;
+
     const updatedUser = {
       ...currentUser,
       name: editName,
       email: editEmail,
+      phone: validPhone || currentUser.phone,
       address: editAddress
     };
     
-    // Save in local state
+    // Save in local state & localStorage session
     onUpdateCurrentUser(updatedUser);
 
-    // Save in Firestore if active
-    if (db && currentUser.phone) {
+    // Save in Firestore Cloud Customers collection
+    const savePhone = validPhone || currentUser.phone;
+    if (savePhone) {
       try {
-        const userDocRef = doc(db, 'customers', currentUser.phone);
-        await updateDoc(userDocRef, {
+        await saveCustomerToCloud({
           name: editName,
-          email: editEmail,
-          address: editAddress
+          phone: savePhone,
+          photoUrl: currentUser.photoUrl
         });
       } catch (err) {
         console.warn("Could not save to Cloud store:", err);
@@ -167,6 +194,15 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
           >
             <Clock size={15} />
             <span>Track Live Bookings</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`w-full text-left px-4 py-3 rounded-xl font-extrabold text-xs flex items-center space-x-3 transition-all ${
+              activeTab === 'orders' ? 'bg-blue-600 text-white shadow-md shadow-blue-100 scale-102' : 'text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <ShoppingBag size={15} />
+            <span>मेरे ऑर्डर्स (Store Orders)</span>
           </button>
           <button
             onClick={() => setActiveTab('history')}
@@ -296,6 +332,180 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
             </div>
           )}
 
+          {activeTab === 'orders' && (
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-black text-slate-900 uppercase">मेरे प्रोडक्ट्स ऑर्डर्स (Store Orders)</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">KS Electrical Store से खरीदे गए सामान का स्टेटस</p>
+                </div>
+                <Link
+                  to="/shop"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-3.5 py-2 rounded-xl transition-all shadow-xs"
+                >
+                  + Place New Order
+                </Link>
+              </div>
+
+              {loadingOrders && (
+                <div className="py-12 text-center text-slate-400 text-xs font-bold animate-pulse">
+                  आपके ऑर्डर्स लोड हो रहे हैं...
+                </div>
+              )}
+
+              {!loadingOrders && productOrders.length === 0 && (
+                <div className="text-center py-12 px-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                  <Package size={32} className="text-slate-300 mx-auto mb-3" />
+                  <h4 className="text-sm font-black text-slate-800">कोई ऑर्डर नहीं मिला</h4>
+                  <p className="text-xs text-slate-500 mt-1">आपने अभी तक Store से कोई सामान नहीं मंगवाया है।</p>
+                  <Link 
+                    to="/shop" 
+                    className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-xs"
+                  >
+                    Store पर जाएं
+                  </Link>
+                </div>
+              )}
+
+              {!loadingOrders && productOrders.length > 0 && (
+                <div className="space-y-4">
+                  {productOrders.map(order => (
+                    <div key={order.id} className="border border-slate-200 rounded-2xl p-5 bg-white shadow-2xs space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                        <div>
+                          <span className="text-xs font-black text-blue-700 uppercase tracking-wider">#{order.id}</span>
+                          <span className="text-[11px] text-slate-400 font-bold ml-2">
+                            {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                            order.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800' :
+                            order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'Confirmed' ? 'bg-indigo-100 text-indigo-800' :
+                            order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}>
+                            {order.status === 'Pending' ? 'ऑर्डर प्रोसेस में है (Pending)' :
+                             order.status === 'Confirmed' ? 'कन्फर्म हो गया (Confirmed)' :
+                             order.status === 'Shipped' ? 'रास्ते में है (Shipped)' :
+                             order.status === 'Delivered' ? 'डिलीवर हो गया (Delivered)' : order.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Expected Delivery & Payment Status Bar */}
+                      <div className="bg-slate-50 rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs border border-slate-100">
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-bold uppercase block">🚚 कब तक आएगा (Expected Delivery)</span>
+                          <span className="font-extrabold text-slate-800">
+                            {order.status === 'Delivered' ? '✅ सामान डिलीवर हो चुका है' :
+                             order.status === 'Shipped' ? '🚚 आज या कल में डिलीवरी (On the Way)' :
+                             '⏳ 24-48 घंटे (1-2 दिन में डिलीवरी संभावित)'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-bold uppercase block">💳 Payment Status</span>
+                          <span className={`font-extrabold ${order.paymentStatus === 'Paid' ? 'text-emerald-600' : 'text-amber-700'}`}>
+                            {order.paymentStatus === 'Paid' ? '✅ Paid (Payment Received)' : '💵 Cash on Delivery / Pay via UPI upon delivery'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Items list */}
+                      <div className="space-y-2 divide-y divide-slate-50 text-xs">
+                        {order.items.map((it, idx) => (
+                          <div key={idx} className="pt-2 flex items-center justify-between text-slate-800">
+                            <div className="flex items-center gap-2">
+                              <img src={it.imageUrl || '/log.webp'} alt={it.productName} className="w-8 h-8 object-contain rounded bg-slate-50 border p-1" />
+                              <div>
+                                <p className="font-bold">{it.productName}</p>
+                                <p className="text-[10px] text-slate-400">Qty: {it.quantity} × ₹{it.price}</p>
+                              </div>
+                            </div>
+                            <span className="font-black">₹{it.price * it.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Footer Details */}
+                      <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-600">
+                        <div>
+                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Delivery Address</span>
+                          <span className="font-semibold text-slate-800">{order.address}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Amount</span>
+                          <span className="text-sm font-black text-blue-700">₹{order.totalAmount}</span>
+                        </div>
+                      </div>
+
+                      {/* Payment Screenshot Proof & UTR Transaction Details */}
+                      <div className="mt-3 pt-3 border-t border-slate-100 bg-slate-50/80 rounded-xl p-3 space-y-2">
+                        <div className="flex flex-wrap items-center justify-between text-xs gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-600">Payment Mode:</span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                              order.paymentMethod === 'UPI' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
+                            }`}>
+                              {order.paymentMethod === 'UPI' ? '💳 UPI / Scan & Pay' : '💵 Cash on Delivery'}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-600">Status:</span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                              order.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                            }`}>
+                              {order.paymentStatus === 'Paid' ? '✅ Paid (भुगतान प्राप्त हुआ)' : '⏳ Pay on Delivery'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Transaction UTR ID */}
+                        {order.upiTransactionId && (
+                          <div className="text-xs text-slate-700 font-mono">
+                            <span className="font-bold text-slate-500">UTR / Ref ID: </span>
+                            <span className="font-black text-blue-700 bg-white px-2 py-0.5 rounded border border-slate-200">{order.upiTransactionId}</span>
+                          </div>
+                        )}
+
+                        {/* Screenshot Proof Preview Image */}
+                        {order.screenshotUrl ? (
+                          <div className="pt-1">
+                            <button
+                              type="button"
+                              onClick={() => setViewingScreenshot(order.screenshotUrl || null)}
+                              className="flex items-center gap-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 p-1.5 rounded-xl transition-all cursor-pointer group shadow-2xs"
+                            >
+                              <img 
+                                src={order.screenshotUrl} 
+                                alt="Payment Proof" 
+                                className="w-11 h-11 object-cover rounded-lg border border-blue-300 group-hover:scale-105 transition-transform bg-white" 
+                              />
+                              <div className="text-left pr-2">
+                                <span className="text-[11px] font-black text-blue-900 block leading-tight">
+                                  📸 पेमेंट स्क्रीनशॉट प्रमाण
+                                </span>
+                                <span className="text-[9px] text-blue-600 font-bold block mt-0.5">🔍 क्लिक करके फुलस्क्रीन में देखें</span>
+                              </div>
+                            </button>
+                          </div>
+                        ) : (
+                          order.paymentMethod === 'UPI' && (
+                            <p className="text-[10px] text-amber-700 font-bold bg-amber-50 p-2 rounded-lg border border-amber-200">
+                              ℹ️ इस UPI ऑर्डर के साथ कोई स्क्रीनशॉट संलग्न नहीं था।
+                            </p>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === 'history' && (
             <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
               <div>
@@ -407,14 +617,17 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
 
               <form onSubmit={handleProfileSave} className="space-y-4 text-xs font-bold text-slate-650 max-w-md">
                 <div className="space-y-1.5">
-                  <label className="block">Contact Mobile (Verified)</label>
+                  <label className="block">Contact Mobile (10-Digit Mobile Number)</label>
                   <div className="relative">
                     <Phone size={14} className="absolute left-3 top-3 text-slate-400" />
                     <input
-                      type="text"
-                      disabled
-                      value={currentUser.phone || "N/A"}
-                      className="w-full bg-slate-100 border border-slate-200 rounded-xl px-10 py-2.5 text-slate-500 focus:outline-none font-bold"
+                      type="tel"
+                      maxLength={10}
+                      required
+                      placeholder="Enter 10-digit mobile number"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value.replace(/\D/g, ''))}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-10 py-2.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold"
                     />
                   </div>
                 </div>
@@ -479,6 +692,60 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
         </main>
 
       </div>
+
+      {/* Fullscreen Payment Screenshot Lightbox Modal */}
+      {viewingScreenshot && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer animate-fade-in"
+          onClick={() => setViewingScreenshot(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl p-5 max-w-lg w-full text-center space-y-4 shadow-2xl relative animate-scale-up" 
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setViewingScreenshot(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex items-center gap-2 justify-center text-blue-700 font-black text-sm pt-1">
+              <span>📸 पेमेंट स्क्रीनशॉट प्रमाण (Payment Proof)</span>
+            </div>
+
+            <div className="bg-slate-50 p-2 rounded-2xl border border-slate-200 max-h-[70vh] overflow-auto flex items-center justify-center">
+              <img 
+                src={viewingScreenshot} 
+                alt="Payment Proof Fullscreen" 
+                className="max-w-full max-h-[65vh] object-contain rounded-xl shadow-md bg-white" 
+              />
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-1">
+              <a
+                href={viewingScreenshot}
+                download="payment_screenshot.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+              >
+                <ZoomIn size={14} />
+                <span>Open Original Size / Download Invoice</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setViewingScreenshot(null)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

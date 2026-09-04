@@ -34,3 +34,36 @@ if ('caches' in window) {
   });
 }
 
+// Auto-recover from dynamic import / chunk load failures (prevents blank white screen)
+window.addEventListener('error', (event) => {
+  if (
+    event.message &&
+    (event.message.includes('Loading chunk') ||
+     event.message.includes('dynamically imported module') ||
+     event.message.includes('Failed to fetch'))
+  ) {
+    console.warn('Chunk load error detected. Reloading page...');
+    const hasReloaded = sessionStorage.getItem('chunk_reload_retry');
+    if (!hasReloaded) {
+      sessionStorage.setItem('chunk_reload_retry', 'true');
+      window.location.reload();
+    }
+  }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason ? String(event.reason) : '';
+  if (
+    reason.includes('Loading chunk') ||
+    reason.includes('dynamically imported module') ||
+    reason.includes('Failed to fetch')
+  ) {
+    console.warn('Unhandled chunk rejection detected. Reloading page...');
+    const hasReloaded = sessionStorage.getItem('chunk_reload_retry');
+    if (!hasReloaded) {
+      sessionStorage.setItem('chunk_reload_retry', 'true');
+      window.location.reload();
+    }
+  }
+});
+

@@ -8,7 +8,7 @@ const ftpHost = "ftpupload.net";
 const ftpUser = "if0_42168126";
 const ftpPass = "FpQLnmHHGj";
 const localDir = resolve('dist');
-const remotePath = "/kselectrical.in/htdocs";
+const targetRoots = ["/htdocs", "/kselectrical.in/htdocs"];
 const cacheFile = resolve('.last_uploaded.json');
 
 // Load cache
@@ -16,7 +16,7 @@ let cache = {};
 if (existsSync(cacheFile)) {
   try {
     cache = JSON.parse(readFileSync(cacheFile, 'utf8'));
-    console.log(`Loaded upload cache with ${Object.keys(cache).length} files.`);
+    console.log(`Loaded upload cache with ${Object.keys(cache).length} entries.`);
   } catch (e) {
     console.log('Could not load cache, starting fresh.');
   }
@@ -29,7 +29,6 @@ function getFileHash(filePath) {
 }
 
 // Function to recursively list all files in a local directory
-// NOTE: readdirSync is called WITHOUT any filter so dotfiles like .htaccess are included
 function getAllFiles(dir, fileList = []) {
   const files = readdirSync(dir, { withFileTypes: true });
   for (const entry of files) {
@@ -45,70 +44,74 @@ function getAllFiles(dir, fileList = []) {
 
 async function deploy() {
   const client = new Client();
-  // Set timeout to 30 seconds
-  client.ftp.timeout = 30000;
+  client.ftp.timeout = 120000;
 
   try {
-    console.log(`Connecting to FTP server ${ftpHost}...`);
-    await client.access({
-      host: ftpHost,
-      user: ftpUser,
-      password: ftpPass,
-      secure: false // ftpupload.net usually does not support secure FTPS on free tier
-    });
-    console.log('Connected successfully! Starting deployment...');
+    async function connectFTP() {
+      console.log(`Connecting to FTP server ${ftpHost}...`);
+      await client.access({
+        host: ftpHost,
+        user: ftpUser,
+        password: ftpPass,
+        secure: false
+      });
+      console.log('Connected successfully!');
+    }
+
+    await connectFTP();
 
     const localFiles = getAllFiles(localDir);
     console.log(`Found ${localFiles.length} local files in dist.`);
 
-    for (const filePath of localFiles) {
-      const relPath = relative(localDir, filePath).replace(/\\/g, '/');
-      const hash = getFileHash(filePath);
+    for (const targetRoot of targetRoots) {
+      console.log(`\n--- Deploying to target webroot: ${targetRoot} ---`);
 
-      // Check if file is already uploaded and unchanged
-      if (cache[relPath] === hash) {
-        console.log(`Skipping ${relPath} (unchanged)`);
-        continue;
-      }
+      for (const filePath of localFiles) {
+        const relPath = relative(localDir, filePath).replace(/\\/g, '/');
+        const hash = getFileHash(filePath);
+        const cacheKey = `${targetRoot}:${relPath}`;
 
-      const remoteFileUrl = `${remotePath}/${relPath}`;
-      const remoteDir = remoteFileUrl.substring(0, remoteFileUrl.lastIndexOf('/'));
+        // Check if file is already uploaded to this target and unchanged
+        if (cache[cacheKey] === hash) {
+          console.log(`Skipping ${targetRoot}/${relPath} (unchanged)`);
+          continue;
+        }
 
-      // Ensure remote directory exists
-      try {
-        await client.ensureDir(remoteDir);
-      } catch (e) {
-        console.log(`Creating directory ${remoteDir}...`);
-        await client.ensureDir(remoteDir);
-      }
+        const remoteFileUrl = `${targetRoot}/${relPath}`;
+        const remoteDir = remoteFileUrl.substring(0, remoteFileUrl.lastIndexOf('/'));
 
-      console.log(`Uploading ${relPath} to ${remoteFileUrl}...`);
-      
-      // Retry mechanism
-      let success = false;
-      let attempts = 0;
-      while (!success && attempts < 3) {
-        try {
-          await client.uploadFrom(filePath, remoteFileUrl);
-          console.log(`Uploaded ${relPath} successfully!`);
-          success = true;
-          
-          // Update cache and save immediately
-          cache[relPath] = hash;
-          writeFileSync(cacheFile, JSON.stringify(cache, null, 2), 'utf8');
-        } catch (err) {
-          attempts++;
-          console.log(`Attempt ${attempts} failed for ${relPath}: ${err.message}`);
-          if (attempts >= 3) {
-            throw new Error(`Failed to upload ${relPath} after 3 attempts.`);
+        // Retry mechanism with auto-reconnect
+        let success = false;
+        let attempts = 0;
+        while (!success && attempts < 5) {
+          try {
+            await client.ensureDir(remoteDir);
+            await client.uploadFrom(filePath, remoteFileUrl);
+            console.log(`Uploaded ${remoteFileUrl} successfully!`);
+            success = true;
+            
+            // Update cache and save immediately
+            cache[cacheKey] = hash;
+            writeFileSync(cacheFile, JSON.stringify(cache, null, 2), 'utf8');
+          } catch (err) {
+            attempts++;
+            console.log(`Attempt ${attempts} failed for ${remoteFileUrl}: ${err.message}`);
+            if (attempts >= 5) {
+              throw new Error(`Failed to upload ${remoteFileUrl} after 5 attempts.`);
+            }
+            console.log("Reconnecting to FTP...");
+            await new Promise(r => setTimeout(r, 2000));
+            try {
+              await connectFTP();
+            } catch (connErr) {
+              console.log(`Reconnect error: ${connErr.message}`);
+            }
           }
-          // Wait 2 seconds before retry
-          await new Promise(r => setTimeout(r, 2000));
         }
       }
     }
 
-    console.log('\n🎉 Deployment completed successfully! All files are up to date.');
+    console.log('\n🎉 Deployment completed successfully to all webroots!');
   } catch (err) {
     console.error('\n❌ Deployment failed:', err.message);
     process.exit(1);

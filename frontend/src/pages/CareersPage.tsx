@@ -68,7 +68,7 @@ export const CareersPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!photoFile) {
-      setSubmitError('Please upload a profile photo / selfie (अपनी फोटो अपलोड करें)।');
+      setSubmitError('Please upload a profile photo or selfie.');
       return;
     }
     if (formData.phone.trim().length !== 10) {
@@ -222,7 +222,7 @@ export const CareersPage: React.FC = () => {
                     {/* DP / Photo Upload */}
                     <div className="space-y-1.5">
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1">
-                        Upload Profile Photo / Selfie (अपनी फोटो अपलोड करें) *
+                        Upload Profile Photo / Selfie *
                       </label>
                       <div className="flex items-center space-x-3">
                         {photoPreview ? (

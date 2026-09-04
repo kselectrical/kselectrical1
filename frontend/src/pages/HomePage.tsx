@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { 
-  Clock, Flame, Wrench, Droplets, Zap, Shield, 
-  Settings, BookOpen, Calendar, Phone, MessageSquare, 
-  Search, ChevronDown, ChevronUp, ChevronRight, Star
+import {
+  Flame, Wrench, Droplets, Zap, ShieldCheck,
+  Settings, Star, Clock,
+  CheckCircle2, Wind, MapPin, User
 } from 'lucide-react';
 import { ServiceGrid } from '../components/ServiceGrid';
-import { blogPostsData } from '../blogData';
+import { servicesData } from '../data';
+import { getAssetPath } from '../firebase';
 import type { TechnicalService, CartItem } from '../types';
 import type { BusinessConfig } from '../data';
 
@@ -27,6 +28,50 @@ interface HomePageProps {
   businessConfig: BusinessConfig;
 }
 
+const HERO_REVIEWS = [
+  {
+    name: 'Rahul Sharma',
+    location: 'Gaur City 2, 14th Avenue',
+    service: 'AC Repair',
+    rating: 5,
+    text: 'Technician arrived within 20 minutes and fixed AC cooling perfectly!'
+  },
+  {
+    name: 'Pooja Verma',
+    location: 'Noida Extension, Eco Village',
+    service: 'Washing Machine Repair',
+    rating: 5,
+    text: 'Honest diagnosis! Saved me from unnecessary drum replacement costs.'
+  },
+  {
+    name: 'Jitesh Hassani',
+    location: 'Gaur City 1, 4th Avenue',
+    service: 'MCB & Wiring Upgrade',
+    rating: 5,
+    text: 'Very professional electrician. Fixed frequent tripping and earth leakages.'
+  },
+  {
+    name: 'Dr. Shalini Mukherji',
+    location: 'Sector 4, Greater Noida West',
+    service: 'RO Filter Service',
+    rating: 5,
+    text: 'TDS adjusted from 1200 to 80 PPM. Water tastes fresh and pure now.'
+  }
+];
+
+
+
+const HERO_QUICK_SERVICES = [
+  { label: 'AC Repair', icon: <Wind size={18} className="text-cyan-400" />, path: '/services/ac-repair' },
+  { label: 'Electrician', icon: <Zap size={18} className="text-yellow-400" />, path: '/services/mcb-upgrade' },
+  { label: 'RO Service', icon: <Droplets size={18} className="text-blue-400" />, path: '/services/ro-service' },
+  { label: 'Washing Machine', icon: <Wrench size={18} className="text-indigo-400" />, path: '/services/washing-machine-repair' },
+  { label: 'Geyser Repair', icon: <Flame size={18} className="text-orange-400" />, path: '/services/geyser-service' },
+  { label: 'Kitchen Chimney', icon: <Settings size={18} className="text-amber-400" />, path: '/services/chimney-service' },
+  { label: 'Refrigerator', icon: <ShieldCheck size={18} className="text-teal-400" />, path: '/services/refrigerator-repair' },
+  { label: 'Fan Repair', icon: <Settings size={18} className="text-emerald-400" />, path: '/services/fan-repair' }
+];
+
 export const HomePage: React.FC<HomePageProps> = ({
   searchQuery,
   setSearchQuery,
@@ -34,26 +79,54 @@ export const HomePage: React.FC<HomePageProps> = ({
   setSelectedCategory,
   filteredServices,
   cart,
-  onSearchSubmit,
   onAddToCart,
   onRemoveFromCart,
-  onProceedToCheckout,
-  businessConfig
+  onProceedToCheckout
 }) => {
-  const [sliderPosition, setSliderPosition] = useState(50);
-  const [faqSearchQuery, setFaqSearchQuery] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [activeGalleryFilter, setActiveGalleryFilter] = useState('ALL');
-  const [showRecentSearch, setShowRecentSearch] = useState(false);
+  const [activeReviewIdx, setActiveReviewIdx] = useState(0);
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
-  const popularSearches = ['Split AC Jet Cleaning', 'RO Membrane Replacement', 'MCB Tripping Repair', 'Balcony Pigeon Netting'];
-  const recentSearches = ['Washing Machine Drum Fix', 'Double Door Fridge Gas Charging'];
+  const handleSliderMove = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    const container = sliderRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    let clientX: number;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+    } else {
+      if (e.buttons !== 1) return; // only move when mouse button pressed
+      clientX = e.clientX;
+    }
+    const pos = Math.min(Math.max(((clientX - rect.left) / rect.width) * 100, 0), 100);
+    setSliderPosition(pos);
+  }, []);
+
+  // Auto rotate customer reviews every 4.5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveReviewIdx((prev) => (prev + 1) % HERO_REVIEWS.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Matching live search results for autocomplete dropdown
+  const searchSuggestions = searchQuery.trim()
+    ? servicesData.filter(s =>
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 4)
+    : [];
+
+  // suppress unused var — used in search dropdown if re-enabled
+  void searchSuggestions;
 
   const categoryCards = [
     {
       title: 'RO Water Purifier',
-      titleHindi: 'आरओ वाटर प्यूरीफायर',
-      icon: <Droplets className="text-blue-500 w-6 h-6" />,
+      titleHindi: 'Pure & Safe Drinking Water',
+      image: '/images/services/ro_service.webp',
       path: '/services/ro-service',
       startingPrice: '₹299',
       responseTime: '30 Min',
@@ -61,8 +134,8 @@ export const HomePage: React.FC<HomePageProps> = ({
     },
     {
       title: 'Washing Machine',
-      titleHindi: 'वाशिंग मशीन सर्विस',
-      icon: <Wrench className="text-blue-500 w-6 h-6" />,
+      titleHindi: 'Laundry & Tub Deep Care',
+      image: '/images/services/washing_machine.webp',
       path: '/services/washing-machine-repair',
       startingPrice: '₹349',
       responseTime: '45 Min',
@@ -70,8 +143,8 @@ export const HomePage: React.FC<HomePageProps> = ({
     },
     {
       title: 'Geyser Service',
-      titleHindi: 'गीजर मरम्मत व सर्विस',
-      icon: <Flame className="text-orange-500 w-6 h-6" />,
+      titleHindi: 'Instant Heating & Descaling',
+      image: '/images/services/geyser.webp',
       path: '/services/geyser-service',
       startingPrice: '₹249',
       responseTime: '30 Min',
@@ -79,17 +152,17 @@ export const HomePage: React.FC<HomePageProps> = ({
     },
     {
       title: 'AC Services',
-      titleHindi: 'एसी सर्विस व रिपेयर',
-      icon: <Flame className="text-cyan-500 w-6 h-6" />,
-      path: '/services/ac-service',
+      titleHindi: 'Jet Wash & Cooling Care',
+      image: '/images/services/ac_service.webp',
+      path: '/services/ac-repair',
       startingPrice: '₹399',
       responseTime: '30 Min',
       desc: 'High-pressure AC jet wash, cooling diagnostics, gas leakage welding, and R32/R22 gas refilling.'
     },
     {
       title: 'Refrigerator Repair',
-      titleHindi: 'रेफ्रिजरेटर मरम्मत',
-      icon: <Shield className="text-blue-500 w-6 h-6" />,
+      titleHindi: 'Compressor & Gas Charging',
+      image: '/images/services/refrigerator.webp',
       path: '/services/refrigerator-repair',
       startingPrice: '₹299',
       responseTime: '45 Min',
@@ -97,8 +170,8 @@ export const HomePage: React.FC<HomePageProps> = ({
     },
     {
       title: 'Kitchen Chimney',
-      titleHindi: 'किचन चिमनी सर्विस',
-      icon: <Settings className="text-orange-500 w-6 h-6" />,
+      titleHindi: 'Suction & Degreasing Care',
+      image: '/images/services/kitchen-chimney-repair-gaur-city.webp',
       path: '/services/chimney-service',
       startingPrice: '₹499',
       responseTime: '60 Min',
@@ -106,8 +179,8 @@ export const HomePage: React.FC<HomePageProps> = ({
     },
     {
       title: 'Microwave Oven',
-      titleHindi: 'माइक्रोवेव रिपेयर',
-      icon: <Settings className="text-purple-500 w-6 h-6" />,
+      titleHindi: 'Heating & Magnetron Care',
+      image: '/images/services/microwave-repair-greater-noida.webp',
       path: '/services/microwave-service',
       startingPrice: '₹299',
       responseTime: '30 Min',
@@ -115,77 +188,32 @@ export const HomePage: React.FC<HomePageProps> = ({
     },
     {
       title: 'Electrician Services',
-      titleHindi: 'बिजली मरम्मत व फिटिंग',
-      icon: <Zap className="text-yellow-500 w-6 h-6" />,
-      path: '/services/electrician-service',
+      titleHindi: 'Licensed Wiring & Repairs',
+      image: '/images/services/electrician.webp',
+      path: '/services/mcb-upgrade',
       startingPrice: '₹49',
       responseTime: '25 Min',
       desc: 'Residential wiring tracing, short circuit repair, smart MCB & distribution box upgrade, and inverter service.'
     },
     {
       title: 'Fan Services',
-      titleHindi: 'पंखे की फिटिंग व रिपेयर',
-      icon: <Settings className="text-emerald-500 w-6 h-6" />,
-      path: '/services/fan-service',
+      titleHindi: 'Ceiling & Smart BLDC Fans',
+      image: '/images/services/ceiling-fan-repair-greater-noida.webp',
+      path: '/services/fan-repair',
       startingPrice: '₹99',
       responseTime: '30 Min',
       desc: 'Installing ceiling fans, decorative designer fans, and smart BLDC fans with remote pairing setup.'
-    },
-    {
-      title: 'Light Services',
-      titleHindi: 'लाइटींग व झूमर फिटिंग',
-      icon: <Flame className="text-yellow-500 w-6 h-6" />,
-      path: '/services/light-service',
-      startingPrice: '₹99',
-      responseTime: '35 Min',
-      desc: 'Installing false ceiling recessed LED panels, wall sconces, tube lights, and heavy decorative chandeliers.'
-    },
-    {
-      title: 'Home Installations',
-      titleHindi: 'होम इंस्टॉलेशन व अन्य कार्य',
-      icon: <Shield className="text-slate-500 w-6 h-6" />,
-      path: '/services/home-installations',
-      startingPrice: '₹149',
-      responseTime: '40 Min',
-      desc: 'Balcony pigeon net installation, tap leak repair, sink plumbing, cupboard hinge alignment, and locks replacement.'
     }
   ];
 
-  const serviceExpert = {
-    name: 'Kaushindra Singh',
-    role: 'Chief Electrical & AC Technician',
-    experience: '12+ Years Experience',
-    expertise: 'Electrical Services, Air Conditioner Repair, RO Systems & Home Appliances',
-    certification: 'Experienced Field Technician | Quality Service | Customer Satisfaction',
-    rating: '4.9 / 5.0',
-    badge: '12+ Years Experience',
-    img: '/profile.webp'
-  };
-
-  const galleryItems = [
-    { title: 'Split AC Pressure Jet Cleaning in Gaur City Noida Extension', category: 'AC', img: '/ac_service_pro.webp' },
-    { title: 'RO Water Purifier Filtration Service at Noida Extension Sector 4', category: 'RO', img: '/ro_service_pro.webp' },
-    { title: 'Smart MCB & Distribution Board Upgrade in Gaur City 1', category: 'Electrical', img: '/electrician_pro.webp' },
-    { title: 'Heavy Chandelier & Light Fixture Installation in Noida Extension', category: 'Electrical', img: '/washing_machine_pro.webp' }
-  ];
-
-  const filteredGallery = activeGalleryFilter === 'ALL' 
-    ? galleryItems 
-    : galleryItems.filter(item => item.category === activeGalleryFilter);
-
   const faqs = [
-    { q: 'How quickly can a technician visit my home?', a: 'We typically assign and dispatch a certified technician within 30 to 45 minutes of booking for Gaur City and Noida Extension locations.' },
+    { q: 'How quickly can a technician visit my home in Greater Noida West?', a: 'We typically assign and dispatch a certified technician within 15 to 30 minutes of booking for GaurCity 1, Gaur City 2, and Noida Extension.' },
     { q: 'Do you use genuine spare parts for repairs?', a: 'Yes, we source only 100% genuine, manufacturer-approved spare parts and provide a transparent bill for all replacements.' },
-    { q: 'Is there a warranty on your doorstep services?', a: 'Absolutely. We offer a full 30-day service warranty. If the same issue recurs within 30 days, we fix it at zero cost.' },
+    { q: 'Is there a warranty on your doorstep services?', a: 'Absolutely. We offer a full 30-day doorstep service warranty. If the same issue recurs within 30 days, we fix it at zero cost.' },
     { q: 'How do I pay for the completed service?', a: 'You can pay securely via UPI, Google Pay, PhonePe, Paytm, Cash, or Credit/Debit Cards after the repair is completed to your satisfaction.' }
   ];
 
-  const filteredFaqs = faqs.filter(faq => 
-    faq.q.toLowerCase().includes(faqSearchQuery.toLowerCase()) || 
-    faq.a.toLowerCase().includes(faqSearchQuery.toLowerCase())
-  );
-
-
+  const filteredFaqs = faqs;
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -200,215 +228,268 @@ export const HomePage: React.FC<HomePageProps> = ({
     }))
   };
 
-
-
-  const handleSliderMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    const container = e.currentTarget;
-    const rect = container.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const x = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setSliderPosition(percentage);
-  };
+  const activeReview = HERO_REVIEWS[activeReviewIdx];
 
   return (
     <>
       <Helmet>
-        <title>KS Electrical & AC Services | Professional Home Appliance Repair in Noida</title>
-        <meta name="description" content="Book certified same-day AC service, RO filter replacement, electrician, washing machine repair, refrigerator maintenance & chimney cleaning in Noida, Greater Noida & Ghaziabad. 4.9★ rated, 5000+ jobs completed." />
+        <title>Professional AC Repair, Electrician & Home Services in Greater Noida West | KS Electrical</title>
+        <meta name="description" content="Book certified doorstep AC repair, RO service, electrician, washing machine & appliance repair in Greater Noida West, Gaur City 1 & 2, Noida Extension. 15-30 min dispatch, 30-day warranty." />
         <link rel="canonical" href="https://www.kselectrical.in/" />
-        <meta property="og:title" content="KS Electrical & AC Services | Professional Doorstep Repair" />
-        <meta property="og:description" content="Certified same-day AC repair, RO service, electrician & appliance repair in Noida, Greater Noida & Ghaziabad. 4.9★ on Google, 5000+ satisfied customers." />
-        <meta property="og:image" content="https://www.kselectrical.in/hero_technician.webp" />
-        <meta property="og:url" content="https://www.kselectrical.in/" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="KS Electrical & AC Services | Doorstep Repair" />
-        <meta name="twitter:description" content="Same-day AC, RO, electrician & appliance repair in Noida, Greater Noida. Verified technicians. 4.9★ rated." />
-        <meta name="twitter:image" content="https://www.kselectrical.in/hero_technician.webp" />
-        <script type="application/ld+json">
-          {JSON.stringify(faqSchema)}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </Helmet>
 
-      {/* Hero Section */}
-      <section className="relative bg-[#08182D] text-white pt-24 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden font-sans border-b border-slate-900">
-        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none select-none" />
-        <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-[#F97316]/5 rounded-full blur-[120px] pointer-events-none select-none" />
+      {/* PREMIUM HERO SECTION */}
+      <section className="relative bg-gradient-to-b from-slate-50 to-white pt-24 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background Shapes */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 left-[30%] -z-10 h-[600px] w-[600px] bg-gradient-to-br from-blue-500/5 to-transparent blur-3xl" />
+          <div className="absolute bottom-0 right-[20%] -z-10 h-[500px] w-[500px] bg-gradient-to-tr from-orange-400/5 to-transparent blur-3xl" />
+          <div className="absolute top-[30%] left-[10%] -z-10 h-[400px] w-[400px] bg-gradient-to-tr from-purple-500/3 to-transparent blur-3xl" />
+        </div>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
-          {/* Left Column */}
-          <div className="lg:col-span-7 space-y-8 text-left">
-            <div className="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-full text-xs font-black text-blue-400 select-none">
-              <span className="w-2 h-2 rounded-full bg-[#F97316] animate-ping" />
-              <span className="uppercase tracking-widest text-[9px]">Emergency Household Repairs Dispatch</span>
+        <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+          {/* LEFT SECTION: Content */}
+          <div className="lg:col-span-7 space-y-8">
+            {/* Premium Badge */}
+            <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-medium">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <span className="text-primary font-medium">Trusted Home Services Provider</span>
             </div>
 
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] text-white">
-                Premium Home Services <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-[#F97316]">
-                  At Your Doorstep
-                </span>
-              </h1>
-              <p className="text-slate-300 text-sm sm:text-base max-w-xl font-medium leading-relaxed">
-                Experience premium convenience similar to top international startups. Certified mechanics, upfront flat prices, and genuine spare parts.
-              </p>
-            </div>
+            {/* Main Headline */}
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight tracking-tighter mb-4">
+              Professional Home Services<br/>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Delivered to Your Doorstep
+              </span>
+            </h1>
 
-            {/* Premium Search Component */}
-            <div className="relative max-w-lg select-none" role="search">
-              <div className="flex items-center bg-white border border-slate-300 rounded-[20px] shadow-search overflow-hidden p-1.5 focus-within:ring-4 focus-within:ring-blue-100 transition-all duration-200">
-                <Search className="text-slate-400 w-5 h-5 ml-3.5 shrink-0" aria-hidden="true" />
-                <input
-                  id="service-search"
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      onSearchSubmit(searchQuery);
-                    }
-                  }}
-                  onFocus={() => setShowRecentSearch(true)}
-                  onBlur={() => setTimeout(() => setShowRecentSearch(false), 200)}
-                  placeholder="Search for RO service, AC repair, Electrician..."
-                  aria-label="Search for home appliance repair services"
-                  aria-autocomplete="list"
-                  aria-controls="search-suggestions"
-                  className="w-full text-slate-800 text-sm font-semibold px-3 py-2.5 bg-transparent focus:outline-none placeholder-slate-400"
-                  autoComplete="off"
-                />
-              </div>
+            {/* Subheadline */}
+            <p className="text-lg text-gray-600 max-w-2xl">
+              Get verified technicians for AC repair, electrical work, appliance service & more.
+              Background-checked professionals with genuine parts & 30-day warranty.
+            </p>
 
-              {/* Autocomplete Dropdown */}
-              {showRecentSearch && !searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-300 rounded-[20px] shadow-dropdown p-4 z-30 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Popular Searches</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {popularSearches.map((item, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setSearchQuery(item)}
-                            className="bg-slate-50 hover:bg-blue-50 border border-slate-300 hover:border-blue-300 text-slate-600 hover:text-blue-600 rounded-full px-2.5 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer"
-                          >
-                            {item}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Recent Searches</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {recentSearches.map((item, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setSearchQuery(item)}
-                            className="bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-600 rounded-full px-2.5 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer"
-                          >
-                            {item}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
 
-            {/* Core Stats Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-4 select-none">
-              <div className="text-left">
-                <span className="block text-2xl sm:text-3xl font-black text-[#F97316]">5000+</span>
-                <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mt-0.5">Jobs Completed</span>
-              </div>
-              <div className="text-left">
-                <span className="block text-2xl sm:text-3xl font-black text-white">100%</span>
-                <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mt-0.5">Verified Pros</span>
-              </div>
-              <div className="text-left">
-                <span className="block text-2xl sm:text-3xl font-black text-emerald-400">4.9★</span>
-                <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mt-0.5">Google Rating</span>
-              </div>
-              <div className="text-left">
-                <span className="block text-2xl sm:text-3xl font-black text-blue-400">30 Min</span>
-                <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mt-0.5">Response Time</span>
-              </div>
-            </div>
-
-            {/* Hero CTAs */}
-            <div className="flex flex-wrap items-center gap-3 mt-6">
-              <Link
-                to="/services"
-                className="inline-flex items-center justify-center rounded-2xl bg-brand-orange px-5 py-3 text-sm font-black text-white transition hover:bg-orange-500 shadow-sm"
-              >
-                Our Services
-              </Link>
-              <Link
-                to="/ac-on-rent"
-                className="inline-flex items-center justify-center rounded-2xl bg-brand-orange px-5 py-3 text-sm font-black text-white transition hover:bg-orange-500 shadow-sm"
-              >
-                AC on Rent
-              </Link>
-              <a
-                href={`tel:${businessConfig.contacts[0]}`}
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-900 transition hover:bg-slate-100 shadow-sm"
-              >
-                Call Now
-              </a>
-              <a
-                href={businessConfig.reviewLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-900 transition hover:bg-slate-100 shadow-sm"
-              >
-                <Star size={14} className="fill-amber-400 text-amber-400 shrink-0" />
-                <span>Google Review</span>
-              </a>
-            </div>
           </div>
 
-          {/* Right Column (Banner Illustration) */}
-          <div className="lg:col-span-5 relative flex items-center justify-center">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-[#0c223c] p-2 aspect-[4/3] w-full max-w-md group">
+          {/* RIGHT SECTION: Visual */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-start gap-4">
+            {/* Hero Image */}
+            <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl bg-gray-50">
               <img
                 src="/hero_technician.webp"
-                alt="KS Electrical certified technician servicing home AC unit at customer doorstep in Gaur City 1 Noida Extension"
-                width={800}
-                height={600}
-                className="w-full h-full object-cover rounded-2xl group-hover:scale-103 transition-transform duration-700 brightness-95"
+                alt="KS Electrical certified technician servicing home AC unit at customer doorstep"
+                className="w-full h-full object-cover transition-transform duration-700"
                 loading="eager"
                 fetchPriority="high"
-                decoding="async"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#08182D]/90 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-6 left-6 right-6 text-left">
-                <span className="bg-[#F97316] text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-md">
-                  Premium Standard
-                </span>
-                <p className="text-white font-extrabold text-base mt-2">Professional Doorstep Diagnostic & Repair</p>
-                <p className="text-slate-300 text-xs mt-0.5 font-medium">Equipped with advanced calibrations & calibration tools.</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-50/80 via-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2 bg-white/80 backdrop-blur rounded-lg px-3 py-1.5 shadow-sm">
+                <MapPin size={16} className="text-red-500" />
+                <span className="text-sm font-medium text-gray-800">Serving Gaur City &amp; Noida Extension</span>
+              </div>
+            </div>
+
+            {/* Special Offer Badge */}
+            <div className="w-full flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md">
+              <Flame size={16} className="text-white" />
+              <span>Limited Offer: AC Jet Wash + Service from ₹499</span>
+            </div>
+
+            {/* Quick Service Chips */}
+            <div className="w-full">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Popular Services</p>
+              <div className="flex flex-wrap gap-2">
+                {HERO_QUICK_SERVICES.map((svc, i) => (
+                  <Link
+                    key={i}
+                    to={svc.path}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-700 text-xs font-medium hover:border-primary hover:text-primary transition-colors shadow-sm"
+                  >
+                    {svc.icon}
+                    <span>{svc.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Customer Testimonial */}
+            <div className="w-full bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                  <User size={20} className="text-gray-500" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="font-semibold text-gray-900 text-sm">{activeReview.name}</p>
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <span>{activeReview.location}</span>
+                    <span>•</span>
+                    <span>{activeReview.service}</span>
+                    <span>•</span>
+                    <span className="flex items-center gap-0.5">
+                      {Array.from({ length: activeReview.rating }).map((_, i) => (
+                        <Star key={i} size={10} className="text-amber-400 fill-amber-400" />
+                      ))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-600 italic text-sm">"{activeReview.text}"</p>
+              <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+                <CheckCircle2 size={13} className="text-green-500" />
+                <span>Verified Buyer • Service Completed Today</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FOUNDER & CHIEF TECHNICIAN GUARANTEE BANNER */}
+        <div className="mt-8 sm:mt-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 text-white rounded-3xl p-5 sm:p-7 shadow-2xl relative overflow-hidden group">
+            {/* Subtle glowing ambient accent */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-orange/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+              {/* Left: Owner Profile Photo & Information */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5 shrink-0">
+                <div className="relative shrink-0">
+                  <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full border-2 border-brand-orange p-0.5 shadow-lg bg-slate-800 overflow-hidden">
+                    <img
+                      src={getAssetPath('/profile.webp')}
+                      alt="Kaushindra Singh - Founder & Chief Technician KS Electrical"
+                      className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = getAssetPath('/log.webp');
+                      }}
+                    />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1 border-2 border-slate-950 shadow-md" title="Verified Owner">
+                    <CheckCircle2 size={14} className="fill-emerald-500 text-white" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <span className="bg-brand-orange/20 text-brand-orange border border-brand-orange/30 text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                      Founder &amp; Chief Technician Guarantee
+                    </span>
+                  </div>
+                  <h3 className="text-white font-black text-xl sm:text-2xl tracking-tight">
+                    Kaushindra Singh
+                  </h3>
+                  <p className="text-amber-400 font-extrabold text-xs sm:text-sm tracking-wide">
+                    Founder &amp; Chief Technician
+                  </p>
+                  <p className="text-slate-400 text-xs font-semibold">
+                    KS Electrical &amp; AC Services • Gaur City &amp; Noida Extension
+                  </p>
+                </div>
+              </div>
+
+              {/* Middle: Owner Guarantee Quote */}
+              <div className="flex-1 max-w-2xl text-center md:text-left bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl">
+                <p className="text-slate-200 text-xs sm:text-sm font-medium leading-relaxed italic">
+                  "I personally guarantee 100% upfront pricing, genuine factory spare parts, and technician dispatch within 30 minutes in Gaur City &amp; Noida Extension — backed by our 30-Day Money-Back Warranty Cover."
+                </p>
+              </div>
+
+              {/* Right: 3 Guarantee Pills */}
+              <div className="flex flex-wrap md:flex-col items-center sm:items-start justify-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-extrabold">
+                  <CheckCircle2 size={14} className="text-emerald-400" />
+                  <span>30-Day Warranty</span>
+                </div>
+                <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 px-3 py-1.5 rounded-full text-xs font-extrabold">
+                  <Clock size={14} className="text-blue-400" />
+                  <span>30-Min Dispatch</span>
+                </div>
+                <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1.5 rounded-full text-xs font-extrabold">
+                  <ShieldCheck size={14} className="text-amber-400" />
+                  <span>100% Honest Rates</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* WHY CHOOSE US — 4 PREMIUM TRUST CARDS */}
+      <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200 select-none">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="text-center space-y-2">
+            <span className="text-[10px] text-orange-600 bg-orange-500/10 border border-orange-500/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
+              Standard Operating Principles
+            </span>
+            <h2 className="text-slate-900 font-black text-2xl sm:text-3xl tracking-tight">
+              Why Homeowners Trust KS Electrical & AC Services
+            </h2>
+            <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
+              Every job is executed by trained local engineers following strict safety and transparent billing guidelines.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-blue-500/30 hover:bg-blue-50/20 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-brand-blue flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
+                👨‍🔧
+              </div>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">Background-Verified Technicians</h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                Dispatched from our local Greater Noida hub in full uniform with digital identity verification.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-emerald-500/30 hover:bg-emerald-50/20 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
+                ⚙️
+              </div>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">100% Genuine OEM Spare Parts</h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                We install only original factory capacitors, relays, copper coils, and brand-approved components.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-orange-500/30 hover:bg-orange-50/20 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-brand-orange flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
+                🏷️
+              </div>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">Transparent Upfront Pricing</h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                Fixed rate card handed over before work starts. Zero surprise charges or extra estimates.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-purple-500/30 hover:bg-purple-50/20 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
+                🛡️
+              </div>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">30-Day Doorstep Warranty</h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                Every repair and component replacement is fully guaranteed for 30 days post-service.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Main Grid Category Section */}
-      <section className="bg-[#f8f9fa] py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto space-y-12">
-          
+      <section className="bg-[#f8f9fa] py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto space-y-10">
+
           {searchQuery ? (
             <div className="space-y-6 text-left">
               <div>
-                <h2 className="text-gray-900 font-black text-2xl tracking-tight">Search Results ({filteredServices.length})</h2>
-                <p className="text-xs text-gray-500 font-semibold mt-1">Showing matches for "{searchQuery}"</p>
-                
+                <h2 className="text-slate-900 font-black text-2xl tracking-tight">Search Results ({filteredServices.length})</h2>
+                <p className="text-xs text-slate-500 font-semibold mt-1">Showing matches for "{searchQuery}"</p>
+
                 {spellingCorrection && (
-                  <p className="text-xs font-bold text-gray-600 mt-2">
+                  <p className="text-xs font-bold text-slate-600 mt-2">
                     Did you mean:{" "}
                     <button
                       onClick={() => setSearchQuery(spellingCorrection)}
@@ -422,17 +503,17 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               {filteredServices.length === 0 ? (
-                <div className="ui-card p-8 text-center space-y-4 max-w-lg mx-auto mt-6">
-                  <p className="text-gray-650 font-extrabold text-sm">No services found matching your criteria.</p>
-                  <p className="text-gray-400 text-xs">
-                    Try checking the spelling, using alternate words, or explore our popular categories below:
+                <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto">
+                  <p className="text-slate-700 font-extrabold text-sm">No services found matching your criteria.</p>
+                  <p className="text-slate-500 text-xs">
+                    Explore our popular service categories below:
                   </p>
                   <div className="flex flex-wrap justify-center gap-2 pt-2">
-                    {['AC Service', 'Washing Machine Repair', 'Electrician', 'RO Service'].map((pop) => (
+                    {['AC Repair', 'Washing Machine Repair', 'Electrician', 'RO Service'].map((pop) => (
                       <button
                         key={pop}
                         onClick={() => setSearchQuery(pop)}
-                        className="bg-slate-50 hover:bg-orange-50 border border-slate-300 hover:border-brand-orange text-slate-700 hover:text-brand-orange font-semibold px-3 py-1.5 rounded-full text-xs transition-all duration-200 cursor-pointer"
+                        className="btn-chip"
                       >
                         {pop}
                       </button>
@@ -440,8 +521,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
                 </div>
               ) : (
-                <ServiceGrid 
-                  services={filteredServices} 
+                <ServiceGrid
+                  services={filteredServices}
                   selectedCategory="ALL"
                   cart={cart}
                   onAddToCart={onAddToCart}
@@ -453,41 +534,51 @@ export const HomePage: React.FC<HomePageProps> = ({
           ) : (
             <>
               {/* Category Header */}
-              <div className="text-center space-y-3">
+              <div className="text-center space-y-2">
                 <span className="text-[10px] text-blue-600 bg-blue-600/10 border border-blue-600/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-                  Certified Core Specialties
+                  Certified Specialties
                 </span>
-                <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-                  Browse Services By Category
+                <h2 className="text-slate-900 font-black text-2xl sm:text-3xl tracking-tight">
+                  Browse Doorstep Services By Category
                 </h2>
                 <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-                  Select a category to explore upfront price structures and customize your booking.
+                  Select a service category to view upfront rate cards and book your local technician.
                 </p>
               </div>
 
-              {/* Redesigned Premium Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Category Cards with Small Photo Thumbnails */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryCards.map((card, idx) => (
                   <div
                     key={idx}
-                    className="ui-card ui-card-hover p-6 flex flex-col justify-between text-left relative overflow-hidden group hover:border-blue-500/30"
+                    className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between text-left relative overflow-hidden group hover:border-blue-500/40 hover:shadow-lg transition-all"
                   >
                     <div className="space-y-4">
                       <div className="flex justify-between items-start">
-                        <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-150 flex items-center justify-center shadow-xs">
-                          {card.icon}
+                        {/* Small Photo Thumbnail in place of SVG icon */}
+                        <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
+                          <img
+                            src={getAssetPath(card.image)}
+                            alt={card.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = getAssetPath('/hero_technician.webp');
+                            }}
+                          />
                         </div>
-                        <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-blue-50 text-blue-600 border border-blue-100 select-none">
+                        <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 select-none">
                           {card.responseTime} Dispatch
                         </span>
                       </div>
 
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         <h3 className="text-slate-900 font-black text-lg sm:text-xl">{card.title}</h3>
-                        <p className="text-xs text-slate-400 font-extrabold tracking-wide uppercase">{card.titleHindi}</p>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wide leading-relaxed pb-0.5">{card.titleHindi}</p>
                       </div>
 
-                      <p className="text-xs text-slate-500 font-semibold leading-relaxed pt-2 border-t border-slate-100 line-clamp-3">
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed pt-2 border-t border-slate-100 line-clamp-3">
                         {card.desc}
                       </p>
                     </div>
@@ -500,7 +591,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <Link
                         to={card.path}
                         onClick={() => setSelectedCategory(card.title)}
-                        className="bg-slate-900 hover:bg-[#F97316] text-white rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 select-none hover:-translate-y-0.5 cursor-pointer shadow-button active:scale-95"
+                        className="btn-cta text-xs px-4 py-2.5"
                       >
                         Book Now
                       </Link>
@@ -508,91 +599,55 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
                 ))}
               </div>
-
             </>
-          )}
-
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="bg-white py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <span className="text-[10px] text-orange-600 bg-orange-500/10 border border-orange-500/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Quality Assurance
-            </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-              Why Noida Trusts KS Electrical
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-              We focus on premium delivery standards, background checking, and customer delight.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 select-none">
-            {[
-              { title: 'Verified Engineers', desc: 'Trained technical pros with strict verification.', icon: '👨‍🔧' },
-              { title: 'Genuine Spare Parts', desc: '100% brand-approved authentic spares.', icon: '⚙️' },
-              { title: 'Transparent Pricing', desc: 'Upfront flat prices matching our catalog.', icon: '🏷️' },
-              { title: '30-Day Covered Warranty', desc: 'Full warranty for ultimate peace of mind.', icon: '🛡️' }
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="ui-card ui-card-hover bg-slate-50/80 p-6 text-left space-y-4"
-              >
-                <div className="text-3xl">{item.icon}</div>
-                <div className="space-y-1">
-                  <h4 className="text-slate-900 font-extrabold text-sm sm:text-base">{item.title}</h4>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          )
+        }
         </div>
       </section>
 
       {/* Before / After Slider Section */}
-      <section className="bg-[#f8f9fa] py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200 select-none">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-5 text-left space-y-6">
+      <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200 select-none">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-5 text-left space-y-4">
             <span className="text-[10px] text-blue-600 bg-blue-600/10 border border-blue-600/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Visual Diagnostics
+              Visual Quality Standard
             </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight leading-tight">
-              Appliance Service Quality Comparison
+            <h2 className="text-slate-900 font-black text-2xl sm:text-3xl tracking-tight leading-tight">
+              Deep Cleaning & Jet Wash Difference
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm font-semibold leading-relaxed">
-              Drag the interactive slider to see the difference between a dirty, non-cooling AC evaporator coil and a clean, chemically serviced KS Electrical coil.
+              Drag the interactive slider to see the difference between a clogged, non-cooling AC coil and a deep-cleaned, pressure jet washed coil by KS Electrical.
             </p>
-            <div className="flex items-center space-x-3.5 text-xs text-slate-650 font-bold">
+            <div className="flex items-center space-x-2 text-xs text-slate-700 font-bold">
               <span className="w-2.5 h-2.5 rounded-full bg-[#F97316]" />
-              <span>Restores 100% cooling & airflow efficiency.</span>
+              <span>Restores 100% cooling & cuts power consumption up to 20%.</span>
             </div>
           </div>
 
           <div className="lg:col-span-7 flex justify-center">
-            <div 
-              className="relative w-full max-w-xl aspect-[16/10] rounded-2xl overflow-hidden border border-slate-300 shadow-2xl cursor-ew-resize select-none"
+            <div
+              ref={sliderRef}
+              className="relative w-full max-w-xl aspect-[16/10] rounded-3xl overflow-hidden border border-slate-300 shadow-2xl cursor-ew-resize select-none touch-none"
               onMouseMove={handleSliderMove}
+              onTouchStart={handleSliderMove}
               onTouchMove={handleSliderMove}
             >
               {/* Before Image */}
-              <img 
-                src="/ac_service_pro.webp" 
-                alt="Dirty split AC indoor unit filter clogged with dust before wet pressure jet wash service" 
+              <img
+                src="/ac_service_pro.webp"
+                alt="Dirty split AC indoor unit filter clogged with dust before wet pressure jet wash service"
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover select-none"
               />
-              
+
               {/* After Image */}
-              <div 
+              <div
                 className="absolute inset-y-0 right-0 overflow-hidden select-none"
                 style={{ left: `${sliderPosition}%` }}
               >
-                <img 
-                  src="/ro_service_pro.webp" 
-                  alt="Clean AC indoor cooling coil after 120-Bar deep cleaning jet wash service by KS Electrical" 
+                <img
+                  src="/ro_service_pro.webp"
+                  alt="Clean AC indoor cooling coil after deep jet wash service by KS Electrical"
                   loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover select-none"
                   style={{ width: '100%', maxWidth: 'none', transform: `translateX(-${sliderPosition}%)` }}
@@ -600,7 +655,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               {/* Slider Line */}
-              <div 
+              <div
                 className="absolute inset-y-0 w-1 bg-white shadow-xl pointer-events-none"
                 style={{ left: `${sliderPosition}%` }}
               >
@@ -608,45 +663,47 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <span className="text-slate-500 text-xs font-black select-none">↔</span>
                 </div>
               </div>
+
+              {/* Labels */}
+              <div className="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-md pointer-events-none">BEFORE</div>
+              <div className="absolute top-3 right-3 bg-emerald-600/80 text-white text-[10px] font-bold px-2 py-1 rounded-md pointer-events-none">AFTER</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Process Section */}
-      <section className="bg-white py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
+      <section className="bg-[#f8f9fa] py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="text-center space-y-2">
             <span className="text-[10px] text-blue-600 bg-blue-600/10 border border-blue-600/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Execution Path
+              Fast Execution Path
             </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-              How It Works
+            <h2 className="text-slate-900 font-black text-2xl sm:text-3xl tracking-tight">
+              Simple 6-Step Booking to Service Execution
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-              Book a verified mechanic in less than 30 seconds with 6 simple stages.
+              Book a verified technician in less than 30 seconds with complete transparency.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-6 select-none">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 select-none">
             {[
               { step: '01', title: 'Book Service', desc: 'Select menu & submit phone.' },
-              { step: '02', title: 'Technician Match', desc: 'Assigned within 15 Min.' },
-              { step: '03', title: 'Visits Home', desc: 'Technician arrives on time.' },
-              { step: '04', title: 'Repairs Unit', desc: 'Diagnosis & replacement.' },
-              { step: '05', title: 'Easy Payment', desc: 'UPI, Cash or card.' },
+              { step: '02', title: 'Tech Assigned', desc: 'Matched within 15 Min.' },
+              { step: '03', title: 'Home Visit', desc: 'Technician arrives on time.' },
+              { step: '04', title: 'Diagnostic Fix', desc: 'Transparent rate & fix.' },
+              { step: '05', title: 'Easy Payment', desc: 'UPI, Cash or Card.' },
               { step: '06', title: '30-Day Cover', desc: 'Warranty active instantly.' }
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="bg-[#f8f9fa] border border-slate-200 rounded-2xl p-5 text-left flex flex-col justify-between h-40 hover:border-blue-500/20 transition-all"
+                className="bg-white border border-slate-200 rounded-2xl p-4 text-left flex flex-col justify-between h-36 hover:border-blue-500/30 transition-all shadow-xs"
               >
-                <span className="text-xs font-black text-blue-600 bg-blue-50 border border-blue-100 rounded-md px-2 py-0.5 w-max select-none">
-                  {item.step}
-                </span>
-                <div className="space-y-1 pt-4">
-                  <h4 className="text-slate-900 font-extrabold text-sm">{item.title}</h4>
-                  <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">{item.desc}</p>
+                <div className="text-brand-orange font-black text-base">{item.step}</div>
+                <div>
+                  <h4 className="font-extrabold text-xs text-slate-900 leading-tight">{item.title}</h4>
+                  <p className="text-[10px] text-slate-500 font-medium leading-normal mt-1">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -654,375 +711,41 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* Certified Technicians Section */}
-      <section className="bg-[#f8f9fa] py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
+      {/* FAQ Accordion Section */}
+      <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+        <div className="max-w-4xl mx-auto space-y-8 text-left">
+          <div className="text-center space-y-2">
             <span className="text-[10px] text-orange-600 bg-orange-500/10 border border-orange-500/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Trained Specialists
+              Help Center
             </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-              Meet Your Service Expert
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-              Professional doorstep repair services with 12+ years of practical experience in Electrical, AC, RO, Washing Machine and Home Appliance repairs.
-            </p>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="w-full max-w-3xl bg-white border border-slate-200 shadow-xl shadow-slate-200/10 rounded-[1.5rem] p-8 sm:p-10">
-              <div className="flex flex-col lg:flex-row items-center gap-8">
-                <div className="w-full lg:w-1/3 flex flex-col justify-center items-center">
-                  <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-[1.5rem] bg-slate-100 border border-slate-200 overflow-hidden shadow-sm shadow-slate-200/70">
-                    <img
-                      src={serviceExpert.img}
-                      alt={serviceExpert.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h4 className="text-slate-900 font-black text-lg sm:text-xl mt-4 text-center">
-                    {serviceExpert.name}
-                  </h4>
-                </div>
-                <div className="w-full lg:w-2/3 space-y-6 text-center lg:text-left">
-                  <div className="space-y-3">
-                    <h3 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-                      Meet Your Service Expert
-                    </h3>
-                    <p className="text-slate-500 text-sm sm:text-base font-semibold max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                      Professional doorstep repair services with 12+ years of practical experience in Electrical, AC, RO, Washing Machine and Home Appliance repairs.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 font-semibold">
-                        Designation
-                      </p>
-                      <p className="text-slate-900 font-black text-base mt-2">
-                        {serviceExpert.role}
-                      </p>
-                    </div>
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 font-semibold">
-                        Experience
-                      </p>
-                      <p className="text-slate-900 font-black text-base mt-2">
-                        {serviceExpert.badge}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 font-semibold">
-                      Expertise
-                    </p>
-                    <p className="text-slate-900 font-semibold text-sm sm:text-base mt-2 leading-relaxed">
-                      {serviceExpert.expertise}
-                    </p>
-                  </div>
-
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 space-y-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 font-semibold">
-                        Certification
-                      </p>
-                      <p className="text-slate-900 font-semibold text-sm sm:text-base mt-2 leading-relaxed">
-                        {serviceExpert.certification}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-center lg:justify-start gap-2 text-[#F97316] font-black text-sm">
-                      <span className="text-2xl">⭐</span>
-                      <span>{serviceExpert.rating}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Cities / Areas Covered */}
-      <section className="bg-white py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <span className="text-[10px] text-blue-600 bg-blue-600/10 border border-blue-600/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Geographical Reach
-            </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-              Service Locations
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-              We provide swift doorstep appliance repair visits across Noida and Ghaziabad extension areas.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 select-none">
-            {[
-              { name: 'Noida', desc: 'Sectors 12-150' },
-              { name: 'Greater Noida', desc: 'Gamma, Alpha, Delta' },
-              { name: 'Ghaziabad', desc: 'Indirapuram, Vasundhara' },
-              { name: 'Noida Extension', desc: 'Gaur City 1 & 2' },
-              { name: 'Delhi NCR', desc: 'Selected sectors' }
-            ].map((loc, idx) => (
-              <div
-                key={idx}
-                className="bg-[#f8f9fa] border border-slate-200 rounded-2xl p-5 text-left hover:border-[#F97316]/20 transition-all"
-              >
-                <h4 className="text-slate-900 font-extrabold text-sm sm:text-base">{loc.name}</h4>
-                <p className="text-[10px] text-slate-500 font-medium mt-0.5">{loc.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Masonry Image Gallery */}
-      <section className="bg-[#f8f9fa] py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <span className="text-[10px] text-orange-600 bg-orange-500/10 border border-orange-500/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Work Portfolio
-            </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-              Doorstep Service Gallery
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-              Real snapshots of repair jobs completed in Gaur City and Noida Extension.
-            </p>
-          </div>
-
-          {/* Filters */}
-          <div className="flex justify-center space-x-2.5 select-none">
-            {['ALL', 'AC', 'RO', 'Electrical'].map((filter, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveGalleryFilter(filter)}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                  activeGalleryFilter === filter 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {filteredGallery.map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm group hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="aspect-[4/3] w-full bg-slate-50 overflow-hidden relative border-b border-slate-150">
-                  <img
-                    src={item.img}
-                    alt={item.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4 text-left">
-                  <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded select-none">
-                    {item.category}
-                  </span>
-                  <h4 className="text-slate-900 font-extrabold text-xs sm:text-sm mt-2">{item.title}</h4>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="bg-white py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-3xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <span className="text-[10px] text-blue-600 bg-blue-600/10 border border-blue-600/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Information Portal
-            </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
+            <h2 className="text-slate-900 font-black text-2xl sm:text-3xl tracking-tight">
               Frequently Asked Questions
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-              Find quick answers to common queries regarding diagnostic visits and charges.
+              Find quick answers to common questions about our doorstep repair services.
             </p>
           </div>
 
-          {/* FAQ Search */}
-          <div className="relative select-none">
-            <div className="flex items-center bg-[#f8f9fa] border border-slate-200 rounded-xl p-1 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-              <Search className="text-slate-400 w-4 h-4 ml-3.5 shrink-0" />
-              <input
-                type="text"
-                value={faqSearchQuery}
-                onChange={(e) => setFaqSearchQuery(e.target.value)}
-                placeholder="Search FAQs..."
-                className="w-full text-slate-800 text-xs font-semibold px-3 py-2 bg-transparent focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {filteredFaqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="border border-slate-200 rounded-2xl overflow-hidden transition-all"
-              >
-                <button
-                  onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
-                  className="w-full px-6 py-4.5 text-left flex justify-between items-center bg-white hover:bg-slate-50 transition-colors focus:outline-none"
-                >
-                  <span className="text-slate-900 font-extrabold text-sm sm:text-base leading-snug">{faq.q}</span>
-                  {openFaqIndex === idx 
-                    ? <ChevronUp size={16} className="text-slate-500 shrink-0 ml-4" /> 
-                    : <ChevronDown size={16} className="text-slate-500 shrink-0 ml-4" />
-                  }
-                </button>
-                {openFaqIndex === idx && (
-                  <div className="px-6 pb-5 pt-1 text-left bg-white text-xs sm:text-sm text-slate-500 leading-relaxed font-semibold border-t border-slate-100 animate-in slide-in-from-top-1 duration-200">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* View More FAQs Button */}
-          <div className="text-center pt-4 select-none">
-            <Link
-              to="/faq"
-              className="inline-flex items-center justify-center px-6 h-12 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer"
-            >
-              <span>More FAQs</span>
-              <ChevronRight size={13} className="ml-1.5 shrink-0" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Blogs / Maintenance Guides */}
-      <section className="bg-[#f8f9fa] py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200" id="blogs">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center sm:text-left space-y-3">
-            <span className="text-[10px] text-orange-600 bg-orange-500/10 border border-orange-500/20 px-3.5 py-1.5 rounded-full font-black uppercase tracking-widest">
-              Knowledge Hub
-            </span>
-            <h2 className="text-slate-900 font-black text-3xl sm:text-4xl tracking-tight">
-              Maintenance Blogs & Guides
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl leading-relaxed">
-              Read simple diagnostic tips from Kaushindra Singh to save on electricity bills and prevent appliance breakdowns.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {blogPostsData.slice(0, 3).map((blog, idx) => (
-              <article
-                key={idx}
-                className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between text-left"
-              >
-                <div className="aspect-video w-full bg-slate-100 relative overflow-hidden border-b border-slate-150">
-                  <img
-                    src={blog.imageUrl}
-                    alt={blog.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.src = '/svc_ac_repair.webp'; }}
-                  />
-                  <span className="absolute top-3 left-3 bg-[#F97316] text-white text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-sm border border-orange-400">
-                    {blog.category}
-                  </span>
-                </div>
-
-                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-3 text-[9px] text-slate-400 font-black uppercase tracking-wider">
-                      <span className="flex items-center"><Calendar size={10} className="mr-1" />{blog.publishDate}</span>
-                      <span className="flex items-center"><Clock size={10} className="mr-1" />{blog.readTime}</span>
-                    </div>
-                    <h3 className="text-slate-900 font-extrabold text-sm sm:text-base leading-snug line-clamp-2">{blog.title}</h3>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed line-clamp-3">{blog.excerpt}</p>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 select-none">
-                    <Link
-                      to={`/blog/${blog.slug}`}
-                      className="w-full bg-slate-50 hover:bg-orange-50 text-slate-800 hover:text-[#F97316] border border-slate-200 hover:border-orange-300 rounded-xl py-2.5 text-xs font-black uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
-                    >
-                      <BookOpen size={12} />
-                      <span>Read Article</span>
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {/* SEO Directory - 1000+ Troubleshooting Guides Index Links */}
-          <div className="mt-16 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 text-left">
-            <div className="border-b border-slate-150 pb-4">
-              <h3 className="text-slate-950 font-black text-lg tracking-tight">
-                Appliance Care & Maintenance Index (1000+ Guides)
-              </h3>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">
-                Direct links to our complete troubleshooting encyclopedia
-              </p>
-            </div>
-            
-            <div className="max-h-80 overflow-y-auto pr-2 space-y-4 no-scrollbar">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {blogPostsData.map((blog) => (
-                  <Link
-                    key={blog.slug}
-                    to={`/blog/${blog.slug}`}
-                    className="text-xs font-bold text-slate-500 hover:text-brand-orange hover:underline truncate"
-                    title={blog.title}
+          <div className="space-y-3">
+            {filteredFaqs.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div key={idx} className="border border-slate-200 rounded-2xl bg-slate-50/70 overflow-hidden">
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full p-4 text-left font-bold text-slate-900 text-xs sm:text-sm flex items-center justify-between cursor-pointer"
                   >
-                    • {blog.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Large CTA Section */}
-      <section className="bg-[#08182D] text-white py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-900 select-none">
-        <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
-          <div className="space-y-4">
-            <span className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-md">
-              Fast Track Dispatch
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              Need Appliance Repairs Today?
-            </h2>
-            <p className="text-slate-300 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
-              Book a verified engineer in under 30 seconds. No advance deposit required. Pay only after the diagnostic repairs are done.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <a
-              href={`tel:${businessConfig.contacts[0]}`}
-              className="w-full sm:w-auto bg-[#F97316] hover:bg-[#F97316]/90 text-white rounded-xl px-8 py-4 text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:scale-102 flex items-center justify-center space-x-2 cursor-pointer"
-            >
-              <Phone size={14} />
-              <span>Call +91 {businessConfig.contacts[0]}</span>
-            </a>
-            <a
-              href={`https://wa.me/91${businessConfig.contacts[0]}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-8 py-4 text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:scale-102 flex items-center justify-center space-x-2 cursor-pointer"
-            >
-              <MessageSquare size={14} />
-              <span>WhatsApp Dispatch</span>
-            </a>
+                    <span>{faq.q}</span>
+                    <span className="text-slate-400 text-xs font-black">{isOpen ? '−' : '+'}</span>
+                  </button>
+                  {isOpen && (
+                    <div className="p-4 pt-0 text-xs text-slate-600 font-medium leading-relaxed border-t border-slate-200/60">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
