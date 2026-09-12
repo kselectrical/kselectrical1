@@ -52,6 +52,19 @@ const normalizeLocationName = (slug: string): string => {
     .join(' ');
 };
 
+const VALID_HUBS = [
+  'gaur-city-1',
+  'gaur-city-2',
+  'noida-extension',
+  'greater-noida-west',
+  'crossings-republik',
+  'indirapuram',
+  'vaishali',
+  'vasundhara',
+  'raj-nagar-extension',
+  'noida-sector-62'
+];
+
 export const LocalLandingPage: React.FC<LocalLandingPageProps> = (props) => {
   const { serviceSlug, locationSlug } = useParams<{ serviceSlug: string; locationSlug: string }>();
 
@@ -60,13 +73,25 @@ export const LocalLandingPage: React.FC<LocalLandingPageProps> = (props) => {
   }
 
   const cleanService = serviceSlug.toLowerCase();
+  const cleanLocation = locationSlug.toLowerCase();
+
+  // If this location was pruned as a thin/zero-traffic variant, consolidate to parent canonical service
+  if (!VALID_HUBS.includes(cleanLocation)) {
+    const parentTarget = (cleanService === 'ac-repair' || cleanService === 'ac-installation') 
+      ? '/services/ac-service' 
+      : (cleanService === 'electrician')
+      ? '/services/electrician-service'
+      : `/services/${cleanService}`;
+    return <Navigate to={parentTarget} replace />;
+  }
+
   const catalogEntry = getServiceBySlug(cleanService);
 
   if (!SERVICE_PREFIXES.includes(cleanService) && !catalogEntry) {
     return <Navigate to="/404" replace />;
   }
 
-  const cityName = normalizeLocationName(locationSlug);
+  const cityName = normalizeLocationName(cleanLocation);
 
   // Render correct service component dynamically with city scope
   if (cleanService === 'ac-service') return <ACService {...props} cityName={cityName} />;

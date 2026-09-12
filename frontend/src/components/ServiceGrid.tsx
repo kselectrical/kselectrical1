@@ -19,7 +19,12 @@ interface ServiceGridProps {
   onProceedToCheckout: () => void;
 }
 
+const mockDataCache = new Map<string, { reviews: number; bookings: string; originalPrice: number }>();
+
 const getStableMockData = (id: string, price: number) => {
+  const cacheKey = `${id}_${price}`;
+  const cached = mockDataCache.get(cacheKey);
+  if (cached) return cached;
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = (hash << 5) - hash + id.charCodeAt(i);
@@ -32,7 +37,9 @@ const getStableMockData = (id: string, price: number) => {
   const markupPercent = 1.25 + ((code % 4) * 0.05);
   let originalPrice = Math.round((price * markupPercent) / 10) * 10;
   if (originalPrice <= price) originalPrice = price + 99;
-  return { reviews, bookings, originalPrice };
+  const res = { reviews, bookings, originalPrice };
+  mockDataCache.set(cacheKey, res);
+  return res;
 };
 
 export const ServiceGrid: React.FC<ServiceGridProps> = ({
@@ -46,6 +53,22 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
   const [selectedServiceForBrand, setSelectedServiceForBrand] = useState<TechnicalService | null>(null);
   const [selectedServiceForDetails, setSelectedServiceForDetails] = useState<TechnicalService | null>(null);
 
+  // Pre-index cart by serviceId for O(1) lookups during render (drastically reduces INP)
+  const { cartQtyMap, cartFirstKeyMap } = React.useMemo(() => {
+    const qtyMap: Record<string, number> = {};
+    const keyMap: Record<string, string> = {};
+    for (const [key, item] of Object.entries(cart)) {
+      qtyMap[item.serviceId] = (qtyMap[item.serviceId] || 0) + item.quantity;
+      if (!keyMap[item.serviceId]) {
+        keyMap[item.serviceId] = key;
+      }
+    }
+    return { cartQtyMap: qtyMap, cartFirstKeyMap: keyMap };
+  }, [cart]);
+
+  const getServiceQuantity = (serviceId: string) => cartQtyMap[serviceId] || 0;
+  const getFirstCartItemKey = (serviceId: string) => cartFirstKeyMap[serviceId] || null;
+
   if (services.length === 0) {
     return (
       <div className="w-full max-w-md mx-auto py-12 px-4 text-center border border-slate-300 rounded-[20px] bg-slate-50/80 font-sans text-sm mt-10 shadow-sm">
@@ -54,19 +77,6 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
       </div>
     );
   }
-
-  // Get total quantity of a service in the cart across all brands
-  const getServiceQuantity = (serviceId: string) => {
-    return Object.values(cart)
-      .filter(item => item.serviceId === serviceId)
-      .reduce((sum, item) => sum + item.quantity, 0);
-  };
-
-  // Get first cart item for a service to increment/decrement from the service card
-  const getFirstCartItemKey = (serviceId: string) => {
-    const found = Object.entries(cart).find(([, item]) => item.serviceId === serviceId);
-    return found ? found[0] : null;
-  };
 
   // Handle click on "Add" button
   const handleAddClick = (service: TechnicalService) => {
@@ -200,9 +210,10 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                 {/* Service Row List */}
                 <div className="space-y-6">
                   {groupServices.map((service) => {
-                    const qtyInCart = getServiceQuantity(service.id);
-                    const itemKey = getFirstCartItemKey(service.id);
+                    const qtyInCart = cartQtyMap[service.id] || 0;
+                    const itemKey = cartFirstKeyMap[service.id] || null;
                     const mockData = getStableMockData(service.id, service.price);
+                    const serviceDetailUrl = `/services/${getServiceSlugById(service.id) || service.id}`;
 
                     // Dynamic Tag determination
                     const isPackage = service.price >= 790 || service.name.toLowerCase().includes('complete') || service.name.toLowerCase().includes('wiring');
@@ -231,9 +242,14 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
                             )}
                           </div>
 
-                          <h3 className="font-extrabold text-gray-900 text-sm md:text-base leading-tight">
-                            {service.name}
-                          </h3>
+                          <Link
+                            to={serviceDetailUrl}
+                            className="group/title block cursor-pointer"
+                          >
+                            <h3 className="font-extrabold text-gray-900 group-hover/title:text-brand-orange text-sm md:text-base leading-tight transition-colors">
+                              {service.name}
+                            </h3>
+                          </Link>
                           
                           {/* Rating Row */}
                           <div className="flex items-center space-x-1.5 text-xs text-gray-500 font-semibold select-none">
@@ -263,7 +279,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
 
                           {/* View details link */}
                           <Link
-                            to={`/services/${getServiceSlugById(service.id) || service.id}`}
+                            to={serviceDetailUrl}
                             className="text-xs text-brand-orange hover:text-brand-orange-dark font-extrabold hover:underline cursor-pointer flex items-center space-x-0.5 select-none"
                           >
                             <span>View details</span>
@@ -272,19 +288,25 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
 
                         {/* Image Block & Action Button (Right) */}
                         <div className="relative w-24 h-24 md:w-28 md:h-28 shrink-0 mx-auto sm:mx-0 mt-4 sm:mt-0 ml-0 sm:ml-4 select-none">
-                          <img 
-                            src={getAssetPath(service.imageUrl)} 
-                            alt={`${service.name} in Greater Noida, Noida Extension & Gaur City - KS Electrical`} 
-                            loading="lazy"
-                            width={112}
-                            height={112}
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              target.onerror = null;
-                              target.src = `https://placehold.co/112x112/f1f5f9/94a3b8?text=${encodeURIComponent(service.name.split(' ')[0])}`;
-                            }}
-                            className="w-full h-full object-cover rounded-2xl border border-slate-300 shadow-sm"
-                          />
+                          <Link
+                            to={serviceDetailUrl}
+                            className="block w-full h-full cursor-pointer group/img overflow-hidden rounded-2xl border border-slate-300 shadow-sm"
+                            title={`View details for ${service.name}`}
+                          >
+                            <img 
+                              src={getAssetPath(service.imageUrl)} 
+                              alt={`${service.name} in Greater Noida, Noida Extension & Gaur City - KS Electrical`} 
+                              loading="lazy"
+                              width={112}
+                              height={112}
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.onerror = null;
+                                target.src = `https://placehold.co/112x112/f1f5f9/94a3b8?text=${encodeURIComponent(service.name.split(' ')[0])}`;
+                              }}
+                              className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-300"
+                            />
+                          </Link>
                           
                           {/* OVERLAY ADD BUTTON */}
                           <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 shrink-0">

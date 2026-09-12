@@ -431,16 +431,26 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
         <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl select-none pointer-events-none" />
 
         <div className="max-w-4xl mx-auto space-y-6 relative z-10">
-          <span className="text-[10px] text-brand-orange bg-brand-orange/10 border border-brand-orange/20 px-3 py-1 rounded-full font-black uppercase tracking-wider select-none">
-            Verified Doorstep Utility
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] text-brand-orange bg-brand-orange/10 border border-brand-orange/20 px-3 py-1 rounded-full font-black uppercase tracking-wider select-none">
+              Verified Doorstep Utility
+            </span>
+            <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full font-black uppercase tracking-wider select-none">
+              Starting from ₹{activeCategoryServices.length > 0 ? Math.min(...activeCategoryServices.map(s => s.price)) : 199}
+            </span>
+            <span className="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full font-black uppercase tracking-wider select-none">
+              30-Min Fast Dispatch
+            </span>
+          </div>
+
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-none text-white">
             {seo.heading}
           </h1>
           <p className="text-sm sm:text-base text-slate-350 font-medium leading-relaxed max-w-2xl">
             {seo.intro}
           </p>
-          <div className="flex flex-wrap gap-4 pt-2 select-none">
+
+          <div className="flex flex-wrap items-center gap-3 pt-2 select-none">
             <a 
               href="#pricing"
               className="bg-brand-orange hover:bg-brand-orange-dark text-white rounded-xl px-5 py-3.5 text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center space-x-1.5 hover:shadow-lg hover:shadow-orange-950/20"
@@ -449,11 +459,37 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
               <ArrowRight size={13} />
             </a>
             <a 
-              href={`tel:${businessConfig.contacts[0]}`}
-              className="bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-xl px-5 py-3.5 text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+              href={`https://wa.me/91${businessConfig.contacts[0]}?text=${encodeURIComponent(`Hello KS Electrical, I would like to book ${serviceName} at my doorstep in ${displayCity || 'Gaur City / Noida Extension'}. Please confirm technician availability.`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-5 py-3.5 text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center space-x-1.5"
             >
-              📞 Call +91 {businessConfig.contacts[0]}
+              <MessageCircle size={14} />
+              <span>Book via WhatsApp</span>
             </a>
+            <a 
+              href={`tel:${businessConfig.contacts[0]}`}
+              className="bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-xl px-5 py-3.5 text-xs font-black uppercase tracking-wider transition-all cursor-pointer inline-flex items-center space-x-1.5"
+            >
+              <PhoneCall size={14} />
+              <span>Call +91 {businessConfig.contacts[0]}</span>
+            </a>
+          </div>
+
+          {/* Above-the-fold Trust Bar to stop Quick Back bounces */}
+          <div className="pt-2 flex flex-wrap items-center gap-y-2 gap-x-6 text-[11px] font-bold text-slate-400 border-t border-white/10">
+            <span className="flex items-center gap-1.5 text-slate-350">
+              <CheckCircle size={13} className="text-emerald-400 shrink-0" />
+              Transparent Rates &amp; No Hidden Charges
+            </span>
+            <span className="flex items-center gap-1.5 text-slate-350">
+              <Shield size={13} className="text-blue-400 shrink-0" />
+              30-Day Service Guarantee
+            </span>
+            <span className="flex items-center gap-1.5 text-slate-350">
+              <CheckCircle size={13} className="text-amber-400 shrink-0" />
+              100% Genuine OEM Spares
+            </span>
           </div>
         </div>
       </div>
@@ -777,7 +813,7 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
       </div>
 
       {/* Explore Other Premium Services */}
-      <div className="bg-white py-12 border-b border-slate-200 text-left font-sans select-none">
+      <div className="bg-white py-12 pb-28 md:pb-12 border-b border-slate-200 text-left font-sans select-none">
         <div className="max-w-4xl mx-auto px-6 space-y-5">
           <h3 className="text-gray-900 font-extrabold text-lg">
             Explore Other Premium Services
@@ -853,6 +889,31 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
             </a>
           </div>
         </div>
+      </div>
+      {/* ── Sticky Mobile Bottom CTA Bar ── */}
+      {/* Visible only on mobile (md:hidden). Fixed to bottom of viewport. */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.10)] px-3 pt-2.5 pb-3 font-sans">
+        <div className="flex gap-2.5 mb-1.5">
+          <a
+            href={`tel:${businessConfig.contacts[0]}`}
+            className="flex-1 flex items-center justify-center gap-1.5 bg-brand-blue hover:bg-blue-700 text-white rounded-xl py-3 text-xs font-black tracking-wide transition-all active:scale-95 shadow-md"
+          >
+            <PhoneCall size={14} />
+            <span>📞 Call: {businessConfig.contacts[0]}</span>
+          </a>
+          <a
+            href={`https://wa.me/91${businessConfig.contacts[0]}?text=${encodeURIComponent(`Hi KS Electrical, I want to book ${serviceName} at my doorstep in ${displayCity || 'Gaur City / Noida Extension'}. Please confirm availability.`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl py-3 text-xs font-black tracking-wide transition-all active:scale-95 shadow-md"
+          >
+            <MessageCircle size={14} />
+            <span>💬 WhatsApp Booking</span>
+          </a>
+        </div>
+        <p className="text-center text-[9px] text-gray-500 font-semibold leading-none">
+          Technician at doorstep within 30–45 mins · Gaur City &amp; Gr. Noida West
+        </p>
       </div>
     </>
   );

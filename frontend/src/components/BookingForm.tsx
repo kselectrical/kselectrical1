@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft, ShieldAlert, Wrench } from 'lucide-react';
+import { Calendar, Clock, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft, ShieldAlert, Wrench, MessageCircle } from 'lucide-react';
 import type { CartItem } from '../types';
 import type { BusinessConfig } from '../data';
 import { auth, isFirebaseConfigured, getCustomerByPhoneFromDb } from '../firebase';
@@ -122,6 +122,31 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           name: prev.name.trim() ? prev.name : (existing.name || prev.name),
           address: prev.address.trim() ? prev.address : (existing.address || prev.address)
         }));
+      }
+
+      // Early lead capture — save partial booking data the moment a valid phone is entered
+      // This preserves the lead even if the user abandons before completing address
+      const currentData = { ...formData, phone: clean };
+      if (cartItems.length > 0 && currentData.date && currentData.timeSlot) {
+        try {
+          onSubmitBooking({
+            customerName: currentData.name || '(Name pending)',
+            phone: clean,
+            address: currentData.address || '(Address pending)',
+            selectedLocation: selectedLocation,
+            dateTime: `${currentData.date} at ${currentData.timeSlot.split('(')[0].trim()}`,
+            items: cartItems.map(item => ({
+              serviceId: item.serviceId,
+              serviceName: item.serviceName,
+              price: item.price,
+              quantity: item.quantity,
+              brand: item.brand
+            })),
+            subtotal: finalCalculatedPrice
+          });
+        } catch {
+          // Silent — early capture is best-effort, never block the user flow
+        }
       }
     }
   };
@@ -629,7 +654,30 @@ Please dispatch a technician. Thank you!`;
 
                 </div>
 
-                {/* Complete Address */}
+                {/* ── Quick WhatsApp Booking ── skip address, book instantly */}
+                {formData.phone.length === 10 && formData.date && formData.timeSlot && (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2">
+                    <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
+                      ⚡ Skip the form — book instantly!
+                    </p>
+                    <p className="text-[11px] text-emerald-600 font-medium">
+                      We've pre-filled your service, date &amp; slot. Just tap below to send via WhatsApp — our operator will call you to confirm the address.
+                    </p>
+                    <a
+                      href={`https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(
+                        `*Quick Booking Request - KS Electrical*\n*Name:* ${formData.name || 'Customer'}\n*Phone:* ${formData.phone}\n*Services:* ${cartItems.map(i => i.serviceName).join(', ')}\n*Date:* ${formData.date}\n*Slot:* ${formData.timeSlot}\n*Estimated Total:* ₹${finalCalculatedPrice}\n\nPlease confirm address &amp; dispatch technician. Thank you!`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm tracking-wide shadow-md active:scale-95 transition-all cursor-pointer"
+                    >
+                      <MessageCircle size={16} className="fill-white shrink-0" />
+                      <span>📲 Book Instantly via WhatsApp</span>
+                    </a>
+                    <p className="text-center text-[10px] text-emerald-500 font-semibold">— or fill address below for full confirmation —</p>
+                  </div>
+                )}
+
                 <div className="space-y-1.5 text-xs">
                   <label htmlFor="booking-address" className="block font-bold text-gray-700 uppercase tracking-wider">
                     Full Home Address (Flat, Block, Gaur City Society...)

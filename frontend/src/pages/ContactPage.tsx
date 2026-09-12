@@ -75,36 +75,42 @@ export const ContactPage: React.FC<ContactPageProps> = ({ businessConfig }) => {
             
             <div className="space-y-4">
               
-              {/* Phone cards */}
-              <div className="flex items-start space-x-3.5 bg-white p-4 border border-gray-200 rounded-xl shadow-sm">
+              {/* Phone cards — full card is clickable to fix dead click zones */}
+              <a
+                href={`tel:${businessConfig.contacts[0]}`}
+                className="flex items-start space-x-3.5 bg-white p-4 border border-gray-200 rounded-xl shadow-sm hover:border-brand-blue hover:shadow-md transition-all duration-200 cursor-pointer block"
+              >
                 <div className="w-10 h-10 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center shrink-0">
                   <Phone size={18} />
                 </div>
                 <div>
                   <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider block">Helpline Dispatch</span>
-                  <a href={`tel:${businessConfig.contacts[0]}`} className="text-gray-900 font-extrabold text-sm sm:text-base hover:text-brand-blue block mt-0.5">
+                  <span className="text-gray-900 font-extrabold text-sm sm:text-base hover:text-brand-blue block mt-0.5">
                     +91 {businessConfig.contacts[0]}
-                  </a>
+                  </span>
                   {businessConfig.contacts[1] && (
-                    <a href={`tel:${businessConfig.contacts[1]}`} className="text-gray-900 font-extrabold text-sm sm:text-base hover:text-brand-blue block mt-0.5">
+                    <span className="text-gray-900 font-extrabold text-sm sm:text-base block mt-0.5">
                       +91 {businessConfig.contacts[1]}
-                    </a>
+                    </span>
                   )}
                 </div>
-              </div>
+              </a>
 
-              {/* Email */}
-              <div className="flex items-start space-x-3.5 bg-white p-4 border border-gray-200 rounded-xl shadow-sm">
+              {/* Email — full card clickable */}
+              <a
+                href={`mailto:${businessConfig.email}`}
+                className="flex items-start space-x-3.5 bg-white p-4 border border-gray-200 rounded-xl shadow-sm hover:border-emerald-400 hover:shadow-md transition-all duration-200 cursor-pointer block"
+              >
                 <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                   <Mail size={18} />
                 </div>
                 <div>
                   <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider block">Official Mail</span>
-                  <a href={`mailto:${businessConfig.email}`} className="text-gray-900 font-extrabold text-sm sm:text-base hover:text-brand-blue block mt-0.5 truncate">
+                  <span className="text-gray-900 font-extrabold text-sm sm:text-base hover:text-brand-blue block mt-0.5 truncate">
                     {businessConfig.email}
-                  </a>
+                  </span>
                 </div>
-              </div>
+              </a>
 
               {/* Head Office */}
               <div className="flex items-start space-x-3.5 bg-white p-4 border border-gray-200 rounded-xl shadow-sm">

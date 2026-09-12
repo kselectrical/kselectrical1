@@ -9,6 +9,8 @@ export interface BlogPost {
   publishDate: string;
   readTime: string;
   category: string;
+  heroHighlight?: string;
+  showStickyMobileBar?: boolean;
 }
 
 const staticBlogPosts: BlogPost[] = [
@@ -48,32 +50,195 @@ const staticBlogPosts: BlogPost[] = [
   {
     slug: 'why-ac-cooling-drops',
     title: 'AC Cooling कम क्यों हो जाती है? जानिए 5 मुख्य कारण और उपाय',
-    metaTitle: 'AC Cooling कम क्यों हो जाती है? जानिए कारण | AC cooling Issues',
-    metaDescription: 'एसी की कूलिंग कम होने के मुख्य कारण जैसे गंदा एयर फिल्टर, गैस लीकेज, या खराब कैपेसिटर के बारे में विस्तार से जानें और इसे तुरंत ठीक करें।',
+    metaTitle: 'AC Cooling कम क्यों हो जाती है? जानिए कारण | AC Low Cooling Problem',
+    metaDescription: 'एसी की कूलिंग कम होने के मुख्य कारण जैसे डस्ट/फिल्टर ब्लॉकेज, गैस लीकेज, या खराब कैपेसिटर के बारे में जानें। 45 मिनट में वेरिफाइड टेक्नीशियन डोरस्टेप चेकअप पाएँ।',
     excerpt: 'क्या आपका एसी ऑन होने के बाद भी कमरा ठंडा नहीं कर रहा है? जानिए एसी कूलिंग कम होने के 5 सबसे बड़े तकनीकी कारण और उनके आसान घरेलू व प्रोफेशनल उपाय।',
     publishDate: 'June 12, 2026',
     readTime: '5 min read',
     category: 'AC Services',
     imageUrl: '/ac-repair-greater-noida.webp',
+    heroHighlight: 'क्या आपका AC हवा तो फेंक रहा है लेकिन कमरा ठंडा नहीं कर रहा? 90% मामलों में यह डस्ट ब्लॉकेज या गैस लीकेज होती है। खुद रिस्क न लें, 45 मिनट में वेरिफाइड टेक्नीशियन से चेक करवाएँ।',
+    showStickyMobileBar: true,
     content: `
-<h2>AC की ठंडी हवा कम होने के मुख्य कारण</h2>
+<h2>AC की ठंडी हवा कम होने के मुख्य कारण (AC Low Cooling Problem)</h2>
 <p>कड़कड़ाती धूप में जब घर का एसी ठंडी हवा देना बंद कर दे, तो परेशानी बहुत बढ़ जाती है। अक्सर लोग सोचते हैं कि एसी पुराना हो गया है, इसलिए कूलिंग कम हो रही है, लेकिन ऐसा नहीं है। एसी कूलिंग कम होने के पीछे कुछ खास तकनीकी और व्यावहारिक कारण होते हैं जिन्हें आसानी से पहचाना और सुधारा जा सकता है।</p>
 
-<h3>1. गंदा एयर फिल्टर (Dirty Air Filters)</h3>
-<p>यह सबसे आम और आसान कारण है। एसी रूम के अंदर की हवा को खींचकर उसे फिल्टर करता है और वापस ठंडी हवा फेंकता है। अगर फिल्टर पर बहुत ज्यादा धूल जमा हो जाए, तो हवा का फ्लो (Airflow) ब्लॉक हो जाता है। 
-<br><strong>उपाय:</strong> हर 15 दिन में एक बार अपने एसी के फिल्टर को निकालकर बहते पानी में साफ करें और सुखाकर वापस लगाएं।</p>
+<h3>1. गंदा एयर फिल्टर एवं डस्ट ब्लॉकेज (Dirty Air Filters & Dust Blockage)</h3>
+<p>यह सबसे आम और आसान कारण है। एसी रूम के अंदर की हवा को खींचकर उसे फिल्टर करता है और वापस ठंडी हवा फेंकता है। अगर फिल्टर पर बहुत ज्यादा धूल जमा हो जाए, तो हवा का फ्लो (Airflow) चोक हो जाता है और बर्फ जमने लगती है।
+<br><strong>घरेलू उपाय:</strong> हर 15 दिन में एक बार अपने एसी के फिल्टर को निकालकर बहते पानी में साफ करें और सुखाकर वापस लगाएं।</p>
 
-<h3>2. रेफ्रिजरेंट गैस का कम होना (Low Gas / Gas Leakage)</h3>
+<div class="my-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 border border-blue-200 shadow-sm not-prose">
+  <div class="flex items-start gap-3">
+    <div class="p-2.5 bg-blue-600 text-white rounded-xl shrink-0 mt-0.5 shadow-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <div class="flex-1 space-y-1">
+      <div class="font-black text-gray-900 text-sm sm:text-base">
+        <span class="text-blue-700">समाधान:</span> AC Jet Service (Deep Clean) / Foam Wash
+      </div>
+      <div class="text-xs sm:text-sm font-semibold text-emerald-700">
+        ⚡ पारदर्शी कीमत: <strong>सर्विस ₹499 से शुरू</strong> | 30 दिन की सर्विस वारंटी
+      </div>
+    </div>
+  </div>
+  <div class="mt-4 pt-3 border-t border-blue-100 flex flex-wrap sm:flex-nowrap gap-2.5">
+    <a href="/book" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <span>अभी AC चेकअप बुक करें</span>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+    </a>
+    <a href="https://wa.me/917895321472?text=नमस्ते,%20मेरा%20AC%20ठीक%20से%20कूलिंग%20नहीं%20कर%20रहा%20है,%20मुझे%20टेक्नीशियन%20चाहिए" target="_blank" rel="noopener noreferrer" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
+      <span>WhatsApp पर सलाह लें</span>
+    </a>
+  </div>
+</div>
+
+<h3>2. रेफ्रिजरेंट गैस का कम होना या लीकेज (Low Gas / Gas Leakage)</h3>
 <p>एसी के अंदर बहने वाली रेफ्रिजरेंट गैस (जैसे R32, R22 या R410A) ही कमरे की गर्मी को सोखकर उसे ठंडा बनाती है। यदि तांबे की पाइपिंग में कहीं कोई बारीक छेद हो जाए, तो गैस धीरे-धीरे लीक हो जाती है और कूलिंग बिल्कुल खत्म हो जाती है।
-<br><strong>उपाय:</strong> यदि एसी की पाइप्स पर बर्फ (frost) जम रही है, तो तुरंत टेक्नीशियन को बुलाएं। वे नाइट्रोजन टेस्टिंग से लीक ढूंढकर वेल्डिंग करेंगे और नई गैस रीफिल करेंगे।</p>
+<br><strong>संकेत:</strong> यदि एसी की पाइप्स पर बर्फ (frost) जम रही है या केवल पंखे जैसी गर्म हवा आ रही है, तो तुरंत गैस लीकेज डायग्नोस्टिक्स करवाएं।</p>
 
-<h3>3. आउटडोर यूनिट का गंदा होना (Dirty Condenser Fins)</h3>
-<p>एसी का आउटडोर यूनिट कमरे से खींची गई गर्मी को बाहर वायुमंडल में छोड़ता है। अगर आउटडोर यूनिट की जाली (condenser fins) पर मिट्टी और जाले जमा हो जाएं, तो गर्मी बाहर नहीं निकल पाती और कंप्रेसर बार-बार ट्रिप (trip) करने लगता है।
-<br><strong>उपाय:</strong> पानी के पाइप से आउटडोर यूनिट को पीछे से अच्छी तरह धो लें (ध्यान रखें कि पानी केवल फिन्स पर जाए, motor wiring पर नहीं)।</p>
+<div class="my-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 border border-blue-200 shadow-sm not-prose">
+  <div class="flex items-start gap-3">
+    <div class="p-2.5 bg-blue-600 text-white rounded-xl shrink-0 mt-0.5 shadow-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <div class="flex-1 space-y-1">
+      <div class="font-black text-gray-900 text-sm sm:text-base">
+        <span class="text-blue-700">समाधान:</span> Diagnostic & Gas Refill Check / Nitrogen Leak Test
+      </div>
+      <div class="text-xs sm:text-sm font-semibold text-emerald-700">
+        ⚡ पारदर्शी कीमत: <strong>सर्विस ₹499 से शुरू</strong> | 30 दिन की सर्विस वारंटी
+      </div>
+    </div>
+  </div>
+  <div class="mt-4 pt-3 border-t border-blue-100 flex flex-wrap sm:flex-nowrap gap-2.5">
+    <a href="/book" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <span>अभी AC चेकअप बुक करें</span>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+    </a>
+    <a href="https://wa.me/917895321472?text=नमस्ते,%20मेरा%20AC%20ठीक%20से%20कूलिंग%20नहीं%20कर%20रहा%20है,%20मुझे%20टेक्नीशियन%20चाहिए" target="_blank" rel="noopener noreferrer" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
+      <span>WhatsApp पर सलाह लें</span>
+    </a>
+  </div>
+</div>
 
-<h3>4. कंप्रेसर कैपेसिटर का खराब होना (Faulty Capacitor)</h3>
-<p>कैपेसिटर एक छोटा सा सेल होता है जो कंप्रेसर मोटर को चालू करने के लिए शुरुआती ऊर्जा देता है। भारतीय गर्मियों में बिजली के उतार-चढ़ाव (voltage fluctuations) के कारण कैपेसिटर अक्सर जल जाते हैं, जिससे ब्लोअर तो चलता है लेकिन कंप्रेसर ऑन नहीं हो पाता।
-<br><strong>उपाय:</strong> इसे खुद बदलने की कोशिश न करें। यह एक कुशल इलेक्ट्रिशियन का काम है जो सही रेटिंग का ओईएम (OEM) कैपेसिटर इंस्टॉल कर सकता है।</p>
+<!-- स्थानीय भरोसा और वारंटी बैज (Local Trust Badges - Mid Article) -->
+<div class="my-8 p-4 sm:p-5 bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-md border border-blue-900/50 not-prose">
+  <div class="text-[11px] font-black uppercase tracking-wider text-blue-300 mb-3 text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
+    <span>🛡️ KS Electrical विश्वसनीयता एवं त्वरित सेवा गारंटी</span>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div class="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+      <span class="text-emerald-400 text-base font-black shrink-0">✓</span>
+      <span class="text-xs font-bold text-gray-100 leading-snug">
+        Gaur City & Noida Extension में <strong class="text-emerald-300">45 मिनट</strong> के भीतर डोरस्टेप सर्विस
+      </span>
+    </div>
+    <div class="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+      <span class="text-emerald-400 text-base font-black shrink-0">✓</span>
+      <span class="text-xs font-bold text-gray-100 leading-snug">
+        <strong class="text-emerald-300">30 दिन</strong> की सर्विस वारंटी और ओरिजिनल स्पेयर पार्ट्स
+      </span>
+    </div>
+    <div class="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+      <span class="text-amber-400 text-base font-black shrink-0">✓</span>
+      <span class="text-xs font-bold text-gray-100 leading-snug">
+        Google पर <strong class="text-amber-300">4.9★</strong> प्रमाणित रेटिंग
+      </span>
+    </div>
+  </div>
+</div>
+
+<h3>3. आउटडोर यूनिट का गंदा होना (Dirty Condenser Fins & Overheating)</h3>
+<p>एसी का आउटडोर यूनिट कमरे से खींची गई गर्मी को बाहर वायुमंडल में छोड़ता है। अगर आउटडोर यूनिट की जाली (condenser fins) पर मिट्टी, धूल और जाले जमा हो जाएं, तो गर्मी बाहर नहीं निकल पाती और कंप्रेसर बार-बार ट्रिप (trip) करने लगता है।
+<br><strong>उपाय:</strong> आउटडोर यूनिट की हाई-प्रेशर वाटर जेट पंप से गहन धुलाई आवश्यक होती है जिससे कंप्रेसर का ओवरहीटिंग प्रोटेक्टर एक्टिव न हो।</p>
+
+<div class="my-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 border border-blue-200 shadow-sm not-prose">
+  <div class="flex items-start gap-3">
+    <div class="p-2.5 bg-blue-600 text-white rounded-xl shrink-0 mt-0.5 shadow-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <div class="flex-1 space-y-1">
+      <div class="font-black text-gray-900 text-sm sm:text-base">
+        <span class="text-blue-700">समाधान:</span> Outdoor Condenser Jet Wash & Overheating Service
+      </div>
+      <div class="text-xs sm:text-sm font-semibold text-emerald-700">
+        ⚡ पारदर्शी कीमत: <strong>सर्विस ₹499 से शुरू</strong> | 30 दिन की सर्विस वारंटी
+      </div>
+    </div>
+  </div>
+  <div class="mt-4 pt-3 border-t border-blue-100 flex flex-wrap sm:flex-nowrap gap-2.5">
+    <a href="/book" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <span>अभी AC चेकअप बुक करें</span>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+    </a>
+    <a href="https://wa.me/917895321472?text=नमस्ते,%20मेरा%20AC%20ठीक%20से%20कूलिंग%20नहीं%20कर%20रहा%20है,%20मुझे%20टेक्नीशियन%20चाहिए" target="_blank" rel="noopener noreferrer" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
+      <span>WhatsApp पर सलाह लें</span>
+    </a>
+  </div>
+</div>
+
+<h3>4. कंप्रेसर कैपेसिटर या मोटर का खराब होना (Faulty Capacitor or Compressor Fault)</h3>
+<p>कैपेसिटर एक छोटा सेल होता है जो कंप्रेसर मोटर को चालू करने के लिए शुरुआती ऊर्जा देता है। भारतीय गर्मियों में बिजली के उतार-चढ़ाव (voltage fluctuations) के कारण कैपेसिटर अक्सर जल जाते हैं, जिससे इनडोर ब्लोअर तो चलता है लेकिन कंप्रेसर ऑन नहीं हो पाता और केवल सामान्य हवा आती है।
+<br><strong>सावधानी:</strong> इसे खुद बदलने की कोशिश न करें। यह एक कुशल इलेक्ट्रिशियन का काम है जो सही रेटिंग का ओईएम (OEM) कैपेसिटर इंस्टॉल कर सकता है।</p>
+
+<div class="my-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 border border-blue-200 shadow-sm not-prose">
+  <div class="flex items-start gap-3">
+    <div class="p-2.5 bg-blue-600 text-white rounded-xl shrink-0 mt-0.5 shadow-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <div class="flex-1 space-y-1">
+      <div class="font-black text-gray-900 text-sm sm:text-base">
+        <span class="text-blue-700">समाधान:</span> Diagnostic & Capacitor / Compressor Electrical Check
+      </div>
+      <div class="text-xs sm:text-sm font-semibold text-emerald-700">
+        ⚡ पारदर्शी कीमत: <strong>सर्विस ₹499 से शुरू</strong> | 30 दिन की सर्विस वारंटी
+      </div>
+    </div>
+  </div>
+  <div class="mt-4 pt-3 border-t border-blue-100 flex flex-wrap sm:flex-nowrap gap-2.5">
+    <a href="/book" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <span>अभी AC चेकअप बुक करें</span>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+    </a>
+    <a href="https://wa.me/917895321472?text=नमस्ते,%20मेरा%20AC%20ठीक%20से%20कूलिंग%20नहीं%20कर%20रहा%20है,%20मुझे%20टेक्नीशियन%20चाहिए" target="_blank" rel="noopener noreferrer" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-1.5 no-underline">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
+      <span>WhatsApp पर सलाह लें</span>
+    </a>
+  </div>
+</div>
+
+<h3>KS Electrical की पेशेवर सलाह</h3>
+<p>यदि आपका एसी केवल पंखा चला रहा है और ठंडा नहीं कर रहा, तो लगातार ऑन रखकर कंप्रेसर पर लोड न डालें। इससे कंप्रेसर सीज हो सकता है जिससे भारी खर्च आ सकता है। 45 मिनट के भीतर हमारे वेरिफाइड टेक्नीशियन से तत्काल डायग्नोस्टिक्स करवाएं।</p>
+
+<!-- स्थानीय भरोसा और वारंटी बैज (Local Trust Badges - Bottom of Article) -->
+<div class="my-8 p-4 sm:p-5 bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-md border border-blue-900/50 not-prose">
+  <div class="text-[11px] font-black uppercase tracking-wider text-blue-300 mb-3 text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
+    <span>🛡️ KS Electrical विश्वसनीयता एवं त्वरित सेवा गारंटी</span>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div class="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+      <span class="text-emerald-400 text-base font-black shrink-0">✓</span>
+      <span class="text-xs font-bold text-gray-100 leading-snug">
+        Gaur City & Noida Extension में <strong class="text-emerald-300">45 मिनट</strong> के भीतर डोरस्टेप सर्विस
+      </span>
+    </div>
+    <div class="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+      <span class="text-emerald-400 text-base font-black shrink-0">✓</span>
+      <span class="text-xs font-bold text-gray-100 leading-snug">
+        <strong class="text-emerald-300">30 दिन</strong> की सर्विस वारंटी और ओरिजिनल स्पेयर पार्ट्स
+      </span>
+    </div>
+    <div class="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+      <span class="text-amber-400 text-base font-black shrink-0">✓</span>
+      <span class="text-xs font-bold text-gray-100 leading-snug">
+        Google पर <strong class="text-amber-300">4.9★</strong> प्रमाणित रेटिंग
+      </span>
+    </div>
+  </div>
+</div>
     `
   },
   {

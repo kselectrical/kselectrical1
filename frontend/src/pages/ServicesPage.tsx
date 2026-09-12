@@ -70,7 +70,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       "@type": "LocalBusiness",
       "name": businessConfig.name,
       "image": `${siteDomain}/hero_technician.webp`,
-      "telephone": "+91-9599055506",
+      "telephone": `+91-${businessConfig.contacts[0]}`,
       "url": siteDomain
     },
     "areaServed": ["Noida", "Greater Noida", "Ghaziabad", "Noida Extension", "Gaur City"],
@@ -91,21 +91,21 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   return (
     <>
       <Helmet>
-        <title>{`All Doorstep Repair Services | ${businessConfig.name}`}</title>
-        <meta name="description" content={`Explore our full range of technical home repair and maintenance services. Book certified electricians, AC technicians, RO service, and appliance repair in Noida.`} />
+        <title>All Electrical, AC &amp; Home Services in Gaur City &amp; Greater Noida West | KS Electrical</title>
+        <meta name="description" content="Book certified electricians, AC repair, RO service, fan repair &amp; all home appliance services at your doorstep in Gaur City, Greater Noida West &amp; Noida Extension. Transparent rates, same-day scheduling." />
         <link rel="canonical" href={`${siteDomain}/services`} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${siteDomain}/services`} />
-        <meta property="og:title" content={`All Doorstep Repair Services | ${businessConfig.name}`} />
-        <meta property="og:description" content="Explore our full range of technical home repair and maintenance services. Upfront rates, same-day scheduling, and certified technicians." />
+        <meta property="og:title" content="All Electrical, AC &amp; Home Services in Gaur City &amp; Greater Noida West | KS Electrical" />
+        <meta property="og:description" content="Book certified electricians, AC repair, RO service &amp; all home appliance services in Gaur City, Greater Noida West &amp; Noida Extension. Upfront rates, same-day dispatch." />
         <meta property="og:image" content={`${siteDomain}/hero_technician.webp`} />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`All Doorstep Repair & Appliance Services | ${businessConfig.name}`} />
-        <meta name="twitter:description" content="Book certified electricians, AC jet cleaning, RO service, and appliance repair in Noida, Greater Noida, and Ghaziabad." />
+        <meta name="twitter:title" content="All Electrical, AC &amp; Home Services in Gaur City &amp; Greater Noida West | KS Electrical" />
+        <meta name="twitter:description" content="Book certified electricians, AC jet cleaning, RO service &amp; appliance repair in Gaur City, Noida Extension &amp; Greater Noida West. Same-day technician dispatch." />
         <meta name="twitter:image" content={`${siteDomain}/hero_technician.webp`} />
 
         {/* JSON-LD Schemas */}

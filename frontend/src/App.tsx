@@ -61,6 +61,7 @@ const FAQPage = lazyWithRetry(() => import('./pages/FAQPage').then(m => ({ defau
 const PrivacyPage = lazyWithRetry(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })), 'PrivacyPage');
 const TermsPage = lazyWithRetry(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })), 'TermsPage');
 const ACOnRentPage = lazyWithRetry(() => import('./pages/ACOnRentPage').then(m => ({ default: m.ACOnRentPage })), 'ACOnRentPage');
+const SellOldAcPage = lazyWithRetry(() => import('./pages/SellOldAcPage').then(m => ({ default: m.SellOldAcPage })), 'SellOldAcPage');
 const BookServicePage = lazyWithRetry(() => import('./pages/BookServicePage').then(m => ({ default: m.BookServicePage })), 'BookServicePage');
 const EmergencyElectricianPage = lazyWithRetry(() => import('./pages/EmergencyElectricianPage').then(m => ({ default: m.EmergencyElectricianPage })), 'EmergencyElectricianPage');
 const AreaHubPage = lazyWithRetry(() => import('./pages/AreaHubPage').then(m => ({ default: m.AreaHubPage })), 'AreaHubPage');
@@ -1150,6 +1151,12 @@ const App: React.FC = () => {
             <Route path="/ac-on-rent" element={
               <ACOnRentPage businessConfig={businessConfigState} />
             } />
+            <Route path="/sell-old-ac" element={
+              <SellOldAcPage businessConfig={businessConfigState} />
+            } />
+            <Route path="/old-ac-scrap-buyer" element={<Navigate to="/sell-old-ac" replace />} />
+            <Route path="/purani-ac-kabadi" element={<Navigate to="/sell-old-ac" replace />} />
+            <Route path="/ac-scrap" element={<Navigate to="/sell-old-ac" replace />} />
             <Route path="/services/ac-service" element={
               <ACService 
                 services={services}
@@ -1338,6 +1345,8 @@ const App: React.FC = () => {
             <Route path="/privacy-policy" element={<PrivacyPage />} />
             <Route path="/terms-and-cond" element={<TermsPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/ac-cooling-kam-kyun-kar-raha-hai" element={<Navigate to="/blog/why-ac-cooling-drops" replace />} />
+            <Route path="/blog/ac-low-cooling-problem" element={<Navigate to="/blog/why-ac-cooling-drops" replace />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/careers" element={<CareersPage />} />
             <Route path="/anti-discrimination" element={<AntiDiscriminationPage />} />

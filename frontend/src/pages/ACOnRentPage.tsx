@@ -1020,6 +1020,30 @@ export const ACOnRentPage: React.FC<{ businessConfig: BusinessConfig }> = ({ bus
           </section>
         </div>
       </div>
+      {/* ── Sticky Mobile Bottom CTA Bar ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.10)] px-3 pt-2.5 pb-3 font-sans">
+        <div className="flex gap-2.5 mb-1.5">
+          <a
+            href={`tel:${businessConfig.contacts[0]}`}
+            className="flex-1 flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 text-xs font-black tracking-wide transition-all active:scale-95 shadow-md"
+          >
+            <Phone size={14} />
+            <span>📞 Call: {businessConfig.contacts[0]}</span>
+          </a>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl py-3 text-xs font-black tracking-wide transition-all active:scale-95 shadow-md"
+          >
+            <MessageCircle size={14} />
+            <span>💬 WhatsApp Booking</span>
+          </a>
+        </div>
+        <p className="text-center text-[9px] text-gray-500 font-semibold leading-none">
+          Technician at doorstep within 30–45 mins · Gaur City &amp; Gr. Noida West
+        </p>
+      </div>
     </>
   );
 };

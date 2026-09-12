@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import {
   Flame, Wrench, Droplets, Zap, ShieldCheck,
   Settings, Star, Clock,
-  CheckCircle2, Wind, MapPin, User
+  CheckCircle2, Wind, MapPin, User,
+  Phone, MessageSquare, Calendar, ArrowRight
 } from 'lucide-react';
 import { ServiceGrid } from '../components/ServiceGrid';
 import { servicesData } from '../data';
@@ -81,8 +82,12 @@ export const HomePage: React.FC<HomePageProps> = ({
   cart,
   onAddToCart,
   onRemoveFromCart,
-  onProceedToCheckout
+  onProceedToCheckout,
+  businessConfig
 }) => {
+  const primaryPhone = businessConfig?.contacts?.[0] || '7895321472';
+  const secondaryPhone = businessConfig?.contacts?.[1] || '9625724903';
+
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeReviewIdx, setActiveReviewIdx] = useState(0);
   const [sliderPosition, setSliderPosition] = useState(50);
@@ -240,7 +245,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       </Helmet>
 
       {/* PREMIUM HERO SECTION */}
-      <section className="relative bg-gradient-to-b from-slate-50 to-white pt-24 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-gradient-to-b from-slate-50 to-white pt-8 sm:pt-12 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Shapes */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-0 left-[30%] -z-10 h-[600px] w-[600px] bg-gradient-to-br from-blue-500/5 to-transparent blur-3xl" />
@@ -251,11 +256,22 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
           {/* LEFT SECTION: Content */}
-          <div className="lg:col-span-7 space-y-8">
-            {/* Premium Badge */}
-            <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
-              <span className="text-primary font-medium">Trusted Home Services Provider</span>
+          <div className="lg:col-span-7 space-y-6">
+            {/* Top Badges & Instant Helpline */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-xs sm:text-sm font-semibold">
+                <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+                <span className="text-primary font-medium">Trusted Home Services</span>
+              </div>
+              <a
+                href={`tel:${primaryPhone}`}
+                className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-3.5 py-1.5 rounded-full text-xs font-black shadow-xs transition-colors cursor-pointer"
+                title="24x7 Helpline"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <Phone size={13} className="text-emerald-600" />
+                <span>24x7 हेल्पलाइन: <strong>+91 {primaryPhone}</strong></span>
+              </a>
             </div>
 
             {/* Main Headline */}
@@ -272,6 +288,79 @@ export const HomePage: React.FC<HomePageProps> = ({
               Background-checked professionals with genuine parts & 30-day warranty.
             </p>
 
+            {/* PROMINENT DIRECT CALL & BOOKING ACTION CARD */}
+            <div className="space-y-4 pt-1 not-prose">
+              {/* Highlight Call Banner */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800 text-white shadow-xl shadow-blue-600/25 border border-blue-400/30">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
+                        ⚡ 30 मिनट में डोरस्टेप सर्विस
+                      </span>
+                      <span className="text-xs text-blue-200 font-semibold hidden sm:inline">
+                        Gaur City &amp; Noida Extension
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-blue-100 font-semibold">
+                      कस्टमर केयर एवं त्वरित बुकिंग के लिए सीधे कॉल करें:
+                    </p>
+                    <div className="flex flex-wrap items-baseline gap-2 pt-0.5">
+                      <a
+                        href={`tel:${primaryPhone}`}
+                        className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white hover:text-amber-300 transition-colors flex items-center gap-2 drop-shadow-sm cursor-pointer"
+                      >
+                        <Phone size={26} className="text-amber-400 animate-bounce shrink-0" />
+                        <span>+91 {primaryPhone}</span>
+                      </a>
+                      {secondaryPhone && (
+                        <a
+                          href={`tel:${secondaryPhone}`}
+                          className="text-xs sm:text-sm font-bold text-blue-200 hover:text-white transition-colors"
+                        >
+                          / {secondaryPhone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+                    <a
+                      href={`tel:${primaryPhone}`}
+                      className="flex-1 sm:flex-initial bg-white hover:bg-gray-100 text-blue-700 text-xs sm:text-sm font-black px-4 py-3 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                    >
+                      <Phone size={16} className="fill-blue-700 text-blue-700" />
+                      <span>कॉल करें (Call Now)</span>
+                    </a>
+                    <a
+                      href={`https://wa.me/91${primaryPhone}?text=${encodeURIComponent('नमस्ते KS Electrical, मुझे तुरंत सर्विस / टेक्नीशियन चाहिए।')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 sm:flex-initial bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm font-black px-4 py-3 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                    >
+                      <MessageSquare size={16} />
+                      <span>WhatsApp चैट</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Secondary Fast Action & Reassurance */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <Link
+                  to="/book"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-black px-5 py-2.5 rounded-xl shadow-sm transition-all active:scale-95"
+                >
+                  <Calendar size={15} className="text-amber-400" />
+                  <span>ऑनलाइन सर्विस बुक करें</span>
+                  <ArrowRight size={14} />
+                </Link>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 font-bold">
+                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                  <span>कोई अग्रिम शुल्क नहीं • 30 दिन की सर्विस वारंटी</span>
+                </div>
+              </div>
+            </div>
 
           </div>
 
@@ -285,6 +374,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="w-full h-full object-cover transition-transform duration-700"
                 loading="eager"
                 fetchPriority="high"
+                width={672}
+                height={378}
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-gray-50/80 via-transparent pointer-events-none" />
@@ -294,11 +385,19 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
 
-            {/* Special Offer Badge */}
-            <div className="w-full flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md">
-              <Flame size={16} className="text-white" />
-              <span>Limited Offer: AC Jet Wash + Service from ₹499</span>
-            </div>
+            {/* Special Offer Badge — Clickable CTA */}
+            <Link
+              to="/services/ac-service"
+              className="w-full flex items-center justify-between rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all active:scale-95 group cursor-pointer select-none"
+            >
+              <div className="flex items-center gap-2">
+                <Flame size={16} className="text-white animate-pulse" />
+                <span>Limited Offer: AC Jet Wash + Service from ₹499</span>
+              </div>
+              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                Book <ArrowRight size={12} />
+              </span>
+            </Link>
 
             {/* Quick Service Chips */}
             <div className="w-full">
@@ -308,7 +407,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <Link
                     key={i}
                     to={svc.path}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-700 text-xs font-medium hover:border-primary hover:text-primary transition-colors shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-700 text-xs font-medium hover:border-primary hover:text-primary transition-colors shadow-sm cursor-pointer"
                   >
                     {svc.icon}
                     <span>{svc.label}</span>
@@ -317,33 +416,43 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
 
-            {/* Customer Testimonial */}
-            <div className="w-full bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                  <User size={20} className="text-gray-500" />
-                </div>
-                <div className="space-y-0.5">
-                  <p className="font-semibold text-gray-900 text-sm">{activeReview.name}</p>
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <span>{activeReview.location}</span>
-                    <span>•</span>
-                    <span>{activeReview.service}</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-0.5">
-                      {Array.from({ length: activeReview.rating }).map((_, i) => (
-                        <Star key={i} size={10} className="text-amber-400 fill-amber-400" />
-                      ))}
-                    </span>
+            {/* Customer Testimonial (Fixed min-height prevents CLS when review rotates) */}
+            <Link
+              to="/reviews"
+              className="w-full bg-white rounded-xl border border-gray-200 p-5 shadow-sm min-h-[148px] flex flex-col justify-between hover:border-blue-500/40 hover:shadow-md transition-all group text-left cursor-pointer"
+            >
+              <div>
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                    <User size={20} className="text-gray-500" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="font-semibold text-gray-900 text-sm">{activeReview.name}</p>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <span>{activeReview.location}</span>
+                      <span>•</span>
+                      <span>{activeReview.service}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-0.5">
+                        {Array.from({ length: activeReview.rating }).map((_, i) => (
+                          <Star key={i} size={10} className="text-amber-400 fill-amber-400" />
+                        ))}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <p className="text-gray-600 italic text-sm line-clamp-2">"{activeReview.text}"</p>
               </div>
-              <p className="text-gray-600 italic text-sm">"{activeReview.text}"</p>
-              <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
-                <CheckCircle2 size={13} className="text-green-500" />
-                <span>Verified Buyer • Service Completed Today</span>
+              <div className="mt-3 flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-1.5 text-emerald-600 font-medium">
+                  <CheckCircle2 size={13} />
+                  <span>Verified Customer</span>
+                </div>
+                <span className="text-blue-600 font-semibold group-hover:underline text-[11px] flex items-center gap-1">
+                  Read all reviews <ArrowRight size={11} />
+                </span>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
 
@@ -363,6 +472,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                       src={getAssetPath('/profile.webp')}
                       alt="Kaushindra Singh - Founder & Chief Technician KS Electrical"
                       className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-500"
+                      width={88}
+                      height={88}
+                      loading="lazy"
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = getAssetPath('/log.webp');
@@ -393,10 +505,37 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               {/* Middle: Owner Guarantee Quote */}
-              <div className="flex-1 max-w-2xl text-center md:text-left bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl">
+              <div className="flex-1 max-w-2xl text-center md:text-left bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl space-y-3">
                 <p className="text-slate-200 text-xs sm:text-sm font-medium leading-relaxed italic">
                   "I personally guarantee 100% upfront pricing, genuine factory spare parts, and technician dispatch within 30 minutes in Gaur City &amp; Noida Extension — backed by our 30-Day Money-Back Warranty Cover."
                 </p>
+                <div className="pt-2 border-t border-slate-700/70 flex flex-wrap items-center justify-center md:justify-start gap-3">
+                  <span className="text-[11px] text-slate-300 font-bold">डायरेक्ट संपर्क / हेल्पलाइन:</span>
+                  <a
+                    href={`tel:${primaryPhone}`}
+                    className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-black text-xs sm:text-sm transition-colors cursor-pointer"
+                  >
+                    <Phone size={14} className="text-amber-400" />
+                    <span>+91 {primaryPhone}</span>
+                  </a>
+                  {secondaryPhone && (
+                    <a
+                      href={`tel:${secondaryPhone}`}
+                      className="text-slate-400 hover:text-slate-200 text-xs font-semibold"
+                    >
+                      | +91 {secondaryPhone}
+                    </a>
+                  )}
+                  <a
+                    href={`https://wa.me/91${primaryPhone}?text=${encodeURIComponent('नमस्ते कौशिंद्र जी, मुझे KS Electrical की सर्विस बुक करनी है।')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    <MessageSquare size={12} />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
               </div>
 
               {/* Right: 3 Guarantee Pills */}
@@ -419,7 +558,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* WHY CHOOSE US — 4 PREMIUM TRUST CARDS */}
+      {/* WHY CHOOSE US — 4 PREMIUM TRUST CARDS (Interactive to eliminate Dead Clicks) */}
       <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200 select-none">
         <div className="max-w-7xl mx-auto space-y-10">
           <div className="text-center space-y-2">
@@ -427,7 +566,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               Standard Operating Principles
             </span>
             <h2 className="text-slate-900 font-black text-2xl sm:text-3xl tracking-tight">
-              Why Homeowners Trust KS Electrical & AC Services
+              Why Homeowners Trust KS Electrical &amp; AC Services
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
               Every job is executed by trained local engineers following strict safety and transparent billing guidelines.
@@ -435,45 +574,102 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-blue-500/30 hover:bg-blue-50/20 transition-all group">
+            <Link
+              to="/about"
+              className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-blue-500/40 hover:bg-blue-50/20 hover:shadow-md transition-all group cursor-pointer block"
+            >
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-brand-blue flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
                 👨‍🔧
               </div>
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">Background-Verified Technicians</h3>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-blue-600 transition-colors flex items-center justify-between">
+                <span>Background-Verified Technicians</span>
+                <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-600" />
+              </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Dispatched from our local Greater Noida hub in full uniform with digital identity verification.
               </p>
-            </div>
+            </Link>
 
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-emerald-500/30 hover:bg-emerald-50/20 transition-all group">
+            <Link
+              to="/services"
+              className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-emerald-500/40 hover:bg-emerald-50/20 hover:shadow-md transition-all group cursor-pointer block"
+            >
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
                 ⚙️
               </div>
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">100% Genuine OEM Spare Parts</h3>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-emerald-600 transition-colors flex items-center justify-between">
+                <span>100% Genuine OEM Spare Parts</span>
+                <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-600" />
+              </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 We install only original factory capacitors, relays, copper coils, and brand-approved components.
               </p>
-            </div>
+            </Link>
 
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-orange-500/30 hover:bg-orange-50/20 transition-all group">
+            <Link
+              to="/services"
+              className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-orange-500/40 hover:bg-orange-50/20 hover:shadow-md transition-all group cursor-pointer block"
+            >
               <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-brand-orange flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
                 🏷️
               </div>
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">Transparent Upfront Pricing</h3>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-brand-orange transition-colors flex items-center justify-between">
+                <span>Transparent Upfront Pricing</span>
+                <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-brand-orange" />
+              </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Fixed rate card handed over before work starts. Zero surprise charges or extra estimates.
               </p>
-            </div>
+            </Link>
 
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-purple-500/30 hover:bg-purple-50/20 transition-all group">
+            <Link
+              to="/faq"
+              className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 hover:border-purple-500/40 hover:bg-purple-50/20 hover:shadow-md transition-all group cursor-pointer block"
+            >
               <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
                 🛡️
               </div>
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">30-Day Doorstep Warranty</h3>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-purple-600 transition-colors flex items-center justify-between">
+                <span>30-Day Doorstep Warranty</span>
+                <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-purple-600" />
+              </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Every repair and component replacement is fully guaranteed for 30 days post-service.
               </p>
-            </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* QUICK DISPATCH CALL STRIP */}
+      <section className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white py-4 px-4 sm:px-6 lg:px-8 border-y border-slate-800">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-3 w-3 relative shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+            </span>
+            <p className="text-xs sm:text-sm font-bold text-gray-200">
+              घर पर कोई अप्लायंस या इलेक्ट्रिकल खराबी? 45 मिनट में वेरिफाइड टेक्नीशियन डोरस्टेप पर!
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+            <a
+              href={`tel:${primaryPhone}`}
+              className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer"
+            >
+              <Phone size={15} className="fill-slate-950" />
+              <span>कॉल करें: +91 {primaryPhone}</span>
+            </a>
+            <a
+              href={`https://wa.me/91${primaryPhone}?text=${encodeURIComponent('नमस्ते KS Electrical, मुझे तुरंत सर्विस चाहिए।')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition-all active:scale-95 cursor-pointer"
+            >
+              <MessageSquare size={14} />
+              <span>WhatsApp</span>
+            </a>
           </div>
         </div>
       </section>
@@ -549,9 +745,11 @@ export const HomePage: React.FC<HomePageProps> = ({
               {/* Category Cards with Small Photo Thumbnails */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryCards.map((card, idx) => (
-                  <div
+                  <Link
                     key={idx}
-                    className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between text-left relative overflow-hidden group hover:border-blue-500/40 hover:shadow-lg transition-all"
+                    to={card.path}
+                    onClick={() => setSelectedCategory(card.title)}
+                    className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between text-left relative overflow-hidden group hover:border-blue-500/40 hover:shadow-lg transition-all cursor-pointer block"
                   >
                     <div className="space-y-4">
                       <div className="flex justify-between items-start">
@@ -560,6 +758,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                           <img
                             src={getAssetPath(card.image)}
                             alt={card.title}
+                            width={48}
+                            height={48}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             loading="lazy"
                             onError={(e) => {
@@ -574,7 +774,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       </div>
 
                       <div className="space-y-0.5">
-                        <h3 className="text-slate-900 font-black text-lg sm:text-xl">{card.title}</h3>
+                        <h3 className="text-slate-900 font-black text-lg sm:text-xl group-hover:text-blue-600 transition-colors">{card.title}</h3>
                         <p className="text-xs text-slate-400 font-bold uppercase tracking-wide leading-relaxed pb-0.5">{card.titleHindi}</p>
                       </div>
 
@@ -588,16 +788,91 @@ export const HomePage: React.FC<HomePageProps> = ({
                         <span className="block text-[9px] text-slate-400 font-black uppercase tracking-wider">Starting From</span>
                         <span className="block text-slate-900 font-black text-base mt-0.5">{card.startingPrice}</span>
                       </div>
-                      <Link
-                        to={card.path}
-                        onClick={() => setSelectedCategory(card.title)}
-                        className="btn-cta text-xs px-4 py-2.5"
-                      >
+                      <span className="btn-cta text-xs px-4 py-2.5 inline-flex items-center gap-1.5 group-hover:bg-brand-orange-dark">
                         Book Now
-                      </Link>
+                        <ArrowRight size={13} />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* OLD AC BUYBACK & SCRAP PROMO CARD */}
+              <div className="mt-12 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 text-white rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden text-left not-prose">
+                {/* Ambient glow */}
+                <div className="absolute -top-20 -right-20 w-60 h-60 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center relative z-10">
+                  {/* Left: AI Generated Image */}
+                  <div className="md:col-span-5 relative">
+                    <div className="rounded-2xl overflow-hidden aspect-[4/3] shadow-lg border-2 border-white/15 bg-slate-800">
+                      <img
+                        src="/images/old-ac-scrap-buyer.webp"
+                        alt="Sell Old or Scrap AC - Best Buyback Rates in Gaur City & Noida Extension"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        width={400}
+                        height={300}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/images/old-ac-scrap-buyer.jpg';
+                        }}
+                      />
+                    </div>
+                    <div className="absolute top-3 left-3 bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2.5 py-1 rounded-full shadow">
+                      Best Rate Guarantee
                     </div>
                   </div>
-                ))}
+
+                  {/* Right: Content & CTA */}
+                  <div className="md:col-span-7 space-y-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
+                        AC Buyback &amp; Scrap Service
+                      </span>
+                      <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                        <CheckCircle2 size={13} />
+                        <span>30-45 Min Doorstep Arrival</span>
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-snug">
+                      Sell Your Old or Scrap AC — Get Instant Best Cash
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                      Got a dead, broken, or used air conditioner? Get top market value for Window &amp; Split ACs across Gaur City &amp; Greater Noida West. <strong>100% Free wall uninstallation</strong> and instant spot cash/UPI payment.
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-200">
+                      <span className="bg-white/10 px-2.5 py-1 rounded-lg border border-white/10">✓ Window AC: ₹4,500 - ₹8,000</span>
+                      <span className="bg-white/10 px-2.5 py-1 rounded-lg border border-white/10">✓ Split AC: ₹4,500 - ₹9,000</span>
+                    </div>
+
+                    <p className="text-[11px] text-amber-300/90 font-medium italic">
+                      *Note: Exact price is determined only after our technician's doorstep inspection visit.
+                    </p>
+
+                    <div className="pt-2 flex flex-wrap items-center gap-3">
+                      <Link
+                        to="/sell-old-ac"
+                        className="bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 font-black px-5 py-3 rounded-xl text-xs sm:text-sm shadow-md flex items-center gap-2 transition-all cursor-pointer"
+                      >
+                        <span>Check AC Rate Guide</span>
+                        <ArrowRight size={14} />
+                      </Link>
+                      <a
+                        href={`https://wa.me/91${primaryPhone}?text=${encodeURIComponent('Hello KS Electrical, I have an old/scrap AC to sell. Please provide valuation and schedule a visit.')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold px-4 py-3 rounded-xl text-xs sm:text-sm shadow-md flex items-center gap-2 transition-all cursor-pointer"
+                      >
+                        <MessageSquare size={15} />
+                        <span>Send Photos on WhatsApp</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </>
           )
@@ -637,6 +912,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 src="/ac_service_pro.webp"
                 alt="Dirty split AC indoor unit filter clogged with dust before wet pressure jet wash service"
                 loading="lazy"
+                width={576}
+                height={360}
                 className="absolute inset-0 w-full h-full object-cover select-none"
               />
 
@@ -649,6 +926,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                   src="/ro_service_pro.webp"
                   alt="Clean AC indoor cooling coil after deep jet wash service by KS Electrical"
                   loading="lazy"
+                  width={576}
+                  height={360}
                   className="absolute inset-0 w-full h-full object-cover select-none"
                   style={{ width: '100%', maxWidth: 'none', transform: `translateX(-${sliderPosition}%)` }}
                 />
@@ -689,23 +968,24 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4 select-none">
             {[
-              { step: '01', title: 'Book Service', desc: 'Select menu & submit phone.' },
-              { step: '02', title: 'Tech Assigned', desc: 'Matched within 15 Min.' },
-              { step: '03', title: 'Home Visit', desc: 'Technician arrives on time.' },
-              { step: '04', title: 'Diagnostic Fix', desc: 'Transparent rate & fix.' },
-              { step: '05', title: 'Easy Payment', desc: 'UPI, Cash or Card.' },
-              { step: '06', title: '30-Day Cover', desc: 'Warranty active instantly.' }
+              { step: '01', title: 'Book Service', desc: 'Select menu & submit phone.', link: '/services' },
+              { step: '02', title: 'Tech Assigned', desc: 'Matched within 15 Min.', link: '/book' },
+              { step: '03', title: 'Home Visit', desc: 'Technician arrives on time.', link: '/about' },
+              { step: '04', title: 'Diagnostic Fix', desc: 'Transparent rate & fix.', link: '/services' },
+              { step: '05', title: 'Easy Payment', desc: 'UPI, Cash or Card.', link: '/book' },
+              { step: '06', title: '30-Day Cover', desc: 'Warranty active instantly.', link: '/faq' }
             ].map((item, idx) => (
-              <div
+              <Link
                 key={idx}
-                className="bg-white border border-slate-200 rounded-2xl p-4 text-left flex flex-col justify-between h-36 hover:border-blue-500/30 transition-all shadow-xs"
+                to={item.link}
+                className="bg-white border border-slate-200 rounded-2xl p-4 text-left flex flex-col justify-between h-36 hover:border-blue-500/40 hover:shadow-md transition-all shadow-xs group cursor-pointer"
               >
-                <div className="text-brand-orange font-black text-base">{item.step}</div>
+                <div className="text-brand-orange font-black text-base group-hover:scale-105 transition-transform">{item.step}</div>
                 <div>
-                  <h4 className="font-extrabold text-xs text-slate-900 leading-tight">{item.title}</h4>
+                  <h4 className="font-extrabold text-xs text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">{item.title}</h4>
                   <p className="text-[10px] text-slate-500 font-medium leading-normal mt-1">{item.desc}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

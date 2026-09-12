@@ -116,6 +116,286 @@
         "source": "/index.html",
         "destination": "/",
         "type": 301
+      },
+      {
+        "source": "/ac-service",
+        "destination": "/services/ac-service",
+        "type": 301
+      },
+      {
+        "source": "/ac-repair",
+        "destination": "/services/ac-service",
+        "type": 301
+      },
+      {
+        "source": "/ac-installation",
+        "destination": "/services/ac-service",
+        "type": 301
+      },
+      {
+        "source": "/ro-service",
+        "destination": "/services/ro-service",
+        "type": 301
+      },
+      {
+        "source": "/electrician",
+        "destination": "/services/electrician-service",
+        "type": 301
+      },
+      {
+        "source": "/electrician-service",
+        "destination": "/services/electrician-service",
+        "type": 301
+      },
+      {
+        "source": "/washing-machine-repair",
+        "destination": "/services/washing-machine-repair",
+        "type": 301
+      },
+      {
+        "source": "/refrigerator-repair",
+        "destination": "/services/refrigerator-repair",
+        "type": 301
+      },
+      {
+        "source": "/chimney-service",
+        "destination": "/services/chimney-service",
+        "type": 301
+      },
+      {
+        "source": "/geyser-service",
+        "destination": "/services/geyser-service",
+        "type": 301
+      },
+      {
+        "source": "/fan-service",
+        "destination": "/services/fan-service",
+        "type": 301
+      },
+      {
+        "source": "/light-service",
+        "destination": "/services/light-service",
+        "type": 301
+      },
+      {
+        "source": "/home-installations",
+        "destination": "/services/home-installations",
+        "type": 301
+      },
+      {
+        "source": "/microwave-service",
+        "destination": "/services/microwave-service",
+        "type": 301
+      },
+      {
+        "source": "/old-ac-scrap-buyer",
+        "destination": "/sell-old-ac",
+        "type": 301
+      },
+      {
+        "source": "/purani-ac-kabadi",
+        "destination": "/sell-old-ac",
+        "type": 301
+      },
+      {
+        "source": "/ac-scrap",
+        "destination": "/sell-old-ac",
+        "type": 301
+      },
+      {
+        "source": "/services/ac-repair",
+        "destination": "/services/ac-service",
+        "type": 301
+      },
+      {
+        "source": "/services/ac-installation",
+        "destination": "/services/ac-service",
+        "type": 301
+      },
+      {
+        "source": "/services/ac-repair/**",
+        "destination": "/services/ac-service",
+        "type": 301
+      },
+      {
+        "source": "/services/ac-installation/**",
+        "destination": "/services/ac-service",
+        "type": 301
+      },
+      {
+        "source": "/services/electrician",
+        "destination": "/services/electrician-service",
+        "type": 301
+      },
+      {
+        "source": "/services/electrician/**",
+        "destination": "/services/electrician-service",
+        "type": 301
+      },
+      {
+        "source": "/services/details/:serviceId",
+        "destination": "/services",
+        "type": 301
+      },
+      {
+        "source": "/services/:service-sector-:sector",
+        "destination": "/services/:service",
+        "type": 301
+      },
+      {
+        "source": "/services/:service/sector-:sector",
+        "destination": "/services/:service",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/ace-city",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/ace-divino",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/fusion-homes",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/mahagun-mywoods",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/palm-olympia",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/supertech-eco-village-1",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/supertech-eco-village-2",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/supertech-eco-village-3",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/cherry-county",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/ajnara-homes",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/nirala-estate",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/la-residentia",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/panchsheel-greens",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/stellar-jeevan",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/alpha-1",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/alpha-2",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/beta-1",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/beta-2",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/delta-1",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/delta-2",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/pari-chowk",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/surajpur",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/dadri",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/noida-sector-15",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/noida-sector-50",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/noida-sector-76",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/noida-sector-137",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/services/:serviceSlug/kaushambi",
+        "destination": "/services/:serviceSlug",
+        "type": 301
+      },
+      {
+        "source": "/blog/ac-cooling-kam-kyun-kar-raha-hai",
+        "destination": "/blog/why-ac-cooling-drops",
+        "type": 301
+      },
+      {
+        "source": "/blog/ac-low-cooling-problem",
+        "destination": "/blog/why-ac-cooling-drops",
+        "type": 301
       }
     ],
     "rewrites": [

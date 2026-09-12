@@ -9,6 +9,7 @@ const BASE_URL = 'https://www.kselectrical.in';
 
 const staticRoutes = [
   '/',
+  '/sell-old-ac',
   '/ac-on-rent',
   '/services',
   '/about',
@@ -20,9 +21,14 @@ const staticRoutes = [
   '/privacy-policy',
   '/terms-and-cond',
   '/anti-discrimination',
+  '/emergency-electrician',
+  '/we-serve',
+  '/book',
+  '/shop'
 ];
 
-const serviceRoutes = [
+// Primary category landing routes (Rate Cards)
+const serviceCategoryRoutes = [
   '/services/ac-service',
   '/services/ro-service',
   '/services/electrician-service',
@@ -36,6 +42,65 @@ const serviceRoutes = [
   '/services/microwave-service'
 ];
 
+// 55 Specific core service detail pages (from serviceCatalog)
+const coreServiceDetailRoutes = [
+  '/services/ac-uninstallation',
+  '/services/ac-jet-wash',
+  '/services/ac-gas-refill',
+  '/services/fan-installation',
+  '/services/fan-uninstallation',
+  '/services/fan-repair',
+  '/services/bldc-fan-installation',
+  '/services/bldc-fan-uninstallation',
+  '/services/bldc-fan-service',
+  '/services/decorative-fan-installation',
+  '/services/decorative-fan-uninstallation',
+  '/services/decorative-fan-repair',
+  '/services/bulb-holder-installation',
+  '/services/bulb-holder-repair',
+  '/services/tube-light-installation',
+  '/services/tube-light-repair',
+  '/services/tube-light-uninstallation',
+  '/services/decorative-wall-light-installation',
+  '/services/decorative-light-repair',
+  '/services/ceiling-panel-light-installation',
+  '/services/chandelier-installation',
+  '/services/ceiling-light-repair',
+  '/services/switch-socket-repair',
+  '/services/switchboard-repair',
+  '/services/new-switchbox-installation',
+  '/services/mcb-upgrade',
+  '/services/house-wiring-tracing',
+  '/services/doorbell-intercom-repair',
+  '/services/inverter-battery-service',
+  '/services/ro-repair',
+  '/services/ro-filter-service',
+  '/services/ro-installation',
+  '/services/ro-uninstallation',
+  '/services/washing-machine-repair-diagnostics',
+  '/services/washing-machine-installation',
+  '/services/washing-machine-uninstallation',
+  '/services/washing-machine-deep-clean',
+  '/services/geyser-repair',
+  '/services/geyser-maintenance',
+  '/services/geyser-installation',
+  '/services/geyser-uninstallation',
+  '/services/refrigerator-repair-diagnostics',
+  '/services/single-door-fridge-gas-charging',
+  '/services/double-door-fridge-gas-charging',
+  '/services/refrigerator-deep-cleaning',
+  '/services/microwave-repair',
+  '/services/microwave-cleaning',
+  '/services/kitchen-chimney-repair',
+  '/services/kitchen-chimney-installation',
+  '/services/kitchen-chimney-uninstallation',
+  '/services/kitchen-chimney-service',
+  '/services/balcony-pigeon-net-installation',
+  '/services/plumbing-utilities',
+  '/services/carpentry-adjustments-repairs',
+  '/services/gypsum-false-ceiling-service'
+];
+
 const blogRoutes = [
   '/blog/how-often-should-we-do-ac-service',
   '/blog/why-ac-cooling-drops',
@@ -46,11 +111,9 @@ const blogRoutes = [
   '/blog/short-circuit-mcb-tripping-prevention-tips'
 ];
 
-// Generate dynamic local landing routes (13 services x 38 locations)
+// 11 Core Service Categories x 10 High-Intent Regional Hubs (110 curated local routes)
 const localServices = [
   'ac-service',
-  'ac-repair',
-  'ac-installation',
   'ro-service',
   'electrician-service',
   'washing-machine-repair',
@@ -64,48 +127,16 @@ const localServices = [
 ];
 
 const localLocations = [
-  // Greater Noida West / Gaur City priority areas
   'gaur-city-1',
   'gaur-city-2',
   'noida-extension',
   'greater-noida-west',
-  'ace-city',
-  'ace-divino',
-  'fusion-homes',
-  'mahagun-mywoods',
-  'palm-olympia',
-  'supertech-eco-village-1',
-  'supertech-eco-village-2',
-  'supertech-eco-village-3',
-  'cherry-county',
-  'ajnara-homes',
-  'nirala-estate',
-  'la-residentia',
-  'panchsheel-greens',
-  'stellar-jeevan',
-  // Greater Noida sectors
-  'alpha-1',
-  'alpha-2',
-  'beta-1',
-  'beta-2',
-  'delta-1',
-  'delta-2',
-  'pari-chowk',
-  'surajpur',
-  'dadri',
-  // Noida priority sectors
-  'noida-sector-62',
-  'noida-sector-15',
-  'noida-sector-50',
-  'noida-sector-76',
-  'noida-sector-137',
-  // Ghaziabad priority areas
+  'crossings-republik',
   'indirapuram',
   'vaishali',
   'vasundhara',
-  'kaushambi',
   'raj-nagar-extension',
-  'crossings-republik'
+  'noida-sector-62'
 ];
 
 const localLandingRoutes = [];
@@ -132,13 +163,23 @@ function generateSitemap() {
     xml += '  </url>\n';
   });
 
-  // Add service category routes
-  serviceRoutes.forEach(route => {
+  // Add service category rate card routes
+  serviceCategoryRoutes.forEach(route => {
     xml += '  <url>\n';
     xml += `    <loc>${BASE_URL}${route}</loc>\n`;
     xml += `    <lastmod>${today}</lastmod>\n`;
     xml += '    <changefreq>weekly</changefreq>\n';
     xml += '    <priority>0.9</priority>\n';
+    xml += '  </url>\n';
+  });
+
+  // Add 55 specific core service detail routes
+  coreServiceDetailRoutes.forEach(route => {
+    xml += '  <url>\n';
+    xml += `    <loc>${BASE_URL}${route}</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += '    <changefreq>weekly</changefreq>\n';
+    xml += '    <priority>0.85</priority>\n';
     xml += '  </url>\n';
   });
 
@@ -174,6 +215,15 @@ function generateSitemap() {
   const sitemapPath = path.join(distDir, 'sitemap.xml');
   fs.writeFileSync(sitemapPath, xml);
   console.log(`Sitemap generated successfully at ${sitemapPath}!`);
+
+  // Also write to public/sitemap.xml for development/static persistence
+  const publicSitemapPath = path.join(__dirname, '../public/sitemap.xml');
+  try {
+    fs.writeFileSync(publicSitemapPath, xml);
+    console.log(`Sitemap mirrored to ${publicSitemapPath}!`);
+  } catch {
+    // Ignore error if public dir not writable
+  }
 
   // Generate 404.html routing fallback for GitHub Pages
   const indexPath = path.join(distDir, 'index.html');

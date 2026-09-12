@@ -132,6 +132,12 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
                 </Link>
               </li>
               <li>
+                <Link to="/sell-old-ac" className="text-amber-400 font-bold hover:text-white transition-colors hover:underline flex items-center">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full mr-2 animate-pulse" />
+                  <span>Sell Old AC / Scrap Buyback</span>
+                </Link>
+              </li>
+              <li>
                 <Link to="/about" className="text-slate-400 hover:text-white transition-colors hover:underline flex items-center">
                   <span className="w-1.5 h-1.5 bg-brand-orange rounded-full mr-2" />
                   <span>About Us (हमारे बारे में)</span>
@@ -192,19 +198,19 @@ export const Footer: React.FC<FooterProps> = ({ businessConfig }) => {
                 </span>
               </div>
 
-              <div className="flex items-center space-x-3 text-slate-400">
-                <div className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0">
+              {/* Phone — full row is clickable to fix dead click zones */}
+              <a
+                href="tel:7895321472"
+                className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors duration-200 group"
+              >
+                <div className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 group-hover:border-slate-500 flex items-center justify-center text-slate-300 shrink-0 transition-colors">
                   <Phone size={13} />
                 </div>
                 <div className="flex flex-col text-left">
-                  <a href="tel:7895321472" className="hover:text-white transition-colors">
-                    +91 7895321472
-                  </a>
-                  <a href="tel:9625724903" className="hover:text-white transition-colors">
-                    +91 9625724903
-                  </a>
+                  <span>+91 7895321472</span>
+                  <span>+91 9625724903</span>
                 </div>
-              </div>
+              </a>
 
               <div className="flex items-center space-x-3 text-slate-400">
                 <div className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0">
