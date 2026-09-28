@@ -351,7 +351,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center gap-3">
                 <a
                   href={`tel:${businessConfig.contacts[0]}`}
-                  className="flex-1 flex items-center justify-center px-3 py-2 rounded-md border border-muted-background/50 bg-background hover:bg-accent/50 text-sm font-medium"
+                  className="flex-1 flex items-center justify-center px-3 py-2 rounded-md border border-slate-200/50 bg-background hover:bg-accent/50 text-sm font-medium"
                 >
                   <Phone size={20} />
                   <span>Call Now</span>
@@ -370,7 +370,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* MOBILE STICKY BOTTOM NAVIGATION BAR */}
       {!location.pathname.startsWith('/blog/') && !location.pathname.startsWith('/sell-old-ac') && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-muted-background/50 px-4 py-3 z-50">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-slate-200/50 px-4 py-3 z-50">
           <div className="flex justify-around">
             <Link
               to="/"

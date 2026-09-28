@@ -48,6 +48,16 @@ const getServiceColor = (name: string) => {
   return { dot: 'bg-slate-400', badge: 'bg-slate-50 text-slate-600 border-slate-200' };
 };
 
+const accentBorderClasses: Record<string, string> = {
+  emerald: 'border-l-emerald-500',
+  blue: 'border-l-blue-500',
+  amber: 'border-l-amber-500',
+  green: 'border-l-green-500',
+  red: 'border-l-red-500',
+  purple: 'border-l-purple-500',
+  indigo: 'border-l-indigo-500',
+};
+
 // ─── Loading Skeleton ─────────────────────────────────────────────────────────
 const BillBookSkeleton: React.FC = () => (
   <div className="space-y-6 animate-pulse">
@@ -395,7 +405,7 @@ export const BillBook: React.FC<BillBookProps> = ({
           { label: 'Pending Bills',  value: `${pendCount} Unpaid`,                  icon: <AlertCircle size={16}/>, accent: 'amber', iconBg: 'bg-amber-50 text-amber-700 border-amber-100' },
           { label: 'Amount Paid',    value: `₹${paidVal.toLocaleString('en-IN')}`,  icon: <CheckCircle size={16}/>, accent: 'green', iconBg: 'bg-green-50 text-green-700 border-green-100' },
         ].map((s, i) => (
-          <div key={i} className={`bg-white border border-slate-200 border-l-4 border-l-${s.accent}-500 rounded-xl p-4 flex items-center space-x-3 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]`}>
+          <div key={i} className={`bg-white border border-slate-200 border-l-4 ${accentBorderClasses[s.accent] || 'border-l-blue-500'} rounded-xl p-4 flex items-center space-x-3 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]`}>
             <div className={`w-10 h-10 rounded-lg border flex items-center justify-center font-black text-base shrink-0 ${s.iconBg}`}>
               {s.icon}
             </div>

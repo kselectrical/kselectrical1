@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { Phone, Mail, MapPin, Send } from 'lucide-react';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import type { BusinessConfig } from '../data';
+import { trackLeadEvent } from '../components/ScrollToTop';
+
 
 interface ContactPageProps {
   businessConfig: BusinessConfig;
@@ -78,8 +80,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ businessConfig }) => {
               {/* Phone cards — full card is clickable to fix dead click zones */}
               <a
                 href={`tel:${businessConfig.contacts[0]}`}
+                onClick={() => trackLeadEvent({ method: 'call', page: '/contact' })}
                 className="flex items-start space-x-3.5 bg-white p-4 border border-gray-200 rounded-xl shadow-sm hover:border-brand-blue hover:shadow-md transition-all duration-200 cursor-pointer block"
               >
+
                 <div className="w-10 h-10 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center shrink-0">
                   <Phone size={18} />
                 </div>

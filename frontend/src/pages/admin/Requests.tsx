@@ -102,18 +102,30 @@ export const Requests: React.FC<RequestsProps> = ({
                     
                     {/* Booking ID */}
                     <td className="px-5 py-3.5 text-left min-w-[130px] select-none">
-                      <span className="text-gray-950 font-black block">{booking.id}</span>
+                      <span className="text-gray-950 font-black block font-mono">{booking.id}</span>
                       <span className="text-[9px] text-gray-455 font-bold block mt-1">
                         {getSafeDate(booking.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
+                      {booking.urgency === 'EMERGENCY' && (
+                        <span className="inline-block mt-1 text-[8px] bg-red-100 text-red-700 font-black px-1.5 py-0.5 rounded border border-red-200 uppercase">
+                          🚨 Urgent
+                        </span>
+                      )}
                     </td>
 
                     {/* Customer */}
                     <td className="px-5 py-3.5 text-left min-w-[200px]">
                       <span className="text-gray-900 font-extrabold block text-sm">{booking.customerName}</span>
-                      <span className="text-gray-655 font-bold block mt-0.5">📞 +91 {booking.phone}</span>
-                      <p className="text-[10px] text-gray-400 font-medium leading-normal mt-1 max-w-[180px]">
-                        📍 {booking.address}
+                      <a href={`tel:${booking.phone}`} className="text-blue-600 font-bold block mt-0.5 hover:underline">
+                        📞 +91 {booking.phone}
+                      </a>
+                      {booking.selectedLocation && (
+                        <span className="inline-block mt-1 text-[9px] bg-blue-50 text-blue-700 font-black px-1.5 py-0.2 rounded border border-blue-100 uppercase">
+                          📍 {booking.selectedLocation}
+                        </span>
+                      )}
+                      <p className="text-[10px] text-gray-500 font-medium leading-normal mt-1 max-w-[220px]">
+                        🏠 {booking.address}
                       </p>
                     </td>
 
@@ -128,6 +140,11 @@ export const Requests: React.FC<RequestsProps> = ({
                           </div>
                         ))}
                       </div>
+                      {booking.problemDescription && (
+                        <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-1 mt-1 font-medium italic">
+                          Note: {booking.problemDescription}
+                        </p>
+                      )}
                       <div className="text-[9px] text-gray-400 font-bold mt-1.5 block leading-none">
                         Schedule: <span className="text-gray-700">{booking.dateTime}</span>
                       </div>

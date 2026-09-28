@@ -262,59 +262,136 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-150 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-black text-slate-900 uppercase">Recent Incoming Requests</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Real-time domestic bookings pipeline</p>
+                <h3 className="text-sm font-black text-slate-900 uppercase">Recent Incoming Requests &amp; Leads</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Live domestic bookings pipeline with full customer transparency</p>
               </div>
-              <span className="text-[10px] font-black bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1 rounded-xl uppercase">
-                {pendingBookings.length} Active Pending
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1 rounded-xl uppercase">
+                  {pendingBookings.length} Active Pending
+                </span>
+                <span className="text-[10px] font-black bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 rounded-xl uppercase">
+                  {bookings.length} Total Logs
+                </span>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-150">
-                    <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Date & Time</th>
-                    <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Booking ID &amp; Received</th>
+                    <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Customer &amp; Contact</th>
+                    <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Area &amp; Doorstep Address</th>
                     <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Service Items</th>
+                    <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Preferred Slot</th>
                     <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Amount</th>
                     <th className="px-6 py-3.5 text-[10px] font-black text-slate-550 uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-150">
-                  {bookings.slice(0, 5).map((booking, idx) => (
-                    <tr key={booking.id || idx} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 truncate">
-                        <span className="text-xs font-black text-slate-800 block">{booking.dateTime}</span>
-                        <span className="text-[9px] text-slate-400 font-bold block mt-0.5">{booking.id}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs font-black text-slate-800 block">{booking.customerName}</span>
-                        <span className="text-[10px] text-slate-500 font-bold block mt-0.5">📞 {booking.phone}</span>
-                      </td>
-                      <td className="px-6 py-4 max-w-xs truncate">
-                        <span className="text-xs font-bold text-slate-650 block truncate">
-                          {booking.items.map(i => `${i.serviceName} (x${i.quantity})`).join(', ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs font-black text-slate-800 font-mono">₹{booking.subtotal}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center space-x-1.5 ${
-                          booking.status === 'Completed' 
-                            ? 'bg-green-50 border border-green-200 text-green-700' 
-                            : booking.status === 'Cancelled'
-                            ? 'bg-red-50 border border-red-200 text-red-700'
-                            : 'bg-blue-50 border border-blue-200 text-blue-700 animate-pulse'
-                        }`}>
-                          {booking.status === 'Completed' && <CheckCircle size={10} />}
-                          {booking.status === 'Pending' && <Clock size={10} />}
-                          {booking.status === 'Cancelled' && <XCircle size={10} />}
-                          <span>{booking.status}</span>
-                        </span>
+                  {bookings.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-xs text-slate-400 font-semibold">
+                        No customer bookings logged yet. Any booking from website or WhatsApp will display here live.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    bookings.slice(0, 15).map((booking, idx) => {
+                      const formattedDate = booking.createdAt
+                        ? new Date(booking.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        : 'Recent';
+
+                      return (
+                        <tr key={booking.id || idx} className="hover:bg-slate-50/50 transition-colors">
+                          {/* Booking ID & Received */}
+                          <td className="px-6 py-4 align-top min-w-[130px]">
+                            <span className="text-xs font-black text-slate-900 block font-mono">{booking.id}</span>
+                            <span className="text-[10px] text-slate-400 font-bold block mt-0.5">
+                              🕒 {formattedDate}
+                            </span>
+                            {booking.urgency === 'EMERGENCY' && (
+                              <span className="inline-block mt-1 text-[8px] bg-red-100 text-red-700 font-black px-1.5 py-0.5 rounded border border-red-200 uppercase">
+                                🚨 Urgent
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Customer & Contact */}
+                          <td className="px-6 py-4 align-top min-w-[160px]">
+                            <span className="text-xs font-black text-slate-900 block">{booking.customerName}</span>
+                            <a
+                              href={`tel:${booking.phone}`}
+                              className="text-[11px] text-blue-600 font-bold block mt-0.5 hover:underline"
+                            >
+                              📞 +91 {booking.phone}
+                            </a>
+                            {booking.email && (
+                              <span className="text-[9px] text-slate-400 font-medium block truncate max-w-[160px]">
+                                ✉️ {booking.email}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Area & Doorstep Address */}
+                          <td className="px-6 py-4 align-top max-w-[200px]">
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-blue-50 text-blue-700 font-black px-2 py-0.5 rounded-md border border-blue-100 uppercase">
+                              <MapPin size={10} className="shrink-0" />
+                              {booking.selectedLocation || 'Noida Extension'}
+                            </span>
+                            <p className="text-[11px] text-slate-600 font-semibold leading-snug mt-1.5 line-clamp-2">
+                              {booking.address || 'Address pending'}
+                            </p>
+                          </td>
+
+                          {/* Service Items */}
+                          <td className="px-6 py-4 align-top max-w-[220px]">
+                            <div className="space-y-1">
+                              {(booking.items || []).map((i, itemIdx) => (
+                                <div key={itemIdx} className="text-[11px] font-bold text-slate-800 flex items-center justify-between">
+                                  <span className="truncate pr-2">• {i.serviceName}</span>
+                                  <span className="text-[10px] text-slate-400 font-black shrink-0">x{i.quantity}</span>
+                                </div>
+                              ))}
+                            </div>
+                            {booking.problemDescription && (
+                              <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-1 mt-1 font-medium italic">
+                                Note: {booking.problemDescription}
+                              </p>
+                            )}
+                          </td>
+
+                          {/* Preferred Slot */}
+                          <td className="px-6 py-4 align-top min-w-[140px]">
+                            <span className="text-xs font-bold text-slate-800 block">
+                              📅 {booking.dateTime || 'Not specified'}
+                            </span>
+                          </td>
+
+                          {/* Amount */}
+                          <td className="px-6 py-4 align-top min-w-[90px]">
+                            <span className="text-xs font-black text-slate-900 font-mono block">
+                              ₹{(booking.subtotal || 0).toLocaleString('en-IN')}
+                            </span>
+                          </td>
+
+                          {/* Status */}
+                          <td className="px-6 py-4 align-top min-w-[110px]">
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center space-x-1.5 ${
+                              booking.status === 'Completed' 
+                                ? 'bg-green-50 border border-green-200 text-green-700' 
+                                : booking.status === 'Cancelled'
+                                ? 'bg-red-50 border border-red-200 text-red-700'
+                                : 'bg-blue-50 border border-blue-200 text-blue-700 animate-pulse'
+                            }`}>
+                              {booking.status === 'Completed' && <CheckCircle size={10} />}
+                              {booking.status === 'Pending' && <Clock size={10} />}
+                              {booking.status === 'Cancelled' && <XCircle size={10} />}
+                              <span>{booking.status}</span>
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

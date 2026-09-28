@@ -30,6 +30,7 @@ export interface BookingData {
   subtotal: number;
   status: 'Pending' | 'Completed' | 'Cancelled';
   createdAt: string;
+  urgency?: 'ROUTINE' | 'EMERGENCY' | string;
   email?: string;
   termsAndConditions?: string;
   problemDescription?: string;
@@ -186,20 +187,35 @@ if (isFirebaseConfigured) {
   };
 
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  
-  // Enable persistent local cache with multi-tab support
-  db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager()
-    })
-  });
-  
+
+  // Enable persistent local cache with multi-tab support.
+  // Wrapped in try-catch: if IndexedDB is corrupted/blocked (9% JS error rate
+  // seen in Clarity), fall back to in-memory Firestore so the app still works.
+  try {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    });
+    console.log("🔥 Firebase Web Client initialized with Multi-Tab Offline Cache.");
+  } catch (indexedDbError) {
+    console.warn("⚠️ IndexedDB persistence unavailable (possibly corrupted). Falling back to in-memory Firestore.", indexedDbError);
+    try {
+      // Fallback: use getFirestore() without persistent cache (already imported above)
+      const { getFirestore } = await import('firebase/firestore');
+      db = getFirestore(app);
+      console.log("🔥 Firebase Web Client initialized in In-Memory (no persistence) mode.");
+    } catch (fallbackError) {
+      console.error("❌ Firebase Firestore failed to initialize:", fallbackError);
+    }
+  }
+
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
-  console.log("🔥 Firebase Web Client initialized with Multi-Tab Offline Cache.");
 } else {
   console.warn("⚠️ Firebase environment keys are missing. Running in Simulated LocalStorage Database Mode.");
 }
+
 
 export const signOutUser = async (): Promise<void> => {
   if (isFirebaseConfigured && auth) {
@@ -548,9 +564,11 @@ export const saveBookingToCloud = async (booking: Omit<BookingData, 'id' | 'crea
       await setDoc(doc(db, 'bookings', newBooking.id), sanitizeForFirestore(newBooking));
       console.log(`☁️ Booking ${newBooking.id} saved to Firestore.`);
       
-      // 2. Create/Update Customer Record (Only if authenticated to avoid guest permissions errors)
+      // 2. Create/Update Customer Record for ALL bookings (guest + logged-in)
+      // Previously this block was gated on auth?.currentUser — but that meant
+      // 90%+ guest bookings never created a customer profile. Fixed now.
       const phoneKey = newBooking.phone.trim();
-      if (phoneKey && auth?.currentUser) {
+      if (phoneKey) {
         try {
           const custRef = doc(db, 'Customers', phoneKey);
           const custSnap = await getDoc(custRef);
@@ -562,7 +580,7 @@ export const saveBookingToCloud = async (booking: Omit<BookingData, 'id' | 'crea
             price: item.price
           }));
 
-          const activeEmail = auth.currentUser.email || '';
+          const activeEmail = auth?.currentUser?.email || '';
 
           if (custSnap.exists()) {
             const existing = custSnap.data() as CustomerUser;
@@ -570,17 +588,21 @@ export const saveBookingToCloud = async (booking: Omit<BookingData, 'id' | 'crea
             await setDoc(custRef, {
               ...existing,
               name: newBooking.customerName,
-              address: newBooking.address,
+              // Preserve existing address if new booking has a placeholder
+              address: newBooking.address && !newBooking.address.includes('pending')
+                ? newBooking.address
+                : (existing.address || newBooking.address),
               serviceHistory: updatedHistory,
               lastBookingDate: newBooking.createdAt,
-              totalBookings: (existing.totalBookings || 0) + 1
+              totalBookings: (existing.totalBookings || 0) + 1,
+              ...(activeEmail && { email: activeEmail })
             }, { merge: true });
           } else {
             const newCustomer: CustomerUser = {
               name: newBooking.customerName,
               phone: phoneKey,
-              email: activeEmail || undefined,
-              address: newBooking.address,
+              ...(activeEmail && { email: activeEmail }),
+              address: newBooking.address || '',
               serviceHistory: newServiceItems,
               lastBookingDate: newBooking.createdAt,
               totalBookings: 1,
@@ -880,7 +902,13 @@ export const getInvoicesFromCloud = async (): Promise<BookingData[]> => {
    6. CUSTOMERS COLLECTION
    ========================================== */
 
-export const saveCustomerToCloud = async (user: { name: string; phone: string; photoUrl?: string }): Promise<CustomerUser> => {
+export const saveCustomerToCloud = async (user: {
+  name: string;
+  phone: string;
+  photoUrl?: string;
+  address?: string;
+  email?: string;
+}): Promise<CustomerUser> => {
   const phoneKey = user.phone.trim().replace(/\D/g, '');
   const joinedAt = new Date().toISOString();
   
@@ -889,35 +917,44 @@ export const saveCustomerToCloud = async (user: { name: string; phone: string; p
     phone: phoneKey,
     photoUrl: user.photoUrl || '/profile.webp',
     joinedAt,
-    address: '',
+    address: user.address || '',
+    email: user.email,
     serviceHistory: [],
     totalBookings: 0,
     lastBookingDate: joinedAt
   };
 
-  if (isFirebaseConfigured && db) {
+  if (isFirebaseConfigured && db && phoneKey) {
     try {
       const docRef = doc(db, 'Customers', phoneKey);
       const existing = await getDoc(docRef);
       
       const currentJoinedAt = existing.exists() ? existing.data().joinedAt : joinedAt;
-      const address = existing.exists() ? (existing.data().address || '') : '';
-      const serviceHistory = existing.exists() ? (existing.data().serviceHistory || []) : [];
-      const totalBookings = existing.exists() ? (existing.data().totalBookings || 0) : 0;
-      const lastBookingDate = existing.exists() ? (existing.data().lastBookingDate || currentJoinedAt) : currentJoinedAt;
+      const existingData = existing.exists() ? existing.data() : null;
+      const address = user.address && !user.address.includes('pending')
+        ? user.address
+        : (existingData?.address || user.address || '');
+      const email = user.email || existingData?.email || undefined;
+      const serviceHistory = existingData?.serviceHistory || [];
+      const totalBookings = existingData?.totalBookings || 0;
+      const lastBookingDate = existingData?.lastBookingDate || currentJoinedAt;
+      const finalName = user.name && !user.name.includes('pending')
+        ? user.name
+        : (existingData?.name || user.name || 'Customer');
 
       const fullCustomer: CustomerUser = {
-        name: user.name,
+        name: finalName,
         phone: phoneKey,
-        photoUrl: user.photoUrl || '/profile.webp',
+        photoUrl: user.photoUrl || existingData?.photoUrl || '/profile.webp',
         joinedAt: currentJoinedAt,
         address,
+        ...(email && { email }),
         serviceHistory,
         totalBookings,
         lastBookingDate
       };
 
-      await setDoc(docRef, fullCustomer);
+      await setDoc(docRef, fullCustomer, { merge: true });
       console.log(`☁️ Customer ${phoneKey} synced in Firestore Customers collection.`);
       return fullCustomer;
     } catch (e) {

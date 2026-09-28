@@ -68,6 +68,7 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
   const [itemQty, setItemQty] = useState('1');
   const [itemGst, setItemGst] = useState('0');
   const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const itemNameRef = useRef<HTMLInputElement>(null);
 
@@ -142,10 +143,24 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
   // ── Submit (Create OR Update) ─────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!manualCustomerName.trim()) { alert('Please enter customer name.'); return; }
-    if (!manualPhone.trim() || manualPhone.length < 10) { alert('Please enter a valid 10-digit phone number.'); return; }
-    if (!manualAddress.trim()) { alert('Please enter customer address.'); return; }
-    if (manualItems.length === 0) { alert('Please add at least one item or service to the invoice.'); return; }
+    setSubmitError('');
+
+    if (!manualCustomerName.trim()) {
+      setSubmitError('⚠️ Please enter customer name.');
+      return;
+    }
+    if (!manualPhone.trim() || manualPhone.length < 10) {
+      setSubmitError('⚠️ Please enter a valid 10-digit phone number.');
+      return;
+    }
+    if (!manualAddress.trim()) {
+      setSubmitError('⚠️ Please enter customer address.');
+      return;
+    }
+    if (manualItems.length === 0) {
+      setSubmitError('⚠️ Please add at least one item or service to the invoice.');
+      return;
+    }
 
     const subtotal = manualItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -531,23 +546,43 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end space-x-3 pt-5 border-t border-slate-200 select-none">
-          <button type="button" onClick={() => navigate('/admin/billbook')}
-            className="px-5 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 text-slate-700 rounded-lg text-xs font-black shadow-sm cursor-pointer border-b-2 border-b-slate-400 active:border-b-0">
-            Cancel
-          </button>
-          <button type="submit" disabled={isSaving}
-            className={`px-6 py-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 text-white rounded-lg text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg border-b-2 active:border-b-0 cursor-pointer flex items-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed ${
-              isEditMode
-                ? 'bg-blue-600 hover:bg-blue-500 border-blue-800'
-                : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-800'
-            }`}>
-            {isEditMode
-              ? <><Pencil size={13} className="stroke-[3]" /><span>{isSaving ? 'Saving...' : 'Save Changes'}</span></>
-              : <><ShoppingCart size={13} className="stroke-[3]" /><span>{isSaving ? 'Saving...' : 'Generate & Download Invoice'}</span></>
-            }
-          </button>
+        <div className="flex flex-col gap-3 pt-5 border-t border-slate-200 select-none">
+          {/* Inline validation error banner */}
+          {submitError && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-xs font-bold px-4 py-2.5 rounded-lg">
+              <span className="shrink-0">❌</span>
+              {submitError}
+            </div>
+          )}
+          <div className="flex justify-end space-x-3">
+            <button type="button" onClick={() => navigate('/admin/billbook')}
+              disabled={isSaving}
+              className="px-5 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 text-slate-700 rounded-lg text-xs font-black shadow-sm cursor-pointer border-b-2 border-b-slate-400 active:border-b-0 disabled:opacity-50 disabled:cursor-not-allowed">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSaving}
+              className={`px-6 py-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 text-white rounded-lg text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg border-b-2 active:border-b-0 cursor-pointer flex items-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none ${
+                isEditMode
+                  ? 'bg-blue-600 hover:bg-blue-500 border-blue-800'
+                  : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-800'
+              }`}>
+              {isSaving ? (
+                <>
+                  <svg className="animate-spin h-3.5 w-3.5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span>{isEditMode ? 'Saving Changes...' : 'Generating Invoice...'}</span>
+                </>
+              ) : isEditMode ? (
+                <><Pencil size={13} className="stroke-[3]" /><span>Save Changes</span></>
+              ) : (
+                <><ShoppingCart size={13} className="stroke-[3]" /><span>Generate &amp; Download Invoice</span></>
+              )}
+            </button>
+          </div>
         </div>
+
       </form>
     </div>
   );

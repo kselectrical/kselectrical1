@@ -435,7 +435,7 @@ export const SellOldAcPage: React.FC<SellOldAcPageProps> = ({ businessConfig }) 
               </span>
               <h3 className="font-extrabold text-base text-slate-900">Call or Send Photos</h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Call us at <strong>+91 ${primaryPhone}</strong> or send quick photos of your AC unit on WhatsApp.
+                Call us at <strong>{`+91 ${primaryPhone}`}</strong> or send quick photos of your AC unit on WhatsApp.
               </p>
             </div>
 
@@ -478,7 +478,7 @@ export const SellOldAcPage: React.FC<SellOldAcPageProps> = ({ businessConfig }) 
               className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3.5 rounded-xl text-sm shadow-md transition-all active:scale-95 cursor-pointer"
             >
               <Phone size={16} />
-              <span>Schedule Free Inspection Visit (+91 ${primaryPhone})</span>
+              <span>{`Schedule Free Inspection Visit (+91 ${primaryPhone})`}</span>
             </a>
           </div>
 
@@ -599,7 +599,7 @@ export const SellOldAcPage: React.FC<SellOldAcPageProps> = ({ businessConfig }) 
               className="bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 font-black px-6 py-3.5 rounded-xl text-sm shadow-lg flex items-center gap-2 transition-all cursor-pointer"
             >
               <Phone size={18} className="fill-slate-950" />
-              <span>Call: +91 ${primaryPhone}</span>
+              <span>{`Call: +91 ${primaryPhone}`}</span>
             </a>
             <a
               href={whatsappUrl}

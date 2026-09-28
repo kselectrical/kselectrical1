@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft, ShieldAlert, Wrench, MessageCircle } from 'lucide-react';
 import type { CartItem } from '../types';
 import type { BusinessConfig } from '../data';
-import { auth, isFirebaseConfigured, getCustomerByPhoneFromDb } from '../firebase';
+import { auth, isFirebaseConfigured, getCustomerByPhoneFromDb, saveCustomerToCloud } from '../firebase';
 
 interface BookingFormProps {
   cart: Record<string, CartItem>;
@@ -16,6 +16,7 @@ interface BookingFormProps {
     address: string;
     selectedLocation: string;
     dateTime: string;
+    urgency?: string;
     items: {
       serviceId: string;
       serviceName: string;
@@ -124,6 +125,13 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         }));
       }
 
+      // Upload/Sync customer immediately to Firestore so number is logged on server!
+      saveCustomerToCloud({
+        name: formData.name || existing?.name || 'Customer',
+        phone: clean,
+        address: formData.address || existing?.address || ''
+      }).catch(console.warn);
+
       // Early lead capture — save partial booking data the moment a valid phone is entered
       // This preserves the lead even if the user abandons before completing address
       const currentData = { ...formData, phone: clean };
@@ -135,6 +143,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
             address: currentData.address || '(Address pending)',
             selectedLocation: selectedLocation,
             dateTime: `${currentData.date} at ${currentData.timeSlot.split('(')[0].trim()}`,
+            urgency: formData.urgency,
             items: cartItems.map(item => ({
               serviceId: item.serviceId,
               serviceName: item.serviceName,
@@ -251,6 +260,7 @@ Please dispatch a technician. Thank you!`;
         address: formData.address,
         selectedLocation: selectedLocation,
         dateTime: `${formData.date} at ${formData.timeSlot.split('(')[0].trim()}`,
+        urgency: formData.urgency,
         items: cartItems.map(item => ({
           serviceId: item.serviceId,
           serviceName: item.serviceName,
@@ -292,6 +302,39 @@ Please dispatch a technician. Thank you!`;
       // Clear global cart state
       onClearCart();
     }
+  };
+
+  const handleQuickWhatsApp = () => {
+    try {
+      onSubmitBooking({
+        customerName: formData.name || 'Quick Booking Customer',
+        phone: formData.phone,
+        address: formData.address || 'Address pending (WhatsApp Quick Booking)',
+        selectedLocation: selectedLocation,
+        dateTime: `${formData.date} at ${formData.timeSlot.split('(')[0].trim()}`,
+        urgency: formData.urgency,
+        items: cartItems.map(item => ({
+          serviceId: item.serviceId,
+          serviceName: item.serviceName,
+          price: item.price,
+          quantity: item.quantity,
+          brand: item.brand
+        })),
+        subtotal: finalCalculatedPrice
+      });
+      saveCustomerToCloud({
+        name: formData.name || 'Quick Booking Customer',
+        phone: formData.phone,
+        address: formData.address || ''
+      }).catch(console.warn);
+    } catch (e) {
+      console.warn('Error saving quick whatsapp booking:', e);
+    }
+
+    const quickMsg = `*Quick Booking Request - KS Electrical*\n*Name:* ${formData.name || 'Customer'}\n*Phone:* ${formData.phone}\n*Services:* ${cartItems.map(i => i.serviceName).join(', ')}\n*Date:* ${formData.date}\n*Slot:* ${formData.timeSlot}\n*Estimated Total:* ₹${finalCalculatedPrice}\n\nPlease confirm address & dispatch technician. Thank you!`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(quickMsg)}`;
+    window.open(whatsappUrl, '_blank');
+    onClearCart();
   };
 
   const handleReset = () => {
@@ -663,17 +706,14 @@ Please dispatch a technician. Thank you!`;
                     <p className="text-[11px] text-emerald-600 font-medium">
                       We've pre-filled your service, date &amp; slot. Just tap below to send via WhatsApp — our operator will call you to confirm the address.
                     </p>
-                    <a
-                      href={`https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(
-                        `*Quick Booking Request - KS Electrical*\n*Name:* ${formData.name || 'Customer'}\n*Phone:* ${formData.phone}\n*Services:* ${cartItems.map(i => i.serviceName).join(', ')}\n*Date:* ${formData.date}\n*Slot:* ${formData.timeSlot}\n*Estimated Total:* ₹${finalCalculatedPrice}\n\nPlease confirm address &amp; dispatch technician. Thank you!`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={handleQuickWhatsApp}
                       className="inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm tracking-wide shadow-md active:scale-95 transition-all cursor-pointer"
                     >
                       <MessageCircle size={16} className="fill-white shrink-0" />
                       <span>📲 Book Instantly via WhatsApp</span>
-                    </a>
+                    </button>
                     <p className="text-center text-[10px] text-emerald-500 font-semibold">— or fill address below for full confirmation —</p>
                   </div>
                 )}

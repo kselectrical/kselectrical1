@@ -138,9 +138,55 @@ export default {
           gray: "#64748B",
           light: "#F8FAFC",
           silver: "#E2E8F0",
-        }
+        },
+        // ── Intermediate color shades (fine-grained design control) ──
+        slate: {
+          150: '#e9eef5',
+          250: '#d7e0ec',
+          350: '#b0c0d6',
+          450: '#7e93af',
+          550: '#536b88',
+          650: '#3d4f66',
+          750: '#2b384a',
+          850: '#141d2c',
+        },
+        gray: {
+          55: '#f7f8f9',
+          150: '#eceff2',
+          250: '#d9e0e7',
+          350: '#b4c0cc',
+          455: '#808f9f',
+          505: '#6b7a8a',
+          555: '#586776',
+          650: '#435160',
+          655: '#3e4b59',
+          750: '#2a3541',
+        },
+        green: {
+          150: '#dcf5e3',
+          650: '#138640',
+        },
+        red: {
+          150: '#fee5e5',
+          650: '#cb2424',
+        },
+        emerald: {
+          650: '#048758',
+        },
+        blue: {
+          150: '#dbeafe',
+          250: '#bfdbfe',
+          550: '#2b7fff',
+          650: '#1d5ec4',
+        },
+        orange: {
+          650: '#d35400',
+        },
       },
       boxShadow: {
+        '3xs': '0 1px 2px 0 rgba(0, 0, 0, 0.02)',
+        '2xs': '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+        'xs': '0 1px 4px 0 rgba(0, 0, 0, 0.06)',
         'sm': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
         'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
         'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
@@ -154,6 +200,16 @@ export default {
         'button': '0 12px 24px -12px rgba(15, 23, 42, 0.22)',
         'soft': '0 10px 25px -16px rgba(15, 23, 42, 0.18)',
         'none': 'none',
+        'premium': '0 8px 30px -8px rgba(249,115,22,0.15), 0 4px 12px -4px rgba(0,0,0,0.08)',
+        'glow-orange': '0 0 20px rgba(249,115,22,0.25)',
+      },
+      backdropBlur: {
+        'xs': '2px',
+      },
+      scale: {
+        '98': '0.98',
+        '102': '1.02',
+        '103': '1.03',
       },
       borderRadius: {
         'none': '0px',
@@ -169,6 +225,7 @@ export default {
       spacing: {
         'px': '1px',
         '0': '0px',
+        '0.2': '0.05rem',
         '0.5': '0.125rem',
         '1': '0.25rem',
         '1.5': '0.375rem',
@@ -177,6 +234,7 @@ export default {
         '3': '0.75rem',
         '3.5': '0.875rem',
         '4': '1rem',
+        '4.5': '1.125rem',
         '5': '1.25rem',
         '6': '1.5rem',
         '7': '1.75rem',

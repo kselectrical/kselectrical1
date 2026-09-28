@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { BookingForm } from '../components/BookingForm';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { MessageCircle, Phone, ChevronDown, ChevronUp, Zap } from 'lucide-react';
+import { MessageCircle, Phone, ChevronDown, ChevronUp, Zap, AlertCircle } from 'lucide-react';
 import type { CartItem } from '../types';
 import type { BusinessConfig } from '../data';
 import type { BookingData } from '../firebase';
+import { saveCustomerToCloud, getCustomerByPhoneFromDb, auth, isFirebaseConfigured } from '../firebase';
+import { trackLeadEvent } from '../components/ScrollToTop';
+
 
 interface CheckoutPageProps {
   cart: Record<string, CartItem>;
@@ -37,23 +40,157 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
   const [qAddress, setQAddress] = useState('');
   const [qSlot, setQSlot] = useState('');
 
+  // Validation error state
+  const [nameError, setNameError] = useState(false);
+  const [phoneError, setPhoneError] = useState(false);
+
+  // Refs for scroll-to-field on validation error
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+
   const cartItems = Object.values(cart);
   const serviceNames = cartItems.length > 0
     ? cartItems.map(i => i.serviceName).join(', ')
     : 'Home Service';
 
-  const quickWhatsAppUrl = () => {
+  // Auto-fill customer details from session or auth if available
+  React.useEffect(() => {
+    if (isFirebaseConfigured && auth && auth.currentUser) {
+      const u = auth.currentUser;
+      const phone = u.email && u.email.endsWith('@kselectrical.in') ? u.email.split('@')[0] : '';
+      if (u.displayName) setQName(u.displayName);
+      if (phone) setQPhone(phone);
+    } else {
+      const saved = localStorage.getItem('ks_customer_session');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.name) setQName(parsed.name);
+          if (parsed.phone) setQPhone(parsed.phone);
+          if (parsed.address) setQAddress(parsed.address);
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, []);
+
+  // Handle phone input change with auto-lookup and instant server upload
+  const handlePhoneChange = async (val: string) => {
+    const clean = val.replace(/\D/g, '').slice(0, 10);
+    setQPhone(clean);
+    if (phoneError) setPhoneError(false);
+
+    if (clean.length === 10) {
+      // 1. Check server database for existing customer profile and auto-fill!
+      const existing = await getCustomerByPhoneFromDb(clean);
+      if (existing) {
+        if (existing.name && !qName) setQName(existing.name);
+        if (existing.address && !qAddress) setQAddress(existing.address);
+      }
+
+      // 2. Immediately upload/sync customer to server database so the number is saved!
+      saveCustomerToCloud({
+        name: qName.trim() || existing?.name || 'Customer',
+        phone: clean,
+        address: qAddress.trim() || existing?.address || ''
+      }).catch(console.warn);
+    }
+  };
+
+  // ── WhatsApp booking handler ───────────────────────────────────────────────
+  // Saves booking and customer to cloud Firestore, then opens WhatsApp.
+  const handleWhatsAppBook = async () => {
+    // Validate required fields
+    let hasError = false;
+    if (!qName.trim()) {
+      setNameError(true);
+      if (!hasError) nameRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      hasError = true;
+    } else {
+      setNameError(false);
+    }
+    if (!qPhone.trim() || qPhone.length < 10) {
+      setPhoneError(true);
+      if (!hasError) phoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      hasError = true;
+    } else {
+      setPhoneError(false);
+    }
+    if (hasError) return;
+
+    // 1. Calculate price and compile items
+    const cartSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const bookingItems = cartItems.length > 0 ? cartItems.map(item => ({
+      serviceId: item.serviceId,
+      serviceName: item.serviceName,
+      price: item.price,
+      quantity: item.quantity,
+      brand: item.brand
+    })) : [{
+      serviceId: 'quick-service',
+      serviceName: 'Doorstep Service (WhatsApp Inquiry)',
+      price: 299,
+      quantity: 1
+    }];
+
+    // 2. Persist to Firestore server so Admin sees this booking!
+    try {
+      await onSubmitBooking({
+        customerName: qName.trim(),
+        phone: qPhone.trim(),
+        address: qAddress.trim() || 'Address to be confirmed on call',
+        selectedLocation: selectedLocation || 'Noida Extension',
+        dateTime: qSlot ? `Today (${qSlot})` : 'Immediate / Earliest Slot',
+        urgency: 'ROUTINE',
+        items: bookingItems,
+        subtotal: cartSubtotal || 299
+      });
+
+      // Also ensure customer directory has full name and address
+      await saveCustomerToCloud({
+        name: qName.trim(),
+        phone: qPhone.trim(),
+        address: qAddress.trim() || ''
+      });
+    } catch (err) {
+      console.warn('Booking submit error in WhatsApp quick checkout:', err);
+    }
+
+    // 3. Build WhatsApp message with full booking details
     const msg = `*Quick Booking – KS Electrical & AC Services*
 ──────────────────────────
-*Name:* ${qName || '(Not provided)'}
-*Phone:* ${qPhone || '(Not provided)'}
+*Name:* ${qName}
+*Phone:* ${qPhone}
 *Society / Flat:* ${qAddress || '(Not provided)'}
 *Services:* ${serviceNames}
 *Preferred Slot:* ${qSlot || '(Not selected)'}
 ──────────────────────────
 Please dispatch a technician. Thank you!`;
-    return `https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(msg)}`;
+
+    const url = `https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(msg)}`;
+
+    // Fire GA4 lead event before opening WhatsApp
+    trackLeadEvent({
+      method: 'whatsapp',
+      service: serviceNames,
+      page: window.location.pathname,
+    });
+
+    // Open WhatsApp in a new tab — reliable on both mobile and desktop
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
+
+  // ── Call button handler ────────────────────────────────────────────────────
+  const handleCallClick = () => {
+    trackLeadEvent({
+      method: 'call',
+      service: serviceNames,
+      page: window.location.pathname,
+    });
+  };
+
+
 
   return (
     <>
@@ -88,27 +225,49 @@ Please dispatch a technician. Thank you!`;
           <div className="bg-white border border-emerald-200 rounded-2xl shadow-md p-5 space-y-4 text-left">
 
             {/* Name */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider block">Your Name</label>
+            <div className="space-y-1" ref={nameRef as React.RefObject<HTMLDivElement>}>
+              <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider block">
+                Your Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 placeholder="e.g. Ramesh Kumar"
                 value={qName}
-                onChange={e => setQName(e.target.value)}
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all"
+                onChange={e => { setQName(e.target.value); if (nameError) setNameError(false); }}
+                className={`w-full border rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 transition-all ${
+                  nameError
+                    ? 'border-red-400 focus:border-red-400 focus:ring-red-100 bg-red-50'
+                    : 'border-slate-200 focus:border-emerald-400 focus:ring-emerald-100'
+                }`}
               />
+              {nameError && (
+                <p className="flex items-center gap-1 text-[10px] text-red-500 font-bold">
+                  <AlertCircle size={11} /> Please enter your name to continue
+                </p>
+              )}
             </div>
 
             {/* Phone */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider block">Mobile Number</label>
+            <div className="space-y-1" ref={phoneRef as React.RefObject<HTMLDivElement>}>
+              <label className="text-[10px] font-black text-gray-500 uppercase tracking-wider block">
+                Mobile Number <span className="text-red-500">*</span>
+              </label>
               <input
                 type="tel"
                 placeholder="e.g. 7895321472"
                 value={qPhone}
-                onChange={e => setQPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all"
+                onChange={e => handlePhoneChange(e.target.value)}
+                className={`w-full border rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 transition-all ${
+                  phoneError
+                    ? 'border-red-400 focus:border-red-400 focus:ring-red-100 bg-red-50'
+                    : 'border-slate-200 focus:border-emerald-400 focus:ring-emerald-100'
+                }`}
               />
+              {phoneError && (
+                <p className="flex items-center gap-1 text-[10px] text-red-500 font-bold">
+                  <AlertCircle size={11} /> Please enter a valid 10-digit mobile number
+                </p>
+              )}
             </div>
 
             {/* Society / Flat */}
@@ -153,18 +312,19 @@ Please dispatch a technician. Thank you!`;
             )}
 
             {/* CTA Buttons */}
-            <a
-              href={quickWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* WhatsApp button — uses window.open() via handler for reliable mobile behavior */}
+            <button
+              type="button"
+              onClick={handleWhatsAppBook}
               className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm tracking-wide shadow-md active:scale-95 transition-all cursor-pointer"
             >
               <MessageCircle size={17} className="fill-white shrink-0" />
               Book Instantly via WhatsApp
-            </a>
+            </button>
 
             <a
               href={`tel:${businessConfig.contacts[0]}`}
+              onClick={handleCallClick}
               className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm transition-all cursor-pointer"
             >
               <Phone size={15} />
@@ -176,6 +336,7 @@ Please dispatch a technician. Thank you!`;
               🛡️ Technician at doorstep within 30–45 mins · Gaur City &amp; Gr. Noida West
             </p>
           </div>
+
 
           {/* Toggle to full form */}
           <div className="text-center">

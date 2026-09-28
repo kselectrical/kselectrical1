@@ -773,6 +773,9 @@ const App: React.FC = () => {
   const handleBookingSubmit = async (bookingDetails: Omit<BookingData, 'id' | 'createdAt' | 'status'>) => {
     const saved = await saveBookingToCloud(bookingDetails);
     setBookings(prev => [saved, ...prev]);
+    getCustomersFromFirestore().then(custs => {
+      if (custs && custs.length > 0) setCustomers(custs);
+    }).catch(console.warn);
   };
 
   // Tax Invoice PDF Generation Logic

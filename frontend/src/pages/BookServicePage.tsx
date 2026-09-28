@@ -6,7 +6,7 @@ import {
   AlertCircle, ArrowRight, Check, Zap, MessageSquare, PhoneCall
 } from 'lucide-react';
 import { businessConfig } from '../data';
-import { auth, isFirebaseConfigured, getCustomerByPhoneFromDb, saveBookingToCloud } from '../firebase';
+import { auth, isFirebaseConfigured, getCustomerByPhoneFromDb, saveBookingToCloud, saveCustomerToCloud } from '../firebase';
 import type { BookingData } from '../firebase';
 
 const LOCATIONS = ['Greater Noida', 'Gaur City', 'Noida Extension', 'Ghaziabad', 'Delhi NCR'];
@@ -147,6 +147,13 @@ export const BookServicePage: React.FC<BookServicePageProps> = ({ onBookingCompl
         if (!name && existing.name) setName(existing.name);
         if (!address && existing.address) setAddress(existing.address);
       }
+
+      // Immediately save/update customer in Firestore so phone is recorded on server!
+      saveCustomerToCloud({
+        name: name || existing?.name || 'Customer',
+        phone: clean,
+        address: address || existing?.address || ''
+      }).catch(console.warn);
     }
   };
 
