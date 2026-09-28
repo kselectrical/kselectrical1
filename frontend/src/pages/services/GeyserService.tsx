@@ -41,6 +41,38 @@ export const GeyserService: React.FC<GeyserServiceProps> = (props) => {
     }
   ];
 
+  /** Point 1: Geyser-specific clickable symptoms */
+  const symptoms = [
+    {
+      title: "Geyser Not Heating Water",
+      cause: "If the indicator light is ON but water stays cold, the heating element has likely burnt out due to hard-water scale buildup. If the indicator stays OFF, check the thermostat safety cutout (it may have tripped) or the power supply at the MCB panel."
+    },
+    {
+      title: "Water Leaking from Geyser Bottom",
+      cause: "Bottom leakage usually means the pressure relief valve (PRV) is releasing excess pressure — often due to high incoming water pressure above 6 bar. It can also indicate a rusted or cracked internal tank lining that needs immediate replacement."
+    },
+    {
+      title: "Geyser Taking Too Long to Heat",
+      cause: "Slow heating is caused by thick calcium/limescale deposits on the heating element — acting as insulation and blocking heat transfer. A descaling service typically restores heating speed by 40–60%."
+    },
+    {
+      title: "Geyser Making Popping / Sizzling Sounds",
+      cause: "Popping sounds during heating are caused by steam bubbles escaping from under hard mineral deposits crusted on the heating element. This indicates an urgent need for descaling before the element burns out completely."
+    },
+    {
+      title: "Mild Electric Shock or Tingling from Water",
+      cause: "This is an electrical emergency. It means the heating element's insulation has failed, allowing live current to enter the water. Turn off the geyser MCB immediately and call us — do not use the tap until it is fixed."
+    }
+  ];
+
+  /** Point 4: Related services — user can jump to installation or uninstallation in 1 click */
+  const relatedServices = [
+    { label: 'Geyser Installation', path: '/services/geyser-service', icon: '🔧', price: '₹349' },
+    { label: 'Geyser Uninstallation', path: '/services/geyser-service', icon: '🔩', price: '₹199' },
+    { label: 'Electrician Service', path: '/services/electrician-service', icon: '⚡', price: '₹49' },
+    { label: 'RO Water Purifier Service', path: '/services/ro-service', icon: '💧', price: '₹299' }
+  ];
+
   return (
     <BaseServicePage
       {...props}
@@ -50,9 +82,12 @@ export const GeyserService: React.FC<GeyserServiceProps> = (props) => {
       benefits={benefits}
       processSteps={processSteps}
       faqs={faqs}
+      symptoms={symptoms}
+      relatedServices={relatedServices}
       catalogCategory="Appliance Repair"
       catalogSubcategory="Geyser"
     />
   );
 };
 export default GeyserService;
+

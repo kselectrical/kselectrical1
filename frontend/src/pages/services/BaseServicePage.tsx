@@ -175,6 +175,22 @@ interface FAQ {
   a: string;
 }
 
+/** A clickable symptom item shown as accordion above the FAQ section */
+interface Symptom {
+  /** Short symptom label, e.g. "Continuous buzzing" */
+  title: string;
+  /** 1-2 line root cause explanation */
+  cause: string;
+}
+
+/** Related service link for cross-sell section */
+interface RelatedService {
+  label: string;
+  path: string;
+  icon: string;
+  price?: string;
+}
+
 interface BaseServicePageProps {
   serviceSlug: string;
   serviceName: string;
@@ -183,6 +199,10 @@ interface BaseServicePageProps {
   benefits: string[];
   processSteps: string[];
   faqs: FAQ[];
+  /** Optional symptom accordion items shown above FAQs */
+  symptoms?: Symptom[];
+  /** Optional related services for cross-linking at page bottom */
+  relatedServices?: RelatedService[];
   catalogCategory: string;
   catalogSubcategory?: string;
   serviceIdPrefix?: string;
@@ -219,6 +239,8 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
   benefits,
   processSteps,
   faqs,
+  symptoms,
+  relatedServices,
   catalogCategory,
   catalogSubcategory,
   serviceIdPrefix,
@@ -230,6 +252,7 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
 }) => {
   const navigate = useNavigate();
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
+  const [openSymptomIdx, setOpenSymptomIdx] = useState<number | null>(null);
 
   // Filter services belonging to this category and optional subcategory
   const activeCategoryServices = services.filter(s => {
@@ -423,7 +446,37 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
       {/* Breadcrumb path navigation */}
       <Breadcrumbs items={breadcrumbsList} />
 
-      {/* Service Hero section */}
+      {/* ── Point 3: Location & Price Highlight Banner ── */}
+      {/* Prominently shown above the fold so users never have to hunt for coverage area or pricing */}
+      <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2.5 font-sans">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-x-6 gap-y-1.5">
+          <div className="flex items-center gap-2 text-sm font-bold">
+            <span className="text-lg shrink-0" aria-hidden="true">📍</span>
+            <span>
+              Doorstep {serviceName}{' '}
+              <span className="font-black underline underline-offset-2">
+                in Gaur City &amp; Greater Noida West
+              </span>
+              {' '}— within <span className="font-black">60 Minutes</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-xs font-black shrink-0">
+            <span className="bg-white/20 border border-white/30 rounded-lg px-3 py-1 whitespace-nowrap">
+              Starting ₹{activeCategoryServices.length > 0
+                ? Math.min(...activeCategoryServices.map(s => s.price))
+                : 199}
+            </span>
+            <a
+              href={`tel:${businessConfig.contacts[0]}`}
+              className="bg-white text-emerald-700 hover:bg-emerald-50 rounded-lg px-3 py-1 transition-colors whitespace-nowrap active:scale-95"
+            >
+              📞 Call Now
+            </a>
+          </div>
+        </div>
+      </div>
+
+
       <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-b border-slate-900 text-white py-20 px-6 sm:px-12 text-left relative overflow-hidden font-sans">
         
         {/* Decorative premium ambient blobs */}
@@ -560,7 +613,91 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
         </div>
       </div>
 
+      {/* ── Point 1: Symptoms / Problems Accordion ── */}
+      {/* Only rendered when parent page passes a `symptoms` prop.
+          Each symptom expands to show root cause + instant Call/WhatsApp CTA.
+          Users were clicking on symptom text expecting interaction → now it works. */}
+      {symptoms && symptoms.length > 0 && (
+        <div className="bg-amber-50 py-14 border-b border-amber-100 text-left font-sans">
+          <div className="max-w-3xl mx-auto px-6 space-y-6">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-200 rounded-full px-3 py-1 mb-3">
+                <span className="text-amber-600 text-[10px] font-black uppercase tracking-wider">⚠️ Diagnose Your Problem</span>
+              </div>
+              <h2 className="text-gray-900 font-black text-2xl tracking-tight leading-tight">
+                What Problem Is Your {serviceName.split(' ')[0]} Showing?
+              </h2>
+              <p className="text-xs text-gray-500 font-semibold mt-1">
+                Click on a symptom below to understand the cause and get it fixed fast.
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              {symptoms.map((symptom, idx) => {
+                const isOpen = openSymptomIdx === idx;
+                return (
+                  <div
+                    key={idx}
+                    className={`bg-white border rounded-xl overflow-hidden shadow-sm transition-all duration-200 ${
+                      isOpen
+                        ? 'border-amber-400 shadow-amber-100/60 shadow-md'
+                        : 'border-slate-200 hover:border-amber-300'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenSymptomIdx(isOpen ? null : idx)}
+                      aria-expanded={isOpen}
+                      className="w-full flex items-center justify-between px-5 py-4 font-bold text-gray-900 text-xs sm:text-sm hover:bg-amber-50/40 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 pr-4">
+                        <span className="w-7 h-7 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-600 text-[11px] font-black shrink-0 select-none">
+                          {idx + 1}
+                        </span>
+                        <span className="font-extrabold text-gray-800">{symptom.title}</span>
+                      </div>
+                      {isOpen
+                        ? <ChevronUp size={16} className="text-amber-500 shrink-0" />
+                        : <ChevronDown size={16} className="text-gray-400 shrink-0" />
+                      }
+                    </button>
+
+                    {isOpen && (
+                      <div className="px-5 pb-5 pt-1 border-t border-amber-100 bg-amber-50/30 space-y-4 animate-in fade-in slide-in-from-top-1 duration-150">
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
+                          <span className="font-extrabold text-gray-800">Root Cause: </span>
+                          {symptom.cause}
+                        </p>
+                        <div className="flex flex-wrap gap-2.5">
+                          <a
+                            href={`tel:${businessConfig.contacts[0]}`}
+                            className="inline-flex items-center gap-1.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-lg px-4 py-2.5 text-xs font-black uppercase tracking-wide transition-all active:scale-95 shadow-sm"
+                          >
+                            <PhoneCall size={13} />
+                            Fix This Issue — Call Now
+                          </a>
+                          <a
+                            href={`https://wa.me/91${businessConfig.contacts[0]}?text=${encodeURIComponent(`Hi KS Electrical, mera ${serviceName} mein problem hai: "${symptom.title}". Kripya technician bhejein.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-4 py-2.5 text-xs font-black uppercase tracking-wide transition-all active:scale-95 shadow-sm"
+                          >
+                            <MessageCircle size={13} />
+                            WhatsApp for Fix
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* FAQs Segment */}
+
       <div className="bg-gray-50 py-16 border-b border-gray-200 text-left font-sans">
         <div className="max-w-3xl mx-auto px-6 space-y-8 select-none">
           <div className="text-center sm:text-left">
@@ -812,7 +949,52 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
         </div>
       </div>
 
+      {/* ── Point 4: Related Services Cross-Links ── */}
+      {/* Only renders when parent page passes a `relatedServices` prop.
+          Keeps users inside the service funnel with 1-click access to related services
+          (e.g. Geyser Uninstall page → Geyser Repair / Geyser Installation). */}
+      {relatedServices && relatedServices.length > 0 && (
+        <div className="bg-blue-50 py-10 border-b border-blue-100 text-left font-sans select-none">
+          <div className="max-w-4xl mx-auto px-6 space-y-4">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-blue-100 border border-blue-200 rounded-full px-3 py-1 mb-2">
+                <span className="text-blue-600 text-[10px] font-black uppercase tracking-wider">🔗 You Might Also Need</span>
+              </div>
+              <h2 className="text-gray-900 font-black text-xl tracking-tight leading-tight">
+                Related Services — Book in 1 Click
+              </h2>
+              <p className="text-xs text-gray-500 font-semibold mt-0.5">
+                Customers who booked this service also found these helpful:
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {relatedServices.map((rs, idx) => (
+                <Link
+                  key={idx}
+                  to={rs.path}
+                  className="flex items-center gap-3 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-400 rounded-2xl px-4 py-3.5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm group"
+                >
+                  <span className="text-2xl shrink-0">{rs.icon}</span>
+                  <div className="leading-tight min-w-0">
+                    <span className="block text-xs font-extrabold text-gray-800 group-hover:text-blue-700 truncate transition-colors">
+                      {rs.label}
+                    </span>
+                    {rs.price && (
+                      <span className="block text-[10px] text-gray-500 font-bold mt-0.5">
+                        Starting from {rs.price}
+                      </span>
+                    )}
+                  </div>
+                  <ArrowRight size={14} className="ml-auto text-gray-400 group-hover:text-blue-500 shrink-0 transition-colors" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Explore Other Premium Services */}
+
       <div className="bg-white py-12 pb-28 md:pb-12 border-b border-slate-200 text-left font-sans select-none">
         <div className="max-w-4xl mx-auto px-6 space-y-5">
           <h3 className="text-gray-900 font-extrabold text-lg">
@@ -889,31 +1071,6 @@ export const BaseServicePage: React.FC<BaseServicePageProps> = ({
             </a>
           </div>
         </div>
-      </div>
-      {/* ── Sticky Mobile Bottom CTA Bar ── */}
-      {/* Visible only on mobile (md:hidden). Fixed to bottom of viewport. */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.10)] px-3 pt-2.5 pb-3 font-sans">
-        <div className="flex gap-2.5 mb-1.5">
-          <a
-            href={`tel:${businessConfig.contacts[0]}`}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-brand-blue hover:bg-blue-700 text-white rounded-xl py-3 text-xs font-black tracking-wide transition-all active:scale-95 shadow-md"
-          >
-            <PhoneCall size={14} />
-            <span>📞 Call: {businessConfig.contacts[0]}</span>
-          </a>
-          <a
-            href={`https://wa.me/91${businessConfig.contacts[0]}?text=${encodeURIComponent(`Hi KS Electrical, I want to book ${serviceName} at my doorstep in ${displayCity || 'Gaur City / Noida Extension'}. Please confirm availability.`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl py-3 text-xs font-black tracking-wide transition-all active:scale-95 shadow-md"
-          >
-            <MessageCircle size={14} />
-            <span>💬 WhatsApp Booking</span>
-          </a>
-        </div>
-        <p className="text-center text-[9px] text-gray-500 font-semibold leading-none">
-          Technician at doorstep within 30–45 mins · Gaur City &amp; Gr. Noida West
-        </p>
       </div>
     </>
   );
