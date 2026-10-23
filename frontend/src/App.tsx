@@ -24,6 +24,7 @@ import { AdminLayout } from './layouts/AdminLayout';
 // Shared Components
 import { LoginModal } from './components/LoginModal';
 import { CustomerProfileModal } from './components/CustomerProfileModal';
+import { PriceConfirmationModal } from './components/PriceConfirmationModal';
 import { ScrollToTop } from './components/ScrollToTop';
 
 // Pages - Lazy loaded with auto-retry on stale chunk load errors
@@ -349,6 +350,7 @@ const App: React.FC = () => {
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPriceConfirmModal, setShowPriceConfirmModal] = useState(false);
   const [loginTriggerSource, setLoginTriggerSource] = useState<'navbar' | 'checkout' | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
@@ -815,6 +817,7 @@ const App: React.FC = () => {
     const saved = await saveBookingToCloud(bookingDetails);
     setCustomerRequests(prev => [saved, ...prev]);
     setBookings(prev => [saved, ...prev]);
+    setShowPriceConfirmModal(true);
     getCustomersFromFirestore().then(custs => {
       if (custs && custs.length > 0) setCustomers(custs);
     }).catch(console.warn);
@@ -1505,6 +1508,12 @@ const App: React.FC = () => {
         currentUser={currentUser}
         bookings={bookings}
         onLogout={handleLogout}
+      />
+
+      {/* Mandatory Price Confirmation Notice Modal */}
+      <PriceConfirmationModal
+        isOpen={showPriceConfirmModal}
+        onClose={() => setShowPriceConfirmModal(false)}
       />
 
       {/* Mobile Sticky Bottom Checkout Bar */}

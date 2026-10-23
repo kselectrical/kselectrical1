@@ -355,6 +355,19 @@ PLEASE DISPATCH NEAREST TECHNICIAN IMMEDIATELY!`;
                 <p className="text-slate-300 text-xs max-w-md mx-auto">
                   Our emergency dispatch manager is calling your phone now. Nearest technician dispatched to your location.
                 </p>
+
+                <div className="bg-amber-950/70 border border-amber-500/50 rounded-xl p-4 text-left space-y-1.5 max-w-md mx-auto">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-black text-xs uppercase">
+                    <span>⚠️</span>
+                    <span>ज़रूरी सूचना / Price Confirmation Notice</span>
+                  </div>
+                  <p className="text-xs font-bold text-amber-200 leading-snug">
+                    🇮🇳 <strong>कन्फर्म प्राइस फोन करके पता कर लें:</strong> कृपया काम शुरू होने से पहले कॉल (+91 96257 24903) पर फाइनल इमरजेंसी चार्ज जरूर कन्फर्म कर लें।
+                  </p>
+                  <p className="text-[11px] font-medium text-slate-300 leading-snug">
+                    🌐 <strong>Please confirm final price over phone:</strong> Verify final charges with the technician based on on-site inspection before work starts.
+                  </p>
+                </div>
                 <button
                   onClick={() => setSuccessBookingId(null)}
                   className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold"

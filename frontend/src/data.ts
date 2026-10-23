@@ -1485,8 +1485,36 @@ export const servicesData: TechnicalService[] = [
     ]
   },
   {
+    "id": "app-chimney-normal",
+    "name": "Kitchen Chimney Normal Cleaning",
+    "code": "APP-CHM-NORM",
+    "category": "Appliance Repair",
+    "subcategory": "Other Appliances",
+    "description": "Standard baffle & mesh filter cleaning, outer body degreasing, and basic suction inspection.",
+    "iconName": "Flame",
+    "duration": "1 hour",
+    "rating": "4.8 ★ (850 reviews)",
+    "price": 599,
+    "warranty": "30 Days Warranty",
+    "imageUrl": "/images/services/chimney-cleaning-service-greater-noida.webp",
+    "specifications": [
+      {
+        "label": "Filter Wash",
+        "value": "Baffle & mesh wash"
+      },
+      {
+        "label": "Outer Body",
+        "value": "Degreased & wiped"
+      },
+      {
+        "label": "Suction Inspection",
+        "value": "Basic speed check"
+      }
+    ]
+  },
+  {
     "id": "app-chimney-service",
-    "name": "Kitchen Chimney Deep Service",
+    "name": "Kitchen Chimney Deep Cleaning",
     "code": "APP-CHM-SVC",
     "category": "Appliance Repair",
     "subcategory": "Other Appliances",
@@ -1494,9 +1522,9 @@ export const servicesData: TechnicalService[] = [
     "iconName": "Flame",
     "duration": "1.5 hours",
     "rating": "4.9 ★ (1.2k reviews)",
-    "price": 499,
+    "price": 1099,
     "warranty": "30 Days Warranty",
-    "imageUrl": "/images/services/chimney-cleaning-service-greater-noida.webp",
+    "imageUrl": "/images/services/kitchen-chimney-repair-gaur-city.webp",
     "specifications": [
       {
         "label": "Grease Boil Wash",

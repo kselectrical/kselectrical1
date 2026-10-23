@@ -418,12 +418,20 @@ export const serviceCatalog: ServiceCatalogEntry[] = [
     aliases: ['uninstall chimney', 'chimney removal']
   },
   {
+    id: 'app-chimney-normal',
+    title: 'Kitchen Chimney Normal Cleaning',
+    slug: 'kitchen-chimney-normal-cleaning',
+    category: 'Appliance Repair',
+    keywords: ['chimney normal cleaning', 'chimney cleaning', 'basic chimney service'],
+    aliases: ['clean chimney filter', 'chimney service 599']
+  },
+  {
     id: 'app-chimney-service',
-    title: 'Kitchen Chimney Deep Service',
+    title: 'Kitchen Chimney Deep Cleaning',
     slug: 'kitchen-chimney-service',
     category: 'Appliance Repair',
-    keywords: ['chimney service', 'kitchen chimney service', 'chimney cleaning'],
-    aliases: ['clean chimney', 'chimney maintenance']
+    keywords: ['chimney deep service', 'kitchen chimney deep cleaning', 'chimney deep clean'],
+    aliases: ['deep clean chimney', 'chimney maintenance 1099']
   },
   {
     id: 'home-pigeon',

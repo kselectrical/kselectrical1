@@ -398,7 +398,7 @@ export const RICH_SERVICES_MAP: Record<string, RichServiceData> = {
     h1: 'Kitchen Chimney Deep Cleaning & Motor Repair in Greater Noida West',
     simpleExplanation: 'Sticky oil, grease, and soot accumulate inside kitchen chimneys, reducing suction power and creating fire hazards. We provide deep caustic chemical degreasing, baffle filter cleaning, suction motor servicing, and duct pipe repair for Faber, Glen, Hindware, Elica, and Kaff chimneys.',
     detailedOverview: 'Indian cooking involving oil and spices clogs baffle filters and oil collectors within 3 to 6 months. When grease coats the internal blower fan, motor RPM drops, noise increases, and smoke fills the kitchen. Our chimney deep cleaning service disassembles the chimney, washes filters in hot degreasing tanks, and inspects motor bearings.',
-    startingPrice: 499,
+    startingPrice: 599,
     warrantyPeriod: '30 Days Performance Warranty',
     commonProblems: [
       { title: 'Low Suction Power / Smoke in Kitchen', symptom: 'Smoke does not get sucked out while cooking.', solution: 'Deep degreasing of baffle filters, blower wheel, and duct pipe clearance.' },

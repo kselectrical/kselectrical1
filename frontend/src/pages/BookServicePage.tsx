@@ -399,6 +399,20 @@ Please confirm technician dispatch. Thank you!`;
                 </div>
               </div>
 
+              {/* Prominent Bilingual Price Confirmation Box */}
+              <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 text-left space-y-2 shadow-sm">
+                <div className="flex items-center gap-2 text-amber-800 font-black text-xs uppercase">
+                  <span className="text-base">⚠️</span>
+                  <span>ज़रूरी सूचना / Important Price Confirmation Notice</span>
+                </div>
+                <p className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
+                  🇮🇳 <strong>कन्फर्म प्राइस फोन करके पता कर लें:</strong> कृपया काम शुरू होने से पहले हमारे हेल्पलाइन नंबर (+91 96257 24903) पर कॉल करके फाइनल प्राइस जरूर कन्फर्म कर लें।
+                </p>
+                <p className="text-xs font-medium text-slate-600 leading-snug">
+                  🌐 <strong>Please confirm final price over phone:</strong> Kindly call our technician / helpline to verify the exact final price based on inspection before work begins.
+                </p>
+              </div>
+
               {/* Instant WhatsApp / Call CTAs */}
               <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
                 <a

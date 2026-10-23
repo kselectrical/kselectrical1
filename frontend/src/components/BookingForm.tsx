@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft, ShieldAlert, Wrench, MessageCircle } from 'lucide-react';
@@ -863,6 +863,26 @@ Please dispatch a technician. Thank you!`;
                   <div className="border-t border-gray-200 pt-3 text-[10px] text-gray-400 text-center leading-relaxed">
                     Our lead contractor, **Kaushindra Singh**, will call you at **{formData.phone}** shortly to confirm the technician dispatch timings. For queries, contact us at **{businessConfig.contacts[0]}**.
                   </div>
+                </div>
+
+                {/* Prominent Bilingual Price Confirmation Box */}
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 text-left space-y-2 max-w-md mx-auto shadow-sm">
+                  <div className="flex items-center gap-2 text-amber-800 font-black text-xs uppercase">
+                    <span className="text-base">⚠️</span>
+                    <span>ज़रूरी सूचना / Important Price Notice</span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-800 leading-snug">
+                    🇮🇳 <strong>कन्फर्म प्राइस फोन करके पता कर लें:</strong> कृपया काम शुरू होने से पहले हमारे हेल्पलाइन नंबर (+91 96257 24903) पर कॉल करके फाइनल प्राइस जरूर कन्फर्म कर लें।
+                  </p>
+                  <p className="text-[11px] font-medium text-slate-600 leading-snug">
+                    🌐 <strong>Please confirm final price over phone:</strong> Kindly call our helpline or technician to verify the exact final price based on inspection before work begins.
+                  </p>
+                  <a
+                    href="tel:+919625724903"
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors text-center cursor-pointer"
+                  >
+                    <span>📞 कॉल करके रेट कन्फर्म करें (+91 96257 24903)</span>
+                  </a>
                 </div>
 
                 <button
