@@ -10,6 +10,7 @@ import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore'
 
 interface DashboardProps {
   bookings: BookingData[];
+  invoices?: BookingData[];
   customers: CustomerUser[];
   businessConfig: BusinessConfig;
 }
@@ -33,6 +34,7 @@ interface OfflineReview {
 
 export const Dashboard: React.FC<DashboardProps> = ({
   bookings,
+  invoices = [],
   customers,
   businessConfig
 }) => {
@@ -80,16 +82,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   // Stats Calculations
-  const completedBookings = bookings.filter(b => b.status === 'Completed');
-  const pendingBookings = bookings.filter(b => b.status === 'Pending');
+  // Strictly separate customer requests from bill book invoices
+  const customerRequestsList = bookings.filter(b => b && b.sourceType !== 'invoice' && !b.id.startsWith('INV-'));
+  const invoicesList = invoices.length > 0 
+    ? invoices 
+    : bookings.filter(b => b && (b.sourceType === 'invoice' || b.id.startsWith('INV-')));
 
-  const totalRevenue = completedBookings.reduce((sum, b) => sum + (b.subtotal || 0), 0);
-  const totalBookingsCount = bookings.length;
-  const averageOrderValue = completedBookings.length > 0 ? Math.round(totalRevenue / completedBookings.length) : 0;
+  const completedBookings = customerRequestsList.filter(b => b.status === 'Completed');
+  const pendingBookings = customerRequestsList.filter(b => b.status === 'Pending');
+
+  const requestsRevenue = completedBookings.reduce((sum, b) => sum + (b.subtotal || 0), 0);
+  const invoiceRevenue = invoicesList.filter(i => i.status === 'Completed').reduce((sum, i) => sum + (i.subtotal || 0), 0);
+  const totalRevenue = requestsRevenue + invoiceRevenue;
+
+  const totalBookingsCount = customerRequestsList.length;
+  const averageOrderValue = completedBookings.length > 0 ? Math.round(requestsRevenue / completedBookings.length) : 0;
 
   // Group bookings by area
   const areaCounts: Record<string, number> = {};
-  bookings.forEach(b => {
+  customerRequestsList.forEach(b => {
     const area = b.selectedLocation || 'Noida Extension';
     areaCounts[area] = (areaCounts[area] || 0) + 1;
   });
@@ -288,14 +299,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-150">
-                  {bookings.length === 0 ? (
+                  {customerRequestsList.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-6 py-12 text-center text-xs text-slate-400 font-semibold">
                         No customer bookings logged yet. Any booking from website or WhatsApp will display here live.
                       </td>
                     </tr>
                   ) : (
-                    bookings.slice(0, 15).map((booking, idx) => {
+                    customerRequestsList.slice(0, 15).map((booking, idx) => {
                       const formattedDate = booking.createdAt
                         ? new Date(booking.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
                         : 'Recent';

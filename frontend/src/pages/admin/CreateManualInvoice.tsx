@@ -8,19 +8,27 @@ import type { BusinessConfig } from '../../data';
 
 interface CreateManualInvoiceProps {
   services: TechnicalService[];
-  bookings: BookingData[];
-  onUpdateBookings: (updated: BookingData[]) => void;
+  bookings?: BookingData[];
+  invoices?: BookingData[];
+  onUpdateBookings?: (updated: BookingData[]) => void;
+  onUpdateInvoices?: (updated: BookingData[]) => void;
   businessConfig: BusinessConfig;
   handleGenerateInvoice: (booking: BookingData) => void;
 }
 
 export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
   services,
-  bookings,
+  bookings = [],
+  invoices = [],
   onUpdateBookings,
+  onUpdateInvoices,
   businessConfig,
   handleGenerateInvoice
 }) => {
+  const invoiceList = invoices.length > 0
+    ? invoices
+    : bookings.filter(b => b.sourceType === 'invoice' || b.id.startsWith('INV-'));
+  const updateInvoiceState = onUpdateInvoices || onUpdateBookings || (() => {});
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -191,14 +199,14 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
     try {
       if (isEditMode) {
         // UPDATE existing invoice
-        const updated = bookings.map(b => b.id === invoicePayload.id ? invoicePayload : b);
-        onUpdateBookings(updated);
+        const updated = invoiceList.map(b => b.id === invoicePayload.id ? invoicePayload : b);
+        updateInvoiceState(updated);
         await updateInvoiceInCloud(invoicePayload);
         alert(`Invoice ${invoicePayload.id} updated successfully!`);
       } else {
         // CREATE new invoice
-        const updated = [invoicePayload, ...bookings];
-        onUpdateBookings(updated);
+        const updated = [invoicePayload, ...invoiceList];
+        updateInvoiceState(updated);
         await saveInvoiceToCloud(invoicePayload);
         alert(`Invoice ${invoicePayload.id} created successfully! Opening print dialog...`);
         handleGenerateInvoice(invoicePayload);

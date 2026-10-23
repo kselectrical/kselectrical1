@@ -15,6 +15,14 @@ export const Requests: React.FC<RequestsProps> = ({
   handleGenerateInvoice
 }) => {
 
+  // Strict filter: strictly customer service requests only (never invoices/bills)
+  const safeRequests = (bookings || []).filter(b => {
+    if (!b || typeof b !== 'object') return false;
+    if (typeof b.id !== 'string' || !b.id.trim()) return false;
+    if (b.sourceType === 'invoice' || b.id.startsWith('INV-')) return false;
+    return true;
+  });
+
   const getSafeDate = (val: unknown): Date => {
     if (!val) return new Date();
     if (typeof val === 'object' && val !== null && 'toDate' in val && typeof (val as { toDate: unknown }).toDate === 'function') {
@@ -28,7 +36,7 @@ export const Requests: React.FC<RequestsProps> = ({
   };
 
   const handleStatusChange = async (bookingId: string, newStatus: 'Pending' | 'Completed' | 'Cancelled') => {
-    const updated = bookings.map(b => {
+    const updated = safeRequests.map(b => {
       if (b.id === bookingId) {
         return { ...b, status: newStatus };
       }
@@ -38,13 +46,13 @@ export const Requests: React.FC<RequestsProps> = ({
     await updateBookingStatusInCloud(bookingId, newStatus);
   };
 
-  // Stats Calculations
-  const totalRevenue = bookings
+  // Stats Calculations strictly based on customer requests
+  const totalRevenue = safeRequests
     .filter(b => b && b.status === 'Completed')
     .reduce((sum, b) => sum + (b.subtotal || 0), 0);
 
-  const successRate = bookings.length > 0
-    ? Math.round((bookings.filter(b => b && b.status === 'Completed').length / bookings.length) * 100)
+  const successRate = safeRequests.length > 0
+    ? Math.round((safeRequests.filter(b => b && b.status === 'Completed').length / safeRequests.length) * 100)
     : 100;
 
   return (
@@ -55,15 +63,15 @@ export const Requests: React.FC<RequestsProps> = ({
         <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3 flex items-center space-x-3">
           <div className="w-9 h-9 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center"><DollarSign size={18} /></div>
           <div>
-            <span className="text-[9px] text-gray-455 font-black uppercase tracking-wider block">Completed Revenue</span>
+            <span className="text-[9px] text-gray-455 font-black uppercase tracking-wider block">Service Revenue</span>
             <span className="text-gray-900 font-black text-base">₹{totalRevenue}</span>
           </div>
         </div>
         <div className="bg-yellow-50/50 border border-yellow-100 rounded-xl p-3 flex items-center space-x-3">
           <div className="w-9 h-9 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center"><ShoppingBag size={18} /></div>
           <div>
-            <span className="text-[9px] text-gray-455 font-black uppercase tracking-wider block">Total Bookings</span>
-            <span className="text-gray-900 font-black text-base">{bookings.length} orders</span>
+            <span className="text-[9px] text-gray-455 font-black uppercase tracking-wider block">Total Customer Requests</span>
+            <span className="text-gray-900 font-black text-base">{safeRequests.length} requests</span>
           </div>
         </div>
         <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 flex items-center space-x-3">
@@ -76,11 +84,11 @@ export const Requests: React.FC<RequestsProps> = ({
       </div>
 
       {/* Requests table */}
-      {bookings.length === 0 ? (
+      {safeRequests.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl py-16 px-4 text-center shadow-sm select-none">
           <ShoppingBag size={44} className="text-gray-300 stroke-1 mx-auto" />
-          <h3 className="text-gray-900 font-extrabold text-sm mt-3">No bookings received yet</h3>
-          <p className="text-[10px] text-gray-455 mt-1 max-w-xs mx-auto font-medium">When customers make doorstep service requests, their detailed invoices will synchronize here live.</p>
+          <h3 className="text-gray-900 font-extrabold text-sm mt-3">No customer requests received yet</h3>
+          <p className="text-[10px] text-gray-455 mt-1 max-w-xs mx-auto font-medium">When customers make doorstep service requests online, their live service orders will show here.</p>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
@@ -91,13 +99,13 @@ export const Requests: React.FC<RequestsProps> = ({
                   <th className="px-5 py-3.5">Booking / Date</th>
                   <th className="px-5 py-3.5">Customer details</th>
                   <th className="px-5 py-3.5">Services ordered</th>
-                  <th className="px-5 py-3.5 text-right">Invoice Sum</th>
+                  <th className="px-5 py-3.5 text-right">Est. Amount</th>
                   <th className="px-5 py-3.5 text-center">Status</th>
                   <th className="px-5 py-3.5 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-xs text-gray-700 font-medium">
-                {bookings.map((booking, idx) => (
+                {safeRequests.map((booking, idx) => (
                   <tr key={`${booking.id}-${idx}`} className="hover:bg-gray-55 transition-colors">
                     
                     {/* Booking ID */}
@@ -172,14 +180,14 @@ export const Requests: React.FC<RequestsProps> = ({
                     <td className="px-5 py-3.5 text-center min-w-[200px] select-none">
                       <div className="flex items-center justify-center space-x-1.5">
                         
-                        {/* Green print bill button */}
+                        {/* Service receipt button */}
                         <button
                           type="button"
                           onClick={() => handleGenerateInvoice(booking)}
                           className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500 rounded text-[10px] font-black uppercase transition-all shadow-sm cursor-pointer active:scale-95"
-                          title="Generate PDF Receipt"
+                          title="Generate Service Receipt / Slip"
                         >
-                          Bill
+                          Receipt
                         </button>
 
                         <button

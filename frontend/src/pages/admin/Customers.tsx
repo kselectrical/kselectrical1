@@ -9,12 +9,14 @@ import type { CustomerUser, BookingData } from '../../firebase';
 interface CustomersProps {
   customers: CustomerUser[];
   bookings?: BookingData[];
+  invoices?: BookingData[];
   onRefresh?: () => Promise<void>;
 }
 
 export const Customers: React.FC<CustomersProps> = ({ 
   customers, 
   bookings = [],
+  invoices = [],
   onRefresh 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -70,10 +72,15 @@ export const Customers: React.FC<CustomersProps> = ({
   // Customer specific bookings from raw list
   const getCustomerBookingsAndInvoices = (phone: string) => {
     const cp = cleanPhone(phone);
-    const relevant = bookings.filter(b => cleanPhone(b.phone) === cp);
-    const onlineRequests = relevant.filter(b => b.sourceType === 'booking' || (!b.sourceType && !b.id.startsWith('INV-')));
-    const bills = relevant.filter(b => b.sourceType === 'invoice' || b.id.startsWith('INV-'));
-    return { onlineRequests, bills, all: relevant };
+    const relevantBookings = (bookings || []).filter(b => cleanPhone(b.phone) === cp);
+    const relevantInvoices = (invoices || []).filter(i => cleanPhone(i.phone) === cp);
+
+    const onlineRequests = relevantBookings.filter(b => b.sourceType === 'booking' || (!b.sourceType && !b.id.startsWith('INV-')));
+    const bills = [
+      ...relevantInvoices.filter(i => i.sourceType === 'invoice' || i.id.startsWith('INV-')),
+      ...relevantBookings.filter(b => b.sourceType === 'invoice' || b.id.startsWith('INV-'))
+    ];
+    return { onlineRequests, bills, all: [...onlineRequests, ...bills] };
   };
 
   return (

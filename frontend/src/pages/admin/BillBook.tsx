@@ -10,8 +10,10 @@ import type { BookingData } from '../../firebase';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface BillBookProps {
-  bookings: BookingData[];
-  onUpdateBookings: (updated: BookingData[]) => void;
+  invoices?: BookingData[];
+  bookings?: BookingData[];
+  onUpdateInvoices?: (updated: BookingData[]) => void;
+  onUpdateBookings?: (updated: BookingData[]) => void;
   handleGenerateInvoice: (booking: BookingData) => void;
   isDataLoading?: boolean;
 }
@@ -32,7 +34,11 @@ const getSafeDate = (val: unknown): Date => {
 const isBillValid = (b: unknown): b is BookingData => {
   if (!b || typeof b !== 'object') return false;
   const bill = b as Record<string, unknown>;
-  return typeof bill.id === 'string' && bill.id.trim() !== '';
+  if (typeof bill.id !== 'string' || !bill.id.trim()) return false;
+  // Exclude online customer requests explicitly
+  if (bill.sourceType === 'booking' || bill.id.startsWith('BK-')) return false;
+  // Include if tagged as invoice or has INV- prefix
+  return bill.sourceType === 'invoice' || bill.id.startsWith('INV-');
 };
 
 const getServiceColor = (name: string) => {
@@ -288,11 +294,15 @@ const BillCard: React.FC<BillCardProps> = ({ b, onStatusChange, onGenerateInvoic
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export const BillBook: React.FC<BillBookProps> = ({
+  invoices,
   bookings,
+  onUpdateInvoices,
   onUpdateBookings,
   handleGenerateInvoice,
   isDataLoading = false,
 }) => {
+  const currentInvoices = invoices || bookings || [];
+  const handleUpdate = onUpdateInvoices || onUpdateBookings || (() => {});
   const navigate = useNavigate();
   const [billSearchQuery, setBillSearchQuery] = useState('');
   const [billStatusFilter, setBillStatusFilter] = useState<'All' | 'Pending' | 'Completed' | 'Cancelled'>('All');
@@ -314,11 +324,11 @@ export const BillBook: React.FC<BillBookProps> = ({
     return () => clearTimeout(t);
   }, []);
 
-  // ── Safe + filtered bookings (newest first) ──────────────────────────────
+  // ── Safe + filtered invoices (newest first) ──────────────────────────────
   const safeBookings: BookingData[] = (() => {
     try {
-      if (!Array.isArray(bookings)) return [];
-      return [...bookings.filter(isBillValid)].sort(
+      if (!Array.isArray(currentInvoices)) return [];
+      return [...currentInvoices.filter(isBillValid)].sort(
         (a, b) => getSafeDate(b.createdAt).getTime() - getSafeDate(a.createdAt).getTime()
       );
     } catch { return []; }
@@ -369,7 +379,7 @@ export const BillBook: React.FC<BillBookProps> = ({
   // ── Status change ─────────────────────────────────────────────────────────
   const handleStatusChange = async (id: string, newStatus: 'Pending' | 'Completed' | 'Cancelled') => {
     try {
-      onUpdateBookings(safeBookings.map(b => b.id === id ? { ...b, status: newStatus } : b));
+      handleUpdate(safeBookings.map(b => b.id === id ? { ...b, status: newStatus } : b));
       await updateBookingStatusInCloud(id, newStatus);
     } catch (err) {
       console.error('[BillBook] Status update failed:', err);

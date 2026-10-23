@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -354,15 +354,16 @@ const App: React.FC = () => {
 
   // Sync / Real-time Datastores State
   const [services, setServices] = useState<TechnicalService[]>(servicesData);
+  const [customerRequests, setCustomerRequests] = useState<BookingData[]>([]);
+  const [invoices, setInvoices] = useState<BookingData[]>([]);
   const [bookings, setBookings] = useState<BookingData[]>([]);
   const [businessConfigState, setBusinessConfigState] = useState<BusinessConfig>(businessConfig);
   const [customers, setCustomers] = useState<CustomerUser[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   const handleUpdateBookingStatus = async (bookingId: string, status: 'Pending' | 'Completed' | 'Cancelled') => {
-    setBookings(prevBookings => 
-      prevBookings.map(b => b.id === bookingId ? { ...b, status } : b)
-    );
+    setCustomerRequests(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b));
+    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b));
     if (db) {
       try {
         const bookingDocRef = doc(db, 'bookings', bookingId);
@@ -376,6 +377,22 @@ const App: React.FC = () => {
         }
       }
     }
+  };
+
+  const handleUpdateCustomerRequests = (updated: BookingData[]) => {
+    setCustomerRequests(updated);
+    setBookings(prev => [
+      ...updated,
+      ...prev.filter(b => b.sourceType === 'invoice' || b.id.startsWith('INV-'))
+    ]);
+  };
+
+  const handleUpdateInvoices = (updated: BookingData[]) => {
+    setInvoices(updated);
+    setBookings(prev => [
+      ...prev.filter(b => b.sourceType !== 'invoice' && !b.id.startsWith('INV-')),
+      ...updated
+    ]);
   };
 
   // Scroll to top automatically on route changes
@@ -434,8 +451,14 @@ const App: React.FC = () => {
             const rawBks = await getBookingsFromCloud();
             const rawInvs = await getInvoicesFromCloud();
 
-            const bks = (rawBks || []).map(b => ({ ...b, sourceType: 'booking' as const }));
-            const invs = (rawInvs || []).map(i => ({ ...i, sourceType: 'invoice' as const }));
+            // Strict sanitization: ensure no cross-contamination between requests and bills
+            const cleanBks = (rawBks || [])
+              .filter(b => b && b.id && !b.id.startsWith('INV-') && b.sourceType !== 'invoice')
+              .map(b => ({ ...b, sourceType: 'booking' as const }));
+
+            const cleanInvs = (rawInvs || [])
+              .filter(i => i && i.id && !i.id.startsWith('BK-') && i.sourceType !== 'booking')
+              .map(i => ({ ...i, sourceType: 'invoice' as const }));
             
             const getSafeSortDate = (val: unknown): Date => {
               if (!val) return new Date(0);
@@ -451,10 +474,16 @@ const App: React.FC = () => {
               return isNaN(d.getTime()) ? new Date(0) : d;
             };
 
-            const combined = [...bks, ...invs].sort(
+            const sortedBks = [...cleanBks].sort(
               (a, b) => getSafeSortDate(b.createdAt).getTime() - getSafeSortDate(a.createdAt).getTime()
             );
-            setBookings(combined);
+            const sortedInvs = [...cleanInvs].sort(
+              (a, b) => getSafeSortDate(b.createdAt).getTime() - getSafeSortDate(a.createdAt).getTime()
+            );
+
+            setCustomerRequests(sortedBks);
+            setInvoices(sortedInvs);
+            setBookings([...sortedBks, ...sortedInvs]);
 
             const custs = await getCustomersFromFirestore();
             setCustomers(custs);
@@ -464,7 +493,9 @@ const App: React.FC = () => {
               currentUser.phone || '',
               currentUser.email || ''
             );
+            setCustomerRequests(customerBookings);
             setBookings(customerBookings);
+            setInvoices([]);
             setCustomers([]); // Customers don't read customer directory
           }
         } catch (err) {
@@ -474,11 +505,14 @@ const App: React.FC = () => {
         // Guest: Load mock/local data only if Firebase is not active
         if (!isFirebaseConfigured) {
           const bks = await getBookingsFromCloud();
+          setCustomerRequests(bks);
           setBookings(bks);
           const custs = await getCustomersFromFirestore();
           setCustomers(custs);
         } else {
           // Firebase active guest: reset states to empty array, no queries to restricted tables!
+          setCustomerRequests([]);
+          setInvoices([]);
           setBookings([]);
           setCustomers([]);
         }
@@ -779,6 +813,7 @@ const App: React.FC = () => {
 
   const handleBookingSubmit = async (bookingDetails: Omit<BookingData, 'id' | 'createdAt' | 'status'>) => {
     const saved = await saveBookingToCloud(bookingDetails);
+    setCustomerRequests(prev => [saved, ...prev]);
     setBookings(prev => [saved, ...prev]);
     getCustomersFromFirestore().then(custs => {
       if (custs && custs.length > 0) setCustomers(custs);
@@ -1401,7 +1436,8 @@ const App: React.FC = () => {
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={
               <Dashboard 
-                bookings={bookings}
+                bookings={customerRequests}
+                invoices={invoices}
                 customers={customers}
                 businessConfig={businessConfigState}
               />
@@ -1414,7 +1450,8 @@ const App: React.FC = () => {
             <Route path="/admin/customers" element={
               <Customers 
                 customers={customers}
-                bookings={bookings}
+                bookings={customerRequests}
+                invoices={invoices}
                 onRefresh={async () => {
                   const refreshed = await getCustomersFromFirestore();
                   setCustomers(refreshed);
@@ -1423,15 +1460,17 @@ const App: React.FC = () => {
             } />
             <Route path="/admin/requests" element={
               <Requests 
-                bookings={bookings.filter(b => b.sourceType === 'booking' || (!b.sourceType && !b.id.startsWith('INV-')))}
-                onUpdateBookings={setBookings}
+                bookings={customerRequests}
+                onUpdateBookings={handleUpdateCustomerRequests}
                 handleGenerateInvoice={handleGenerateInvoice}
               />
             } />
             <Route path="/admin/billbook" element={
               <BillBook 
-                bookings={bookings.filter(b => b.sourceType === 'invoice' || b.id.startsWith('INV-'))}
-                onUpdateBookings={setBookings}
+                invoices={invoices}
+                bookings={invoices}
+                onUpdateInvoices={handleUpdateInvoices}
+                onUpdateBookings={handleUpdateInvoices}
                 handleGenerateInvoice={handleGenerateInvoice}
                 isDataLoading={isDataLoading}
               />
@@ -1439,8 +1478,10 @@ const App: React.FC = () => {
             <Route path="/admin/billbook/create" element={
               <CreateManualInvoice 
                 services={services}
-                bookings={bookings}
-                onUpdateBookings={setBookings}
+                invoices={invoices}
+                bookings={invoices}
+                onUpdateInvoices={handleUpdateInvoices}
+                onUpdateBookings={handleUpdateInvoices}
                 businessConfig={businessConfigState}
                 handleGenerateInvoice={handleGenerateInvoice}
               />
