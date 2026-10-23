@@ -34,11 +34,7 @@ const getSafeDate = (val: unknown): Date => {
 const isBillValid = (b: unknown): b is BookingData => {
   if (!b || typeof b !== 'object') return false;
   const bill = b as Record<string, unknown>;
-  if (typeof bill.id !== 'string' || !bill.id.trim()) return false;
-  // Exclude online customer requests explicitly
-  if (bill.sourceType === 'booking' || bill.id.startsWith('BK-')) return false;
-  // Include if tagged as invoice or has INV- prefix
-  return bill.sourceType === 'invoice' || bill.id.startsWith('INV-');
+  return typeof bill.id === 'string' && bill.id.trim() !== '';
 };
 
 const getServiceColor = (name: string) => {

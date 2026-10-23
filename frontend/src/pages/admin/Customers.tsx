@@ -75,11 +75,8 @@ export const Customers: React.FC<CustomersProps> = ({
     const relevantBookings = (bookings || []).filter(b => cleanPhone(b.phone) === cp);
     const relevantInvoices = (invoices || []).filter(i => cleanPhone(i.phone) === cp);
 
-    const onlineRequests = relevantBookings.filter(b => b.sourceType === 'booking' || (!b.sourceType && !b.id.startsWith('INV-')));
-    const bills = [
-      ...relevantInvoices.filter(i => i.sourceType === 'invoice' || i.id.startsWith('INV-')),
-      ...relevantBookings.filter(b => b.sourceType === 'invoice' || b.id.startsWith('INV-'))
-    ];
+    const onlineRequests = relevantBookings;
+    const bills = relevantInvoices;
     return { onlineRequests, bills, all: [...onlineRequests, ...bills] };
   };
 

@@ -451,13 +451,13 @@ const App: React.FC = () => {
             const rawBks = await getBookingsFromCloud();
             const rawInvs = await getInvoicesFromCloud();
 
-            // Strict sanitization: ensure no cross-contamination between requests and bills
+            // In Firestore, rawBks comes from 'bookings' collection and rawInvs comes from 'invoices' collection
             const cleanBks = (rawBks || [])
-              .filter(b => b && b.id && !b.id.startsWith('INV-') && b.sourceType !== 'invoice')
+              .filter(b => b && b.id)
               .map(b => ({ ...b, sourceType: 'booking' as const }));
 
             const cleanInvs = (rawInvs || [])
-              .filter(i => i && i.id && !i.id.startsWith('BK-') && i.sourceType !== 'booking')
+              .filter(i => i && i.id)
               .map(i => ({ ...i, sourceType: 'invoice' as const }));
             
             const getSafeSortDate = (val: unknown): Date => {
