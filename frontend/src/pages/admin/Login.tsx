@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ShieldCheck, User, Lock, AlertCircle, Loader } from 'lucide-react';
@@ -22,7 +22,7 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, userRole, onLoginSucce
   // If already logged in as admin, redirect to catalog
   if (isLoggedIn && userRole === 'admin') {
     const state = location.state as { from?: { pathname?: string } } | null;
-    const from = state?.from?.pathname || '/admin/catalog';
+    const from = state?.from?.pathname || '/admin/dashboard';
     return <Navigate to={from} replace />;
   }
 
@@ -49,7 +49,7 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, userRole, onLoginSucce
               email: user.email || cleanUsername,
               photoUrl: user.photoURL || '/profile.webp'
             }, false); // Real Firebase Auth session! isBackupAdmin = false
-            navigate('/admin/catalog');
+            navigate('/admin/dashboard');
             return;
           } else {
             await auth.signOut();
@@ -85,7 +85,7 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, userRole, onLoginSucce
           const isAdmin = await isAdminEmail(email);
           if (isAdmin) {
             onLoginSuccess('admin', { name, email, photoUrl }, false); // Real Firebase Auth session! isBackupAdmin = false
-            navigate('/admin/catalog');
+            navigate('/admin/dashboard');
           } else {
             // Un-authorize instantly if not registered
             await auth.signOut();

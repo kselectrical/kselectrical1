@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
+﻿import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -94,9 +94,7 @@ const Dashboard = lazyWithRetry(() => import('./pages/admin/Dashboard'), 'AdminD
 const CustomerDashboard = lazyWithRetry(() => import('./pages/customer/Dashboard'), 'CustomerDashboard');
 const CustomerLoginPage = lazyWithRetry(() => import('./pages/customer/Login'), 'CustomerLoginPage');
 const TechnicianDashboard = lazyWithRetry(() => import('./pages/technician/Dashboard'), 'TechnicianDashboard');
-const Catalog = lazyWithRetry(() => import('./pages/admin/Catalog'), 'AdminCatalog');
-const Categories = lazyWithRetry(() => import('./pages/admin/Categories'), 'AdminCategories');
-const Branding = lazyWithRetry(() => import('./pages/admin/Branding'), 'AdminBranding');
+
 const Customers = lazyWithRetry(() => import('./pages/admin/Customers'), 'AdminCustomers');
 const Requests = lazyWithRetry(() => import('./pages/admin/Requests'), 'AdminRequests');
 const BillBook = lazyWithRetry(() => import('./pages/admin/BillBook'), 'AdminBillBook');
@@ -743,7 +741,7 @@ const App: React.FC = () => {
     setShowLoginModal(false);
     setTimeout(() => {
       if (role === 'admin') {
-        navigate('/admin/catalog');
+        navigate('/admin/dashboard');
       } else if (loginTriggerSource === 'checkout') {
         navigate('/checkout');
       }
@@ -1409,24 +1407,10 @@ const App: React.FC = () => {
               />
             } />
 
-            <Route path="/admin/catalog" element={
-              <Catalog 
-                services={services}
-                onUpdateServices={setServices}
-              />
-            } />
-            <Route path="/admin/categories" element={
-              <Categories 
-                services={services}
-                onUpdateServices={setServices}
-              />
-            } />
-            <Route path="/admin/branding" element={
-              <Branding 
-                businessConfig={businessConfigState}
-                onUpdateBusinessConfig={setBusinessConfigState}
-              />
-            } />
+            {/* Redirect decommissioned admin routes to Dashboard */}
+            <Route path="/admin/catalog" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/categories" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/branding" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/customers" element={
               <Customers 
                 customers={customers}

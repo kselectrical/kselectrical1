@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Navigate, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Settings, FolderOpen, Palette, Users, ShoppingBag, FileText, ArrowLeft, LogOut, Menu, X, TrendingUp, Package } from 'lucide-react';
+import { Users, ShoppingBag, FileText, ArrowLeft, LogOut, Menu, X, TrendingUp, Package } from 'lucide-react';
 import type { BusinessConfig } from '../data';
 
 interface AdminLayoutProps {
@@ -31,14 +31,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   const navItems = [
-    { path: '/admin/dashboard', label: 'Dashboard Overview', icon: TrendingUp },
-    { path: '/admin/catalog', label: 'Manage Service Rates', icon: Settings },
-    { path: '/admin/categories', label: 'Manage Categories', icon: FolderOpen },
-    { path: '/admin/products', label: 'Product Shop', icon: Package, isNew: true },
-    { path: '/admin/branding', label: 'Branding Customizer', icon: Palette },
+    { path: '/admin/dashboard', label: 'Customer Overview', icon: TrendingUp },
     { path: '/admin/customers', label: 'Customer Directory', icon: Users },
     { path: '/admin/requests', label: 'Customer Requests', icon: ShoppingBag },
-    { path: '/admin/billbook', label: 'Bill Book', icon: FileText, isNew: true }
+    { path: '/admin/billbook', label: 'Bill Book', icon: FileText },
+    { path: '/admin/products', label: 'Product Shop', icon: Package, isNew: true }
   ];
 
   return (
