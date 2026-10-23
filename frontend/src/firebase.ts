@@ -1,4 +1,4 @@
-﻿import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   initializeFirestore,
   persistentLocalCache,
@@ -35,6 +35,7 @@ export interface BookingData {
   termsAndConditions?: string;
   problemDescription?: string;
   photoBase64?: string;
+  sourceType?: 'booking' | 'invoice';
 }
 
 export interface CustomerUser {
@@ -48,9 +49,15 @@ export interface CustomerUser {
     serviceName: string;
     date: string;
     price: number;
+    source?: 'booking' | 'invoice';
+    referenceId?: string;
   }[];
   lastBookingDate: string;
+  lastInvoiceDate?: string;
   totalBookings: number;
+  totalInvoices?: number;
+  recordType?: 'booking' | 'invoice' | 'both';
+  lastSource?: 'booking' | 'invoice';
   joinedAt: string;
 }
 
@@ -165,6 +172,13 @@ export function sanitizeForFirestore<T>(obj: T): T {
     return cleanObj as T;
   }
   return obj;
+};
+
+/** Normalize any phone number format (+91, spaces, dashes) to clean 10 digits */
+export const normalizePhone = (phone: string): string => {
+  if (!phone) return '';
+  const digits = phone.replace(/\D/g, '');
+  return digits.length > 10 ? digits.slice(-10) : digits;
 };
 
 import type { Firestore } from 'firebase/firestore';
@@ -567,65 +581,66 @@ export const saveBookingToCloud = async (booking: Omit<BookingData, 'id' | 'crea
   const newBooking: BookingData = {
     ...booking,
     id: 'BK-' + Math.floor(1000 + Math.random() * 9000),
+    sourceType: 'booking',
     status: 'Pending',
     createdAt: new Date().toISOString()
   };
 
   if (isFirebaseConfigured && db) {
     try {
-      // 1. Save booking
+      // 1. Save booking to 'bookings' collection
       await setDoc(doc(db, 'bookings', newBooking.id), sanitizeForFirestore(newBooking));
-      console.log(`☁️ Booking ${newBooking.id} saved to Firestore.`);
+      console.log(`☁️ Booking ${newBooking.id} saved to Firestore (Online Request).`);
       
-      // 2. Create/Update Customer Record for ALL bookings (guest + logged-in)
-      // Previously this block was gated on auth?.currentUser — but that meant
-      // 90%+ guest bookings never created a customer profile. Fixed now.
-      const phoneKey = newBooking.phone.trim();
+      // 2. Create/Update Customer Record in 'Customers' collection
+      const phoneKey = normalizePhone(newBooking.phone);
       if (phoneKey) {
         try {
           const custRef = doc(db, 'Customers', phoneKey);
-          const custSnap = await getDoc(custRef);
+          let existingData: CustomerUser | null = null;
+          try {
+            const custSnap = await getDoc(custRef);
+            if (custSnap.exists()) {
+              existingData = custSnap.data() as CustomerUser;
+            }
+          } catch (readErr) {
+            console.warn("Could not read customer pre-check, will merge directly:", readErr);
+          }
           
           const newServiceItems = newBooking.items.map(item => ({
             serviceId: item.serviceId,
             serviceName: item.serviceName,
             date: newBooking.createdAt,
-            price: item.price
+            price: item.price,
+            source: 'booking' as const,
+            referenceId: newBooking.id
           }));
 
           const activeEmail = auth?.currentUser?.email || '';
+          const currentBookings = (existingData?.totalBookings || 0) + 1;
+          const currentInvoices = existingData?.totalInvoices || 0;
+          const recordType: 'booking' | 'invoice' | 'both' = currentInvoices > 0 ? 'both' : 'booking';
 
-          if (custSnap.exists()) {
-            const existing = custSnap.data() as CustomerUser;
-            const updatedHistory = [...(existing.serviceHistory || []), ...newServiceItems];
-            await setDoc(custRef, {
-              ...existing,
-              name: newBooking.customerName,
-              // Preserve existing address if new booking has a placeholder
-              address: newBooking.address && !newBooking.address.includes('pending')
-                ? newBooking.address
-                : (existing.address || newBooking.address),
-              serviceHistory: updatedHistory,
-              lastBookingDate: newBooking.createdAt,
-              totalBookings: (existing.totalBookings || 0) + 1,
-              ...(activeEmail && { email: activeEmail })
-            }, { merge: true });
-          } else {
-            const newCustomer: CustomerUser = {
-              name: newBooking.customerName,
-              phone: phoneKey,
-              ...(activeEmail && { email: activeEmail }),
-              address: newBooking.address || '',
-              serviceHistory: newServiceItems,
-              lastBookingDate: newBooking.createdAt,
-              totalBookings: 1,
-              joinedAt: new Date().toISOString()
-            };
-            await setDoc(custRef, newCustomer);
-          }
-          console.log(`☁️ Customer directory record synced for phone: ${phoneKey}`);
+          const fullCustomer: CustomerUser = {
+            name: newBooking.customerName || existingData?.name || 'Customer',
+            phone: phoneKey,
+            ...(activeEmail && { email: activeEmail }),
+            address: newBooking.address && !newBooking.address.includes('pending')
+              ? newBooking.address
+              : (existingData?.address || newBooking.address || ''),
+            serviceHistory: [...(existingData?.serviceHistory || []), ...newServiceItems],
+            lastBookingDate: newBooking.createdAt,
+            totalBookings: currentBookings,
+            totalInvoices: currentInvoices,
+            recordType,
+            lastSource: 'booking',
+            joinedAt: existingData?.joinedAt || new Date().toISOString()
+          };
+
+          await setDoc(custRef, sanitizeForFirestore(fullCustomer), { merge: true });
+          console.log(`☁️ Customer directory record synced for phone: ${phoneKey} (Booking Request)`);
         } catch (custErr) {
-          console.warn("Could not sync customer directory record (ignoring):", custErr);
+          console.error("Critical: Could not sync customer directory record:", custErr);
         }
       }
     } catch (e) {
@@ -633,9 +648,7 @@ export const saveBookingToCloud = async (booking: Omit<BookingData, 'id' | 'crea
     }
   }
 
-  // PHP Backend Fallback / Local state fallback:
-  // Note: BookingForm.tsx already posts directly to submit_booking.php. 
-  // We just return the newBooking object to update state client-side without duplicate entries.
+  // PHP Backend Fallback / Local state fallback
   return newBooking;
 };
 
@@ -693,7 +706,12 @@ export const getBookingsFromCloud = async (): Promise<BookingData[]> => {
       const snap = await getDocs(collection(db, 'bookings'));
       const bookings: BookingData[] = [];
       snap.forEach(doc => {
-        bookings.push(doc.data() as BookingData);
+        const item = doc.data() as BookingData;
+        bookings.push({
+          ...item,
+          id: item.id || doc.id,
+          sourceType: 'booking'
+        });
       });
       // Sort newest first
       return bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -762,11 +780,16 @@ export const getBookingsForCustomerFromCloud = async (phone: string, email?: str
    ========================================== */
 
 export const saveInvoiceToCloud = async (invoice: BookingData): Promise<void> => {
+  const taggedInvoice: BookingData = {
+    ...invoice,
+    sourceType: 'invoice'
+  };
+
   if (isFirebaseConfigured && db) {
     try {
       // 1. Save to 'invoices'
-      await setDoc(doc(db, 'invoices', invoice.id), invoice);
-      console.log(`☁️ Manual Invoice ${invoice.id} saved to Firestore.`);
+      await setDoc(doc(db, 'invoices', taggedInvoice.id), sanitizeForFirestore(taggedInvoice));
+      console.log(`☁️ Manual Invoice ${taggedInvoice.id} saved to Firestore.`);
 
       const activeEmail = auth?.currentUser?.email || 'admin@kselectrical.in';
 
@@ -774,16 +797,16 @@ export const saveInvoiceToCloud = async (invoice: BookingData): Promise<void> =>
       const historyRef = doc(collection(db, 'invoice_history'));
       const historyRecord: InvoiceHistory = {
         id: historyRef.id,
-        invoiceNumber: invoice.id,
+        invoiceNumber: taggedInvoice.id,
         customerDetails: {
-          name: invoice.customerName,
-          phone: invoice.phone,
-          address: invoice.address,
-          selectedLocation: invoice.selectedLocation
+          name: taggedInvoice.customerName,
+          phone: taggedInvoice.phone,
+          address: taggedInvoice.address,
+          selectedLocation: taggedInvoice.selectedLocation
         },
-        items: invoice.items,
-        totalAmount: invoice.subtotal,
-        generatedDate: invoice.createdAt,
+        items: taggedInvoice.items,
+        totalAmount: taggedInvoice.subtotal,
+        generatedDate: taggedInvoice.createdAt,
         pdfMetadata: {
           printDate: new Date().toISOString(),
           operatorIdentity: activeEmail
@@ -792,43 +815,53 @@ export const saveInvoiceToCloud = async (invoice: BookingData): Promise<void> =>
       await setDoc(historyRef, historyRecord);
       console.log(`☁️ Invoice history record created: ${historyRef.id}`);
 
-      // 3. Create/Update Customer Record
-      const phoneKey = invoice.phone.trim();
+      // 3. Create/Update Customer Record in 'Customers' collection
+      const phoneKey = normalizePhone(taggedInvoice.phone);
       if (phoneKey) {
-        const custRef = doc(db, 'Customers', phoneKey);
-        const custSnap = await getDoc(custRef);
-        
-        const newServiceItems = invoice.items.map(item => ({
-          serviceId: item.serviceId,
-          serviceName: item.serviceName,
-          date: invoice.createdAt,
-          price: item.price
-        }));
+        try {
+          const custRef = doc(db, 'Customers', phoneKey);
+          let existingData: CustomerUser | null = null;
+          try {
+            const custSnap = await getDoc(custRef);
+            if (custSnap.exists()) {
+              existingData = custSnap.data() as CustomerUser;
+            }
+          } catch (readErr) {
+            console.warn("Could not read customer pre-check for invoice, will merge:", readErr);
+          }
+          
+          const newServiceItems = taggedInvoice.items.map(item => ({
+            serviceId: item.serviceId,
+            serviceName: item.serviceName,
+            date: taggedInvoice.createdAt,
+            price: item.price,
+            source: 'invoice' as const,
+            referenceId: taggedInvoice.id
+          }));
 
-        if (custSnap.exists()) {
-          const existing = custSnap.data() as CustomerUser;
-          const updatedHistory = [...(existing.serviceHistory || []), ...newServiceItems];
-          await setDoc(custRef, {
-            ...existing,
-            name: invoice.customerName,
-            address: invoice.address,
-            serviceHistory: updatedHistory,
-            lastBookingDate: invoice.createdAt,
-            totalBookings: (existing.totalBookings || 0) + 1
-          }, { merge: true });
-        } else {
-          const newCustomer: CustomerUser = {
-            name: invoice.customerName,
+          const currentBookings = existingData?.totalBookings || 0;
+          const currentInvoices = (existingData?.totalInvoices || 0) + 1;
+          const recordType: 'booking' | 'invoice' | 'both' = currentBookings > 0 ? 'both' : 'invoice';
+
+          const fullCustomer: CustomerUser = {
+            name: taggedInvoice.customerName || existingData?.name || 'Customer',
             phone: phoneKey,
-            address: invoice.address,
-            serviceHistory: newServiceItems,
-            lastBookingDate: invoice.createdAt,
-            totalBookings: 1,
-            joinedAt: new Date().toISOString()
+            address: taggedInvoice.address || existingData?.address || '',
+            serviceHistory: [...(existingData?.serviceHistory || []), ...newServiceItems],
+            lastBookingDate: taggedInvoice.createdAt,
+            lastInvoiceDate: taggedInvoice.createdAt,
+            totalBookings: currentBookings,
+            totalInvoices: currentInvoices,
+            recordType,
+            lastSource: 'invoice',
+            joinedAt: existingData?.joinedAt || new Date().toISOString()
           };
-          await setDoc(custRef, newCustomer);
+
+          await setDoc(custRef, sanitizeForFirestore(fullCustomer), { merge: true });
+          console.log(`☁️ Customer record updated via invoice for phone: ${phoneKey} (Tax Invoice)`);
+        } catch (custErr) {
+          console.error("Critical: Could not sync customer directory record via invoice:", custErr);
         }
-        console.log(`☁️ Customer record updated via invoice for phone: ${phoneKey}`);
       }
 
       // 4. Log to 'audit_logs'
@@ -836,7 +869,7 @@ export const saveInvoiceToCloud = async (invoice: BookingData): Promise<void> =>
       await setDoc(auditRef, {
         id: auditRef.id,
         action: 'invoice_created',
-        details: `Created manual invoice ${invoice.id} for ${invoice.customerName} (Total: ₹${invoice.subtotal})`,
+        details: `Created manual invoice ${taggedInvoice.id} for ${taggedInvoice.customerName} (Total: ₹${taggedInvoice.subtotal})`,
         changedBy: activeEmail,
         timestamp: new Date().toISOString()
       });
@@ -849,26 +882,31 @@ export const saveInvoiceToCloud = async (invoice: BookingData): Promise<void> =>
 
   // Local fallback
   const currentInvoices = await getInvoicesFromCloud();
-  currentInvoices.unshift(invoice);
+  currentInvoices.unshift(taggedInvoice);
   localStorage.setItem('ks_invoices', JSON.stringify(currentInvoices));
 };
 
 // ─── Update an existing invoice (edit mode) ─────────────────────────────────
 export const updateInvoiceInCloud = async (invoice: BookingData): Promise<void> => {
+  const taggedInvoice: BookingData = {
+    ...invoice,
+    sourceType: 'invoice'
+  };
+
   if (isFirebaseConfigured && db) {
     try {
       const activeEmail = auth?.currentUser?.email || 'admin@kselectrical.in';
 
       // Overwrite the invoice doc (keeping same ID)
-      await setDoc(doc(db, 'invoices', invoice.id), invoice);
-      console.log(`☁️ Invoice ${invoice.id} updated in Firestore.`);
+      await setDoc(doc(db, 'invoices', taggedInvoice.id), sanitizeForFirestore(taggedInvoice));
+      console.log(`☁️ Invoice ${taggedInvoice.id} updated in Firestore.`);
 
       // Audit log
       const auditRef = doc(collection(db, 'audit_logs'));
       await setDoc(auditRef, {
         id: auditRef.id,
         action: 'invoice_updated',
-        details: `Edited invoice ${invoice.id} for ${invoice.customerName} (Total: ₹${invoice.subtotal})`,
+        details: `Edited invoice ${taggedInvoice.id} for ${taggedInvoice.customerName} (Total: ₹${taggedInvoice.subtotal})`,
         changedBy: activeEmail,
         timestamp: new Date().toISOString()
       });
@@ -879,8 +917,8 @@ export const updateInvoiceInCloud = async (invoice: BookingData): Promise<void> 
   } else {
     // Local fallback
     const current = await getInvoicesFromCloud();
-    const idx = current.findIndex(i => i.id === invoice.id);
-    if (idx !== -1) current[idx] = invoice;
+    const idx = current.findIndex(i => i.id === taggedInvoice.id);
+    if (idx !== -1) current[idx] = taggedInvoice;
     localStorage.setItem('ks_invoices', JSON.stringify(current));
   }
 };
@@ -891,7 +929,12 @@ export const getInvoicesFromCloud = async (): Promise<BookingData[]> => {
       const snap = await getDocs(collection(db, 'invoices'));
       const invoices: BookingData[] = [];
       snap.forEach(doc => {
-        invoices.push(doc.data() as BookingData);
+        const item = doc.data() as BookingData;
+        invoices.push({
+          ...item,
+          id: item.id || doc.id,
+          sourceType: 'invoice'
+        });
       });
       return invoices.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } catch (e) {
@@ -922,7 +965,7 @@ export const saveCustomerToCloud = async (user: {
   address?: string;
   email?: string;
 }): Promise<CustomerUser> => {
-  const phoneKey = user.phone.trim().replace(/\D/g, '');
+  const phoneKey = normalizePhone(user.phone);
   const joinedAt = new Date().toISOString();
   
   const customer: CustomerUser = {
@@ -934,22 +977,32 @@ export const saveCustomerToCloud = async (user: {
     email: user.email,
     serviceHistory: [],
     totalBookings: 0,
+    totalInvoices: 0,
+    recordType: 'booking',
     lastBookingDate: joinedAt
   };
 
   if (isFirebaseConfigured && db && phoneKey) {
     try {
       const docRef = doc(db, 'Customers', phoneKey);
-      const existing = await getDoc(docRef);
+      let existingData: CustomerUser | null = null;
+      try {
+        const existing = await getDoc(docRef);
+        if (existing.exists()) {
+          existingData = existing.data() as CustomerUser;
+        }
+      } catch (readErr) {
+        console.warn("Could not read customer pre-check, will merge directly:", readErr);
+      }
       
-      const currentJoinedAt = existing.exists() ? existing.data().joinedAt : joinedAt;
-      const existingData = existing.exists() ? existing.data() : null;
+      const currentJoinedAt = existingData?.joinedAt || joinedAt;
       const address = user.address && !user.address.includes('pending')
         ? user.address
         : (existingData?.address || user.address || '');
       const email = user.email || existingData?.email || undefined;
       const serviceHistory = existingData?.serviceHistory || [];
       const totalBookings = existingData?.totalBookings || 0;
+      const totalInvoices = existingData?.totalInvoices || 0;
       const lastBookingDate = existingData?.lastBookingDate || currentJoinedAt;
       const finalName = user.name && !user.name.includes('pending')
         ? user.name
@@ -964,18 +1017,18 @@ export const saveCustomerToCloud = async (user: {
         ...(email && { email }),
         serviceHistory,
         totalBookings,
+        totalInvoices,
+        recordType: existingData?.recordType || (totalInvoices > 0 ? 'invoice' : 'booking'),
         lastBookingDate
       };
 
-      await setDoc(docRef, fullCustomer, { merge: true });
+      await setDoc(docRef, sanitizeForFirestore(fullCustomer), { merge: true });
       console.log(`☁️ Customer ${phoneKey} synced in Firestore Customers collection.`);
       return fullCustomer;
     } catch (e) {
       console.error("Error saving customer to Firestore:", e);
     }
   }
-
-  // No-op fallback
 
   return customer;
 };
@@ -998,9 +1051,39 @@ export const getCustomersFromFirestore = async (): Promise<CustomerUser[]> => {
       const snap = await getDocs(collection(db, 'Customers'));
       const customers: CustomerUser[] = [];
       snap.forEach(doc => {
-        customers.push(doc.data() as CustomerUser);
+        const data = doc.data() as CustomerUser;
+        const phone = data.phone || doc.id;
+        
+        // Count online requests vs invoices from serviceHistory if counters are 0
+        const hist = data.serviceHistory || [];
+        const bookingItemsCount = hist.filter(s => s.source === 'booking').length;
+        const invoiceItemsCount = hist.filter(s => s.source === 'invoice').length;
+        
+        const bCount = Math.max(data.totalBookings || 0, bookingItemsCount > 0 ? 1 : 0);
+        const iCount = Math.max(data.totalInvoices || 0, invoiceItemsCount > 0 ? 1 : 0);
+        
+        let recordType = data.recordType;
+        if (!recordType) {
+          if (bCount > 0 && iCount > 0) recordType = 'both';
+          else if (iCount > 0) recordType = 'invoice';
+          else recordType = 'booking';
+        }
+
+        customers.push({
+          ...data,
+          phone,
+          totalBookings: bCount,
+          totalInvoices: iCount,
+          recordType
+        });
       });
-      return customers;
+
+      // Sort newest activity first
+      return customers.sort((a, b) => {
+        const dateA = new Date(a.lastBookingDate || a.lastInvoiceDate || a.joinedAt || 0).getTime();
+        const dateB = new Date(b.lastBookingDate || b.lastInvoiceDate || b.joinedAt || 0).getTime();
+        return dateB - dateA;
+      });
     } catch (e) {
       console.error("Error fetching customers from Firestore:", e);
     }

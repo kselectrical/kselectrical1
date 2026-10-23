@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -432,9 +432,12 @@ const App: React.FC = () => {
       if (isLoggedIn && currentUser && userRole) {
         try {
           if (userRole === 'admin') {
-            // Admin: Load everything
-            const bks = await getBookingsFromCloud();
-            const invs = await getInvoicesFromCloud();
+            // Admin: Load everything with explicit source classification
+            const rawBks = await getBookingsFromCloud();
+            const rawInvs = await getInvoicesFromCloud();
+
+            const bks = (rawBks || []).map(b => ({ ...b, sourceType: 'booking' as const }));
+            const invs = (rawInvs || []).map(i => ({ ...i, sourceType: 'invoice' as const }));
             
             const getSafeSortDate = (val: unknown): Date => {
               if (!val) return new Date(0);
@@ -450,7 +453,7 @@ const App: React.FC = () => {
               return isNaN(d.getTime()) ? new Date(0) : d;
             };
 
-            const combined = [...(bks || []), ...(invs || [])].sort(
+            const combined = [...bks, ...invs].sort(
               (a, b) => getSafeSortDate(b.createdAt).getTime() - getSafeSortDate(a.createdAt).getTime()
             );
             setBookings(combined);
@@ -1427,18 +1430,23 @@ const App: React.FC = () => {
             <Route path="/admin/customers" element={
               <Customers 
                 customers={customers}
+                bookings={bookings}
+                onRefresh={async () => {
+                  const refreshed = await getCustomersFromFirestore();
+                  setCustomers(refreshed);
+                }}
               />
             } />
             <Route path="/admin/requests" element={
               <Requests 
-                bookings={bookings}
+                bookings={bookings.filter(b => b.sourceType === 'booking' || (!b.sourceType && !b.id.startsWith('INV-')))}
                 onUpdateBookings={setBookings}
                 handleGenerateInvoice={handleGenerateInvoice}
               />
             } />
             <Route path="/admin/billbook" element={
               <BillBook 
-                bookings={bookings}
+                bookings={bookings.filter(b => b.sourceType === 'invoice' || b.id.startsWith('INV-'))}
                 onUpdateBookings={setBookings}
                 handleGenerateInvoice={handleGenerateInvoice}
                 isDataLoading={isDataLoading}

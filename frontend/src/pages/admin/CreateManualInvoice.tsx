@@ -165,8 +165,9 @@ export const CreateManualInvoice: React.FC<CreateManualInvoiceProps> = ({
     const subtotal = manualItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const invoicePayload: BookingData = {
-      // In edit mode keep the same ID + original createdAt; in create mode generate new ones
-      id: isEditMode ? editBooking!.id : ('BK-' + Math.floor(100000 + Math.random() * 900000)),
+      // In edit mode keep the same ID + original createdAt; in create mode generate new ones with INV- prefix
+      id: isEditMode ? editBooking!.id : ('INV-' + Math.floor(100000 + Math.random() * 900000)),
+      sourceType: 'invoice',
       customerName: manualCustomerName.trim(),
       phone: manualPhone,
       address: manualAddress.trim(),
