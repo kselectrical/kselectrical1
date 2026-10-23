@@ -15,6 +15,7 @@ interface NavbarProps {
   userRole: 'customer' | 'admin' | null;
   currentUser: { name: string; email?: string; photoUrl: string; phone?: string } | null;
   onLoginClick: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onLogoutClick: () => void;
   onAdminPanelClick: () => void;
   onProfileClick: () => void;
@@ -39,6 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   userRole,
   currentUser,
   onLoginClick,
+  onLogoutClick: _onLogoutClick, // kept in API, mobile menu logout removed in refactor
   onAdminPanelClick,
   onProfileClick,
   businessConfig

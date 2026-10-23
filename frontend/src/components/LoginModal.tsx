@@ -33,9 +33,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   if (!isOpen) return null;
 
+  /**
+   * FIXED: Authentication-first flow.
+   *
+   * Old (broken) flow:
+   *   1. Query Firestore (Customers/{phone}) — fails for unauthenticated users
+   *      because Firestore rules now require auth for reads.
+   *   2. Try to sign in.
+   *
+   * New (correct) flow:
+   *   1. Try sign-in first (email = phone@kselectrical.in, password = phone).
+   *   2. On success → fetch Firestore profile with the now-authenticated token.
+   *   3. On "user not found" → move to name-collection step (new customer).
+   */
   const handleCustomerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const phone = customerPhone.trim();
     if (phone.length !== 10) {
       setError('Please enter a valid 10-digit mobile number.');
@@ -45,58 +58,69 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setIsCustomerLoading(true);
     setError('');
 
+    const email = `${phone}@kselectrical.in`;
+    const password = phone;
+    const photoUrl = '/profile.webp';
+
     if (loginStep === 'phone') {
       try {
-        let name = '';
-        let userExists = false;
+        // ── Step 1: Attempt Firebase Auth sign-in ──────────────────────────
+        let firebaseUser = null;
+        let isNewUser = false;
 
-        // Query Firestore Customers collection first
-        if (isFirebaseConfigured && db) {
+        if (isFirebaseConfigured && auth) {
+          try {
+            const cred = await signInWithEmailAndPassword(auth, email, password);
+            firebaseUser = cred.user;
+          } catch (signInErr) {
+            const code = (signInErr as { code?: string }).code;
+            if (
+              code === 'auth/user-not-found' ||
+              code === 'auth/invalid-credential' ||
+              code === 'auth/invalid-email'
+            ) {
+              // User doesn't exist yet → collect their name next
+              isNewUser = true;
+            } else {
+              throw signInErr;
+            }
+          }
+        }
+
+        if (isNewUser) {
+          // Move to name collection step for new customers
+          setLoginStep('name');
+          setIsCustomerLoading(false);
+          return;
+        }
+
+        // ── Step 2: Auth succeeded → fetch profile from Firestore ──────────
+        let name = firebaseUser?.displayName || 'Valued Customer';
+        if (isFirebaseConfigured && db && firebaseUser) {
           try {
             const docRef = doc(db, 'Customers', phone);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-              name = docSnap.data().name || 'Valued Customer';
-              userExists = true;
+              name = docSnap.data().name || name;
             }
           } catch (fsErr) {
-            console.error("Firestore customer check failed:", fsErr);
+            // Non-fatal: we still have a valid auth session
+            console.warn('Firestore profile fetch failed (non-critical):', fsErr);
           }
         }
 
-        if (userExists) {
-          const email = `${phone}@kselectrical.in`;
-          const password = phone;
-          const photoUrl = '/profile.webp';
-
-          const user = { name, email, photoUrl, phone };
-
-          if (isFirebaseConfigured && auth) {
-            try {
-              await signInWithEmailAndPassword(auth, email, password);
-            } catch (err) {
-              const authError = err as { code?: string; message?: string };
-              if (authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential' || authError.code === 'auth/invalid-email') {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(userCredential.user, { displayName: name });
-              } else {
-                throw err;
-              }
-            }
-          }
-
-          onLoginSuccess('customer', user);
-          handleClose();
-        } else {
-          setLoginStep('name');
-        }
+        const user = { name, email, photoUrl, phone };
+        onLoginSuccess('customer', user);
+        handleClose();
       } catch (err) {
-        console.error("Error checking customer existence:", err);
-        setLoginStep('name');
+        const authError = err as { message?: string; code?: string };
+        console.error('Customer login error:', err);
+        setError(authError.message || 'Login failed. Please try again.');
       } finally {
         setIsCustomerLoading(false);
       }
     } else {
+      // ── Registration branch (new customer with name collected) ────────────
       const name = customerName.trim();
       if (name.length < 2) {
         setError('Please enter a valid name (at least 2 characters).');
@@ -105,35 +129,31 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       }
 
       try {
-        const email = `${phone}@kselectrical.in`;
-        const password = phone;
-        const photoUrl = '/profile.webp';
-
-        const user = { name, email, photoUrl, phone };
-
-        // 1. Sign up/In to Firebase Auth
+        // 1. Create Firebase Auth account
         if (isFirebaseConfigured && auth) {
           try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCredential.user, { displayName: name });
           } catch (err) {
-            const authError = err as { code?: string; message?: string };
-            if (authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential' || authError.code === 'auth/invalid-email') {
-              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-              await updateProfile(userCredential.user, { displayName: name });
+            const code = (err as { code?: string }).code;
+            if (code === 'auth/email-already-in-use') {
+              // Race condition: account was created between steps → just sign in
+              await signInWithEmailAndPassword(auth, email, password);
             } else {
               throw err;
             }
           }
         }
 
-        // 2. Save profile in Firestore Customers collection
+        // 2. Save profile to Firestore (auth token is now valid)
         await saveCustomerToCloud({ name, phone, photoUrl });
 
+        const user = { name, email, photoUrl, phone };
         onLoginSuccess('customer', user);
         handleClose();
       } catch (err) {
         const authError = err as { message?: string };
-        console.error("Customer signup failed:", err);
+        console.error('Customer registration failed:', err);
         setError(authError.message || 'Registration failed. Please try again.');
       } finally {
         setIsCustomerLoading(false);
@@ -143,15 +163,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      
+
       {/* Backdrop Click Close */}
       <div className="absolute inset-0" onClick={handleClose} />
 
       {/* Modal Container */}
       <div className="bg-white rounded-2xl max-w-sm w-full p-6 relative z-10 shadow-dropdown font-sans text-center border border-gray-100">
-        
+
         {/* Close Button */}
-        <button 
+        <button
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-50 transition-all cursor-pointer select-none"
           aria-label="Close login modal"

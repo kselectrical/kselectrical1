@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import { BookingForm } from '../components/BookingForm';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { MessageCircle, Phone, ChevronDown, ChevronUp, Zap, AlertCircle } from 'lucide-react';
@@ -32,6 +33,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
   onSubmitBooking,
   businessConfig
 }) => {
+  const navigate = useNavigate();
   const [showFullForm, setShowFullForm] = useState(false);
 
   // Quick booking state
@@ -40,9 +42,15 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
   const [qAddress, setQAddress] = useState('');
   const [qSlot, setQSlot] = useState('');
 
+  // Fix #2: Store fetched customer so handleWhatsAppBook can use it (was a closure race condition)
+  const [fetchedCustomer, setFetchedCustomer] = useState<{ name?: string; address?: string } | null>(null);
+
   // Validation error state
   const [nameError, setNameError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
+
+  // Loading state — prevents double-submit and shows spinner until Firestore is done
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refs for scroll-to-field on validation error
   const nameRef = useRef<HTMLInputElement>(null);
@@ -54,7 +62,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
     : 'Home Service';
 
   // Auto-fill customer details from session or auth if available
-  React.useEffect(() => {
+  useEffect(() => {
     if (isFirebaseConfigured && auth && auth.currentUser) {
       const u = auth.currentUser;
       const phone = u.email && u.email.endsWith('@kselectrical.in') ? u.email.split('@')[0] : '';
@@ -82,14 +90,15 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
     if (phoneError) setPhoneError(false);
 
     if (clean.length === 10) {
-      // 1. Check server database for existing customer profile and auto-fill!
+      // Fix #2: Store fetched customer in state so handleWhatsAppBook can use it
       const existing = await getCustomerByPhoneFromDb(clean);
       if (existing) {
+        setFetchedCustomer(existing);
         if (existing.name && !qName) setQName(existing.name);
         if (existing.address && !qAddress) setQAddress(existing.address);
       }
 
-      // 2. Immediately upload/sync customer to server database so the number is saved!
+      // Immediately upload/sync customer to server database so the number is saved!
       saveCustomerToCloud({
         name: qName.trim() || existing?.name || 'Customer',
         phone: clean,
@@ -98,9 +107,21 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
     }
   };
 
+  // Fix #8: Redirect to /services if cart is empty and user lands here directly
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      // Small delay so the page doesn't flash on slow networks
+      const t = setTimeout(() => navigate('/services', { replace: true }), 800);
+      return () => clearTimeout(t);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── WhatsApp booking handler ───────────────────────────────────────────────
-  // Saves booking and customer to cloud Firestore, then opens WhatsApp.
+  // Saves booking and customer to cloud Firestore FIRST, then opens WhatsApp.
   const handleWhatsAppBook = async () => {
+    // Prevent double-submit while Firestore write is in progress
+    if (isSubmitting) return;
+
     // Validate required fields
     let hasError = false;
     if (!qName.trim()) {
@@ -119,6 +140,9 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
     }
     if (hasError) return;
 
+    // Show loading spinner — disable the button
+    setIsSubmitting(true);
+
     // 1. Calculate price and compile items
     const cartSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const bookingItems = cartItems.length > 0 ? cartItems.map(item => ({
@@ -134,30 +158,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
       quantity: 1
     }];
 
-    // 2. Persist to Firestore server so Admin sees this booking!
-    try {
-      await onSubmitBooking({
-        customerName: qName.trim(),
-        phone: qPhone.trim(),
-        address: qAddress.trim() || 'Address to be confirmed on call',
-        selectedLocation: selectedLocation || 'Noida Extension',
-        dateTime: qSlot ? `Today (${qSlot})` : 'Immediate / Earliest Slot',
-        urgency: 'ROUTINE',
-        items: bookingItems,
-        subtotal: cartSubtotal || 299
-      });
-
-      // Also ensure customer directory has full name and address
-      await saveCustomerToCloud({
-        name: qName.trim(),
-        phone: qPhone.trim(),
-        address: qAddress.trim() || ''
-      });
-    } catch (err) {
-      console.warn('Booking submit error in WhatsApp quick checkout:', err);
-    }
-
-    // 3. Build WhatsApp message with full booking details
+    // 2. Build WhatsApp message (ready to use after save)
     const msg = `*Quick Booking – KS Electrical & AC Services*
 ──────────────────────────
 *Name:* ${qName}
@@ -168,17 +169,48 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
 ──────────────────────────
 Please dispatch a technician. Thank you!`;
 
-    const url = `https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(msg)}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(msg)}`;
 
-    // Fire GA4 lead event before opening WhatsApp
-    trackLeadEvent({
-      method: 'whatsapp',
-      service: serviceNames,
-      page: window.location.pathname,
-    });
+    try {
+      // 3. WAIT for Firestore writes to complete BEFORE opening WhatsApp
+      //    so the network request is not cut mid-flight by navigation.
+      await onSubmitBooking({
+        customerName: qName.trim(),
+        phone: qPhone.trim(),
+        address: qAddress.trim() || 'Address to be confirmed on call',
+        selectedLocation: selectedLocation || 'Noida Extension',
+        dateTime: qSlot ? `Today (${qSlot})` : 'Immediate / Earliest Slot',
+        urgency: 'ROUTINE',
+        items: bookingItems,
+        subtotal: cartSubtotal || 299
+      });
+      console.log('✅ Booking saved to Firestore successfully.');
 
-    // Open WhatsApp in a new tab — reliable on both mobile and desktop
-    window.open(url, '_blank', 'noopener,noreferrer');
+      // 4. Sync customer record (use fetchedCustomer from state — fixes closure race condition)
+      await saveCustomerToCloud({
+        name: qName.trim() || fetchedCustomer?.name || 'Customer',
+        phone: qPhone.trim(),
+        address: qAddress.trim() || fetchedCustomer?.address || ''
+      });
+      console.log('✅ Customer record synced to Customers collection.');
+
+      // 5. Fire GA4 lead event
+      trackLeadEvent({
+        method: 'whatsapp',
+        service: serviceNames,
+        page: window.location.pathname,
+      });
+
+      // 6. All data saved — NOW open WhatsApp safely
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
+    } catch (err) {
+      console.error('❌ Booking save failed. WhatsApp NOT opened to prevent data loss:', err);
+      // Optionally show user-friendly error here
+    } finally {
+      // Always reset loading state
+      setIsSubmitting(false);
+    }
   };
 
   // ── Call button handler ────────────────────────────────────────────────────
@@ -312,14 +344,32 @@ Please dispatch a technician. Thank you!`;
             )}
 
             {/* CTA Buttons */}
-            {/* WhatsApp button — uses window.open() via handler for reliable mobile behavior */}
+            {/* WhatsApp button — disabled while saving to Firestore to prevent race condition */}
             <button
               type="button"
               onClick={handleWhatsAppBook}
-              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm tracking-wide shadow-md active:scale-95 transition-all cursor-pointer"
+              disabled={isSubmitting}
+              className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-black text-sm tracking-wide shadow-md transition-all cursor-pointer ${
+                isSubmitting
+                  ? 'bg-emerald-400 cursor-not-allowed opacity-80'
+                  : 'bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white'
+              }`}
             >
-              <MessageCircle size={17} className="fill-white shrink-0" />
-              Book Instantly via WhatsApp
+              {isSubmitting ? (
+                <>
+                  {/* Inline SVG spinner */}
+                  <svg className="animate-spin h-4 w-4 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  <span className="text-white">Saving Booking…</span>
+                </>
+              ) : (
+                <>
+                  <MessageCircle size={17} className="fill-white shrink-0" />
+                  Book Instantly via WhatsApp
+                </>
+              )}
             </button>
 
             <a

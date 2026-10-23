@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import {
@@ -748,7 +748,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <Link
                     key={idx}
                     to={card.path}
-                    onClick={() => setSelectedCategory(card.title)}
+                    onClick={() => setSelectedCategory('ALL')}
                     className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between text-left relative overflow-hidden group hover:border-blue-500/40 hover:shadow-lg transition-all cursor-pointer block"
                   >
                     <div className="space-y-4">

@@ -1,9 +1,9 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+﻿import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
-  collection, doc, getDoc, getDocs, setDoc, deleteDoc,
+  collection, doc, getDoc, getDocs, setDoc, deleteDoc, writeBatch,
   query, where
 } from 'firebase/firestore';
 import { 
@@ -382,10 +382,19 @@ export const loadServicesFromDb = async (initialServices: TechnicalService[]): P
         return loaded.sort((a, b) => (a.code || a.id).localeCompare(b.code || b.id));
       }
       
-      // Auto-seed collection if empty
-      console.log("🌱 Seeding default services in Firestore...");
-      for (const service of initialServices) {
-        await setDoc(doc(db, 'services', service.id), service);
+      // Auto-seed collection if empty — use writeBatch for a single atomic write
+      // instead of N sequential setDoc calls (dramatically faster for 57 services).
+      console.log("🌱 Seeding default services in Firestore via writeBatch...");
+      const BATCH_LIMIT = 500; // Firestore hard limit per batch
+      // db is guaranteed non-null here — we are inside `if (isFirebaseConfigured && db)`
+      const _db = db!;
+      for (let i = 0; i < initialServices.length; i += BATCH_LIMIT) {
+        const batch = writeBatch(_db);
+        const chunk = initialServices.slice(i, i + BATCH_LIMIT);
+        chunk.forEach(service => {
+          batch.set(doc(_db, 'services', service.id), service);
+        });
+        await batch.commit();
       }
       return initialServices;
     } catch (e) {
@@ -433,11 +442,15 @@ export const loadCategoriesFromDb = async (): Promise<CategoryData[]> => {
         return loaded;
       }
       
-      // Auto-seed categories
-      console.log("🌱 Seeding default categories in Firestore...");
-      for (const cat of defaultCats) {
-        await setDoc(doc(db, 'categories', cat.id), cat);
-      }
+      // Auto-seed categories — single atomic writeBatch commit
+      console.log("🌱 Seeding default categories in Firestore via writeBatch...");
+      // db is guaranteed non-null here — we are inside `if (isFirebaseConfigured && db)`
+      const _catDb = db!;
+      const catBatch = writeBatch(_catDb);
+      defaultCats.forEach(cat => {
+        catBatch.set(doc(_catDb, 'categories', cat.id), cat);
+      });
+      await catBatch.commit();
       return defaultCats;
     } catch (e) {
       console.error("Error loading categories from Firestore:", e);

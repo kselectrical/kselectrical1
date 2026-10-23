@@ -1,68 +1,116 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to check if the user is authenticated
+
+    // ─── Helper Functions ───────────────────────────────────────────────────
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper to check if the user is a registered admin
     function isAdmin() {
-      return isAuthenticated() && 
-        (request.auth.token.email == 'kaushindrasingh04@gmail.com' || 
+      return isAuthenticated() &&
+        (request.auth.token.email == 'kaushindrasingh04@gmail.com' ||
+         request.auth.token.email == 'kselectrical004@gmail.com' ||
          exists(/databases/$(database)/documents/admins/$(request.auth.token.email)));
     }
 
-    // Public configurations & reviews
+    // Customers are stored with phone as doc ID.
+    // Our auth uses phone@kselectrical.in as the email address.
+    function isOwner(phone) {
+      return isAuthenticated() &&
+        request.auth.token.email == phone + '@kselectrical.in';
+    }
+
+    // ─── Public Catalog ─────────────────────────────────────────────────────
     match /services/{document} {
       allow read: if true;
       allow write: if isAdmin();
     }
+
     match /categories/{document} {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // ─── Branding — app writes to branding/current_branding ─────────────────
+    match /branding/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Alias: legacy path referenced in older rules; kept for safety
     match /business_config/{document} {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // ─── Reviews ─────────────────────────────────────────────────────────────
     match /offline_reviews/{document} {
       allow read: if true;
-      allow write: if isAdmin() || isAuthenticated();
+      allow create: if true;             // Guests can submit reviews
+      allow update, delete: if isAdmin();
     }
 
-    // Products collection (Marketplace)
+    // ─── Marketplace ─────────────────────────────────────────────────────────
     match /products/{document} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin();
     }
 
-    // Orders collection (Marketplace)
     match /orders/{document} {
-      allow read, write: if true;
+      allow create: if true;
+      allow read, update: if isAuthenticated() || isAdmin();
+      allow delete: if isAdmin();
     }
 
-    // Bookings collection
+    // ─── Bookings ────────────────────────────────────────────────────────────
     match /bookings/{bookingId} {
-      allow create: if true; // Allow guests to book
-      allow read, update: if true;
-      allow delete: if true;
+      allow create: if true;             // Guests can book without auth
+      allow read: if true;
+      allow update: if isAuthenticated() || isAdmin();
+      allow delete: if isAdmin();
     }
 
-    // Customers profiles
+    // ─── Customer Profiles ───────────────────────────────────────────────────
+    // Authenticated customers can read/write their own doc; admins can read all.
     match /Customers/{phone} {
-      allow read, write: if true;
+      allow read: if isAuthenticated() || isAdmin();
+      allow create: if true;             // Registration path
+      allow update: if isOwner(phone) || isAdmin();
+      allow delete: if isAdmin();
     }
 
-    // Admins list
+    // ─── Admin Management ────────────────────────────────────────────────────
     match /admins/{email} {
-      allow read, write: if true;
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
-    // Fallback rule for safety
+    // ─── Internal / Audit Collections ────────────────────────────────────────
+    match /audit_logs/{document} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /price_history/{document} {
+      allow read, write: if isAdmin();
+    }
+
+    match /invoices/{document} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /invoice_history/{document} {
+      allow read, write: if isAdmin();
+    }
+
+    // ─── Fallback (locks down any uncovered collection) ──────────────────────
     match /{document=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
   }
 }

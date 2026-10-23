@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
+﻿import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -109,13 +109,13 @@ const ShopCheckoutPage = lazyWithRetry(() => import('./pages/shop/ShopCheckoutPa
 // Ambient Loading Screen Placeholder
 // Ambient Isolated Sub-components for CPU-efficient DOM updates
 const CYCLER_SERVICES = [
-  { label: 'AC Repair & Service', icon: '❄️' },
-  { label: 'RO Water Purifier', icon: '💧' },
-  { label: 'Certified Electrician', icon: '⚡' },
-  { label: 'Washing Machine Repair', icon: '🧺' },
-  { label: 'Geyser Repair & Service', icon: '🔥' },
-  { label: 'Kitchen Chimney Service', icon: '🍳' },
-  { label: 'Home Electrical Services', icon: '🏠' }
+  { label: 'AC Repair & Service', icon: 'â„ï¸' },
+  { label: 'RO Water Purifier', icon: 'ðŸ’§' },
+  { label: 'Certified Electrician', icon: 'âš¡' },
+  { label: 'Washing Machine Repair', icon: 'ðŸ§º' },
+  { label: 'Geyser Repair & Service', icon: 'ðŸ”¥' },
+  { label: 'Kitchen Chimney Service', icon: 'ðŸ³' },
+  { label: 'Home Electrical Services', icon: 'ðŸ ' }
 ];
 
 const ServiceCycler: React.FC = () => {
@@ -158,7 +158,7 @@ const MessageCycler: React.FC<{ messages?: string[] }> = ({
   }, [messages]);
 
   if (messages.length === 0) {
-    return <p className="text-xs font-bold text-slate-500 animate-pulse transition-all duration-300">Loading…</p>;
+    return <p className="text-xs font-bold text-slate-500 animate-pulse transition-all duration-300">Loadingâ€¦</p>;
   }
 
   return (
@@ -393,20 +393,26 @@ const App: React.FC = () => {
   }, [location.pathname, navigate]);
 
   // Async load public data from Firestore database on mount
+  // PERF FIX: Migration runs in background (non-blocking); all Firestore
+  // reads are parallelised with Promise.all to reduce total round-trip time.
   useEffect(() => {
     const loadInitialData = async () => {
       setIsDataLoading(true);
       try {
-        // 1. Run migration first
-        await runMigrationToFirestore();
+        // 1. Fire migration in the background — do NOT await on the critical path.
+        //    It exits instantly via localStorage flag for returning users.
+        runMigrationToFirestore().catch((e) =>
+          console.warn('Migration background task failed (non-critical):', e)
+        );
 
-        // 2. Load categories
-        await loadCategoriesFromDb();
+        // 2. Parallelise all independent Firestore reads (saves 2-3 sequential RTTs).
+        const [srvs, config] = await Promise.all([
+          loadServicesFromDb(servicesData),
+          loadBusinessConfigFromDb(businessConfig),
+          loadCategoriesFromDb(),   // seeds/caches categories; result unused here
+        ]);
 
-        const srvs = await loadServicesFromDb(servicesData);
         setServices(srvs);
-
-        const config = await loadBusinessConfigFromDb(businessConfig);
         setBusinessConfigState(config);
       } catch (e) {
         console.error("Error loading initial public data from Firestore:", e);
@@ -517,7 +523,7 @@ const App: React.FC = () => {
                 await saveAdminLogToCloud(email, 'admin_refresh');
               }
             } else {
-              // It is a customer — fetch fresh profile directly from Cloud Firestore
+              // It is a customer â€” fetch fresh profile directly from Cloud Firestore
               role = 'customer';
               let phone = email.endsWith('@kselectrical.in') ? email.split('@')[0] : (firebaseUser.phoneNumber || parsed?.currentUser?.phone || '');
               if (!phone && email) {
@@ -846,9 +852,9 @@ const App: React.FC = () => {
             ${item.brand ? `<span style="font-size: 7.5px; background: #eff6ff; color: #2563eb; padding: 1px 4px; border: 1px solid #bfdbfe; border-radius: 3px; display: inline-block; margin-top: 1px; font-weight: 800; text-transform: uppercase;">${escapeHtml(item.brand)}</span>` : ''}
           </td>
           <td style="padding: 4px 6px; border-bottom: 1px solid #e5e7eb; text-align: center; font-weight: bold; color: #111827;">${item.quantity}</td>
-          <td style="padding: 4px 6px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: bold; color: #111827;">₹${item.price.toLocaleString('en-IN')}</td>
+          <td style="padding: 4px 6px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: bold; color: #111827;">â‚¹${item.price.toLocaleString('en-IN')}</td>
           <td style="padding: 4px 6px; border-bottom: 1px solid #e5e7eb; text-align: center; font-weight: bold; color: #2563eb;">${rate}%</td>
-          <td style="padding: 4px 6px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 900; color: #1e3a8a;">₹ ${(item.price * item.quantity).toLocaleString('en-IN')}</td>
+          <td style="padding: 4px 6px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 900; color: #1e3a8a;">â‚¹ ${(item.price * item.quantity).toLocaleString('en-IN')}</td>
         </tr>
       `;
     }).join('');
@@ -959,12 +965,12 @@ const App: React.FC = () => {
                 <div style="font-size: 20px; font-weight: 900; color: #1e3a8a; letter-spacing: -0.025em; line-height: 1.1;">${escapeHtml(businessConfigState.name)}</div>
                 <div style="font-size: 8px; color: #3b82f6; font-weight: 800; text-transform: uppercase; margin-top: 1px; letter-spacing: 0.8px;">${escapeHtml(businessConfigState.tagline)}</div>
                 <div style="font-size: 8.5px; color: #4b5563; font-weight: 600; margin-top: 3px; line-height: 1.3;">
-                  📍 Gaur City 1, Greater Noida West, Noida Extension, UP 201301
+                  ðŸ“ Gaur City 1, Greater Noida West, Noida Extension, UP 201301
                 </div>
                 <div style="font-size: 8.5px; color: #1f2937; font-weight: 700; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; line-height: 1.3;">
-                  <span>📞 <strong>Contact:</strong> +91 ${escapeHtml(businessConfigState.contacts[0])} / +91 ${escapeHtml(businessConfigState.contacts[1])}</span>
-                  <span>📧 <strong>Email:</strong> ${escapeHtml(businessConfigState.email)}</span>
-                  <span>🌐 <strong>Web:</strong> ${escapeHtml(businessConfigState.website)}</span>
+                  <span>ðŸ“ž <strong>Contact:</strong> +91 ${escapeHtml(businessConfigState.contacts[0])} / +91 ${escapeHtml(businessConfigState.contacts[1])}</span>
+                  <span>ðŸ“§ <strong>Email:</strong> ${escapeHtml(businessConfigState.email)}</span>
+                  <span>ðŸŒ <strong>Web:</strong> ${escapeHtml(businessConfigState.website)}</span>
                 </div>
               </div>
             </div>
@@ -982,8 +988,8 @@ const App: React.FC = () => {
             <div class="card-block" style="border-left: 3px solid #2563eb;">
               <div class="section-title">Bill To (Customer Details)</div>
               <div class="card-bold">${escapeHtml(booking.customerName)}</div>
-              <div class="details-text">📞 <strong>Contact:</strong> +91 ${escapeHtml(booking.phone)}</div>
-              <div class="details-text">📍 <strong>Address:</strong> ${escapeHtml(booking.address)}</div>
+              <div class="details-text">ðŸ“ž <strong>Contact:</strong> +91 ${escapeHtml(booking.phone)}</div>
+              <div class="details-text">ðŸ“ <strong>Address:</strong> ${escapeHtml(booking.address)}</div>
             </div>
             <div class="card-block">
               <div class="section-title">Invoice & Schedule Details</div>
@@ -1012,26 +1018,26 @@ const App: React.FC = () => {
 
           <div class="summary-payment-wrapper">
             <div class="payment-card" style="flex: 1; min-height: 80px; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; text-align: left;">
-              <div class="section-title" style="font-size: 8.5px; font-weight: 900; color: #475569; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px; margin-bottom: 6px; text-transform: uppercase;">Terms & Conditions / Warranty (नियम, शर्तें एवं वारंटी)</div>
+              <div class="section-title" style="font-size: 8.5px; font-weight: 900; color: #475569; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px; margin-bottom: 6px; text-transform: uppercase;">Terms & Conditions / Warranty (à¤¨à¤¿à¤¯à¤®, à¤¶à¤°à¥à¤¤à¥‡à¤‚ à¤à¤µà¤‚ à¤µà¤¾à¤°à¤‚à¤Ÿà¥€)</div>
               <div style="font-size: 8.5px; color: #4b5563; line-height: 1.45; white-space: pre-line; font-weight: 550;">${escapeHtml(booking.termsAndConditions || `1. 30-Day doorstep warranty applies on AC repairs.\n2. Kindly check all fittings and cooling before final handoff.\n3. Physical damage or third-party repair voids warranty.`)}</div>
             </div>
             
             <div class="totals-container">
               <div class="totals-row">
                 <span>Taxable Value (Base):</span>
-                <span>₹${baseAmount.toLocaleString('en-IN')}</span>
+                <span>â‚¹${baseAmount.toLocaleString('en-IN')}</span>
               </div>
               <div class="totals-row">
                 <span>CGST (Central Tax):</span>
-                <span>₹${cgst.toLocaleString('en-IN')}</span>
+                <span>â‚¹${cgst.toLocaleString('en-IN')}</span>
               </div>
               <div class="totals-row">
                 <span>SGST (State Tax):</span>
-                <span>₹${sgst.toLocaleString('en-IN')}</span>
+                <span>â‚¹${sgst.toLocaleString('en-IN')}</span>
               </div>
               <div class="totals-row totals-final">
                 <span>Grand Total:</span>
-                <span>₹${totalAmount.toLocaleString('en-IN')}</span>
+                <span>â‚¹${totalAmount.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>
@@ -1070,7 +1076,7 @@ const App: React.FC = () => {
   const showMobileCartBar = cartCount > 0 && !location.pathname.startsWith('/admin') && location.pathname !== '/checkout';
 
   // NOTE: We intentionally do NOT block render on isAuthLoading to prevent hero section blink.
-  // Auth state is resolved in background — UI renders immediately with guest state.
+  // Auth state is resolved in background â€” UI renders immediately with guest state.
 
 
   return (
@@ -1477,7 +1483,7 @@ const App: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-black text-gray-900 leading-tight">
-                {cartCount} {cartCount === 1 ? 'item' : 'items'} • ₹{cartSubtotal}
+                {cartCount} {cartCount === 1 ? 'item' : 'items'} â€¢ â‚¹{cartSubtotal}
               </span>
               <span className="text-[9px] text-green-600 font-bold leading-tight mt-0.5">
                 Free visitation included
@@ -1549,7 +1555,7 @@ class AppErrorBoundary extends React.Component<
             }}
             className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase px-6 py-3 rounded-2xl transition-all shadow-md cursor-pointer"
           >
-            🔄 Reload Page
+            ðŸ”„ Reload Page
           </button>
         </div>
       );

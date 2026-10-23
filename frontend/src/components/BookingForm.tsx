@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft, ShieldAlert, Wrench, MessageCircle } from 'lucide-react';
@@ -25,7 +25,7 @@ interface BookingFormProps {
       brand?: string;
     }[];
     subtotal: number;
-  }) => void;
+  }) => Promise<void>;
   businessConfig: BusinessConfig;
 }
 
@@ -79,6 +79,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
     return list;
   });
   const [dispatchId, setDispatchId] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Restore customer session details on mount
   useEffect(() => {
@@ -219,20 +220,21 @@ export const BookingForm: React.FC<BookingFormProps> = ({
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateStep3()) {
-      setDispatchId(Math.floor(Math.random() * 89999 + 10000));
-      setStep(4);
+    if (isSubmitting) return;  // Prevent double-submit
+    if (!validateStep3()) return;
 
-      // Compile cart item details into a list string
-      const cartItemsListText = cartItems.map((item, idx) => {
-        const brandText = item.brand ? ` [${item.brand}]` : '';
-        return `${idx + 1}. ${item.serviceName}${brandText} x ${item.quantity} (₹${item.price * item.quantity})`;
-      }).join('\n');
+    setIsSubmitting(true);
 
-      // Compile WhatsApp message
-      const textMessage = `*New Doorstep Booking Request - KS Electrical & AC Services*
+    // Compile cart item details into a list string
+    const cartItemsListText = cartItems.map((item, idx) => {
+      const brandText = item.brand ? ` [${item.brand}]` : '';
+      return `${idx + 1}. ${item.serviceName}${brandText} x ${item.quantity} (₹${item.price * item.quantity})`;
+    }).join('\n');
+
+    // Compile WhatsApp message
+    const textMessage = `*New Doorstep Booking Request - KS Electrical & AC Services*
 ---------------------------------------
 *Customer Name:* ${formData.name}
 *Mobile Number:* ${formData.phone}
@@ -250,11 +252,14 @@ ${cartItemsListText}
 ---------------------------------------
 Please dispatch a technician. Thank you!`;
 
-      const encodedText = encodeURIComponent(textMessage);
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=919625724903&text=${encodedText}`;
-      
-      // Save details to dynamic store
-      onSubmitBooking({
+    const encodedText = encodeURIComponent(textMessage);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=919625724903&text=${encodedText}`;
+
+    try {
+      // ── 1. Save to Firestore (primary database) ────────────────────────────
+      //    Awaited BEFORE opening WhatsApp so the network request is not
+      //    aborted mid-flight by the browser tab navigation.
+      await onSubmitBooking({
         customerName: formData.name,
         phone: formData.phone,
         address: formData.address,
@@ -270,43 +275,62 @@ Please dispatch a technician. Thank you!`;
         })),
         subtotal: finalCalculatedPrice
       });
+      console.log('✅ Booking saved to Firestore (BookingForm).');
 
-      // Sync booking request to the remote PHP server database
-      const serviceTypeString = cartItems.map(item => {
-        const brandText = item.brand ? ` [${item.brand}]` : '';
-        return `${item.serviceName}${brandText} (x${item.quantity})`;
-      }).join(', ');
-
+      // ── 2. Mirror booking to PHP/MySQL backend (best-effort, non-blocking) ─
+      //    Fire-and-forget: PHP failure must NOT block the user flow.
       const bookingParams = new URLSearchParams();
       bookingParams.append('customer_name', formData.name);
       bookingParams.append('phone', formData.phone);
-      bookingParams.append('alternate_phone', '');
-      bookingParams.append('service_type', serviceTypeString);
       bookingParams.append('address', formData.address);
-      bookingParams.append('area', selectedLocation);
-      bookingParams.append('preferred_date', formData.date);
-      bookingParams.append('preferred_time', formData.timeSlot);
-      bookingParams.append('subtotal', String(finalCalculatedPrice));
-      bookingParams.append('items_json', JSON.stringify(cartItems.map(item => ({
-        serviceId: item.serviceId,
-        serviceName: item.serviceName,
-        price: item.price,
-        quantity: item.quantity,
-        brand: item.brand
-      }))));
+      bookingParams.append('location', selectedLocation);
+      bookingParams.append('date_time', `${formData.date} at ${formData.timeSlot.split('(')[0].trim()}`);
+      bookingParams.append('urgency', formData.urgency);
+      bookingParams.append('services', cartItems.map(i => `${i.serviceName} x${i.quantity}`).join(', '));
+      bookingParams.append('total_amount', String(finalCalculatedPrice));
 
+      fetch('/backend/submit_booking.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: bookingParams.toString(),
+        // keepalive: survive the upcoming tab navigation to WhatsApp
+        keepalive: true,
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            console.warn(`⚠️ PHP booking mirror failed (HTTP ${res.status}):`, text);
+          } else {
+            console.log('✅ Booking mirrored to PHP/MySQL backend.');
+          }
+        })
+        .catch((phpErr) => {
+          // PHP backend is optional — log but do not surface to the user
+          console.warn('⚠️ PHP booking mirror request failed (non-critical):', phpErr);
+        });
 
+      // ── 3. Advance to success step ─────────────────────────────────────────
+      setDispatchId(Math.floor(Math.random() * 89999 + 10000));
+      setStep(4);
 
-      // Auto redirect to WhatsApp
+      // ── 4. Open WhatsApp AFTER Firestore write is confirmed ────────────────
       window.open(whatsappUrl, '_blank');
+
       // Clear global cart state
       onClearCart();
+
+    } catch (err) {
+      console.error('❌ BookingForm: Firestore save failed, WhatsApp NOT opened:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleQuickWhatsApp = () => {
+  const handleQuickWhatsApp = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
-      onSubmitBooking({
+      await onSubmitBooking({
         customerName: formData.name || 'Quick Booking Customer',
         phone: formData.phone,
         address: formData.address || 'Address pending (WhatsApp Quick Booking)',
@@ -322,19 +346,22 @@ Please dispatch a technician. Thank you!`;
         })),
         subtotal: finalCalculatedPrice
       });
-      saveCustomerToCloud({
+      await saveCustomerToCloud({
         name: formData.name || 'Quick Booking Customer',
         phone: formData.phone,
         address: formData.address || ''
-      }).catch(console.warn);
-    } catch (e) {
-      console.warn('Error saving quick whatsapp booking:', e);
-    }
+      });
+      console.log('✅ Quick WhatsApp booking saved to Firestore.');
 
-    const quickMsg = `*Quick Booking Request - KS Electrical*\n*Name:* ${formData.name || 'Customer'}\n*Phone:* ${formData.phone}\n*Services:* ${cartItems.map(i => i.serviceName).join(', ')}\n*Date:* ${formData.date}\n*Slot:* ${formData.timeSlot}\n*Estimated Total:* ₹${finalCalculatedPrice}\n\nPlease confirm address & dispatch technician. Thank you!`;
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(quickMsg)}`;
-    window.open(whatsappUrl, '_blank');
-    onClearCart();
+      const quickMsg = `*Quick Booking Request - KS Electrical*\n*Name:* ${formData.name || 'Customer'}\n*Phone:* ${formData.phone}\n*Services:* ${cartItems.map(i => i.serviceName).join(', ')}\n*Date:* ${formData.date}\n*Slot:* ${formData.timeSlot}\n*Estimated Total:* ₹${finalCalculatedPrice}\n\nPlease confirm address & dispatch technician. Thank you!`;
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=919625724903&text=${encodeURIComponent(quickMsg)}`;
+      window.open(whatsappUrl, '_blank');
+      onClearCart();
+    } catch (e) {
+      console.error('❌ Quick WhatsApp booking save failed, WhatsApp NOT opened:', e);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -759,10 +786,27 @@ Please dispatch a technician. Thank you!`;
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-2xl font-semibold text-xs tracking-wider uppercase flex items-center space-x-1.5 transition-all duration-200 cursor-pointer shadow-button hover:shadow-card-hover active:scale-98"
+                    disabled={isSubmitting}
+                    className={`px-6 py-2.5 rounded-2xl font-semibold text-xs tracking-wider uppercase flex items-center space-x-1.5 transition-all duration-200 shadow-button ${
+                      isSubmitting
+                        ? 'bg-blue-400 cursor-not-allowed opacity-80 text-white'
+                        : 'bg-brand-blue hover:bg-brand-blue-dark text-white cursor-pointer hover:shadow-card-hover active:scale-98'
+                    }`}
                   >
-                    <span>Request Booking</span>
-                    <CheckCircle2 size={12} />
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin h-3 w-3 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        <span>Saving…</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Request Booking</span>
+                        <CheckCircle2 size={12} />
+                      </>
+                    )}
                   </button>
                 </div>
               </motion.div>

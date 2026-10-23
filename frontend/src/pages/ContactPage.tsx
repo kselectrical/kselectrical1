@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Phone, Mail, MapPin, Send } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import type { BusinessConfig } from '../data';
 import { trackLeadEvent } from '../components/ScrollToTop';
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 
 interface ContactPageProps {
@@ -14,14 +16,36 @@ export const ContactPage: React.FC<ContactPageProps> = ({ businessConfig }) => {
   const [formName, setFormName] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formMessage, setFormMessage] = useState('');
+  // Fix #6: Track submission state — no more alert(), save to Firestore
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Thank you, ${formName}! Your query has been logged. Our dispatch operator will call you back shortly.`);
-    setFormName('');
-    setFormEmail('');
-    setFormMessage('');
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    try {
+      if (db) {
+        await addDoc(collection(db, 'contact_queries'), {
+          name: formName.trim(),
+          email: formEmail.trim(),
+          message: formMessage.trim(),
+          submittedAt: new Date().toISOString(),
+          source: 'contact_page'
+        });
+      }
+      trackLeadEvent({ method: 'form', page: '/contact' });
+      setSubmitStatus('success');
+      setFormName('');
+      setFormEmail('');
+      setFormMessage('');
+    } catch {
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   // Compile JSON-LD Schema
   const schemaMarkup = {
@@ -178,11 +202,26 @@ export const ContactPage: React.FC<ContactPageProps> = ({ businessConfig }) => {
 
               <button
                 type="submit"
-                className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white rounded-lg py-2.5 text-xs font-black uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                disabled={isSubmitting}
+                className="w-full bg-brand-blue hover:bg-brand-blue-dark disabled:opacity-60 text-white rounded-lg py-2.5 text-xs font-black uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
               >
                 <Send size={13} />
-                <span>Submit Query</span>
+                <span>{isSubmitting ? 'Submitting...' : 'Submit Query'}</span>
               </button>
+
+              {/* Fix #6: Inline success / error feedback */}
+              {submitStatus === 'success' && (
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg px-3 py-2.5 text-xs font-bold">
+                  <CheckCircle size={14} className="shrink-0" />
+                  Thank you! Your query has been saved. Our operator will call you back shortly.
+                </div>
+              )}
+              {submitStatus === 'error' && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2.5 text-xs font-bold">
+                  <AlertCircle size={14} className="shrink-0" />
+                  Submission failed. Please call us directly or try again.
+                </div>
+              )}
             </form>
           </div>
 

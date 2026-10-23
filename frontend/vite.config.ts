@@ -5,16 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [
     react(),
-    {
-      // Non-blocking CSS load — prevents render-blocking stylesheet
-      name: 'lazy-load-css',
-      transformIndexHtml(html) {
-        return html.replace(
-          /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)"\s*\/?>/g,
-          '<link rel="stylesheet" crossorigin href="$1" media="print" onload="this.onload=null;this.media=\'all\'">'
-        );
-      }
-    }
+    // NOTE: The previous 'lazy-load-css' plugin that set media="print" on
+    // Tailwind stylesheets has been removed. It caused severe CLS (Cumulative
+    // Layout Shift) because the browser rendered unstyled HTML until the
+    // onload callback fired, producing a visible flash of unstyled content.
+    // Critical CSS must load synchronously on first paint.
   ],
   server: {
     host: true,
@@ -63,4 +58,3 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom'],
   },
 })
-
